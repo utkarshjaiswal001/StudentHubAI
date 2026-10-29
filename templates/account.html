@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Centre | StudentHub AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=3) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css', v=7) }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">StudentHub AI</div>
+        <ul class="nav-links">
+            <li><a href="{{ url_for('home') }}">Home</a></li>
+            <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+            <li><a href="{{ url_for('notes') }}">Notes</a></li>
+            <li><a href="{{ url_for('chatbot') }}">AI Career Mentor</a></li>
+            <li><a class="active" aria-current="page" href="{{ url_for('account_center') }}">Account Centre</a></li>
+            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+        </ul>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Your Account Centre</h1>
+            <p>Your profile, recently visited notes, and saved mentor conversations in one place.</p>
+        </div>
+    </section>
+
+    <main class="account-center">
+        <section class="account-profile-panel" aria-labelledby="account-profile-title">
+            <div class="account-profile-heading">
+                <div class="account-avatar" aria-hidden="true">{{ user.name[:1]|upper }}</div>
+                <div>
+                    <span class="section-kicker">YOUR STUDENT PROFILE</span>
+                    <h2 id="account-profile-title">{{ user.name }}</h2>
+                    <p>{{ user.email }}</p>
+                </div>
+            </div>
+            <dl class="account-details-grid">
+                <div><dt>College</dt><dd>{{ user.college }}</dd></div>
+                <div><dt>Branch</dt><dd>{{ user.branch }}</dd></div>
+                <div><dt>Study year</dt><dd>{{ user.year }}</dd></div>
+                <div><dt>Member since</dt><dd>{{ user.created_at[:10] }}</dd></div>
+            </dl>
+        </section>
+
+        <section class="account-stats" aria-label="Your activity">
+            <article><span class="account-stat-icon" aria-hidden="true">📚</span><strong>{{ note_count }}</strong><span>notes visited</span></article>
+            <article><span class="account-stat-icon" aria-hidden="true">💬</span><strong>{{ conversations|length }}</strong><span>recent mentor chats</span></article>
+        </section>
+
+        <div class="account-content-grid">
+            <section class="account-section-panel" aria-labelledby="recent-notes-title">
+                <div class="account-section-heading">
+                    <div><span class="section-kicker">PICK UP WHERE YOU LEFT OFF</span><h2 id="recent-notes-title">Recently visited notes</h2></div>
+                    <a href="{{ url_for('notes') }}">Browse notes →</a>
+                </div>
+                {% if recent_notes %}
+                    <ul class="account-activity-list">
+                        {% for note in recent_notes %}
+                            <li>
+                                <span class="notes-file-icon" aria-hidden="true">PDF</span>
+                                <div class="account-activity-copy">
+                                    <a href="{{ url_for('preview_note', note_id=note.id) }}">{{ note.title }}</a>
+                                    <span>{{ note.subject }} · {{ note.branch }} · {{ note.year }} · {{ note.semester }}</span>
+                                    <small>{{ 'Previewed' if note.action == 'preview' else 'Downloaded' }} · {{ note.accessed_at }}</small>
+                                </div>
+                                <a class="notes-preview-action" href="{{ url_for('preview_note', note_id=note.id) }}">Open</a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="account-empty-state">
+                        <span aria-hidden="true">📖</span>
+                        <h3>No notes visited yet</h3>
+                        <p>Notes you preview or download will be saved here for quick access.</p>
+                        <a class="notes-preview-action" href="{{ url_for('notes') }}">Explore Notes</a>
+                    </div>
+                {% endif %}
+            </section>
+
+            <section class="account-section-panel" aria-labelledby="mentor-history-title">
+                <div class="account-section-heading">
+                    <div><span class="section-kicker">YOUR CAREER JOURNEY</span><h2 id="mentor-history-title">Mentor conversations</h2></div>
+                    <a href="{{ url_for('chatbot') }}">Open mentor →</a>
+                </div>
+                <p class="account-disclosure">Your questions are saved in your account. {% if ai_configured %}You can choose to share a message and recent context for an AI reply in the Mentor.{% else %}AI replies can be enabled later by configuring an API key.{% endif %}</p>
+                {% if conversations %}
+                    <ul class="account-conversation-list">
+                        {% for conversation in conversations %}
+                            <li>
+                                <a href="{{ url_for('chatbot', conversation_id=conversation.id) }}">
+                                    <span class="account-conversation-icon" aria-hidden="true">💬</span>
+                                    <span><strong>{{ conversation.title }}</strong><small>{{ conversation.latest_message|default('No messages yet', true) }} · {{ conversation.updated_at }}</small></span>
+                                    <span class="suggestion-arrow" aria-hidden="true">↗</span>
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="account-empty-state">
+                        <span aria-hidden="true">🧭</span>
+                        <h3>No mentor conversations yet</h3>
+                        <p>Start a thread to save questions you want to revisit.</p>
+                        <a class="notes-preview-action" href="{{ url_for('chatbot') }}">Start a conversation</a>
+                    </div>
+                {% endif %}
+            </section>
+        </div>
+    </main>
+
+    <footer><p>© 2026 StudentHub AI | Developed by <strong>Utkarsh Jaiswal</strong></p></footer>
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - StudentHub AI</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=3) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css', v=4) }}">
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+
+    <nav class="navbar">
+
+        <div class="logo">
+            StudentHub AI
+        </div>
+
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/notes">Notes</a></li>
+            <li><a href="/chatbot">AI Career Mentor</a></li>
+            <li><a href="/register">Register</a></li>
+        </ul>
+
+    </nav>
+
+
+    <!-- Login Form -->
+
+    <div class="form-container">
+
+        <div class="form-card">
+
+            <h1>Welcome Back 👋</h1>
+
+            <p>Login to continue your learning journey.</p>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% for category, message in messages %}
+                    <p class="auth-message {{ category }}" role="status">{{ message }}</p>
+                {% endfor %}
+            {% endwith %}
+
+            <form action="{{ url_for('login', next=request.args.get('next', '')) }}" method="POST">
+
+                <input
+                    type="email"
+                    name="email"
+                    placeholder="Enter your Email"
+                    required
+                >
+
+                <input
+                    type="password"
+                    name="password"
+                    placeholder="Enter your Password"
+                    required
+                >
+
+                <button type="submit">
+                    Login
+                </button>
+
+            </form>
+
+            <p class="bottom-text">
+
+                Don't have an account?
+
+                <a href="{{ url_for('register', next=request.args.get('next', '')) }}">
+                    Register Here
+                </a>
+
+            </p>
+
+        </div>
+
+    </div>
+
+</body>
+</html>

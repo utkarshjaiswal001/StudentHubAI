@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ branch }} Notes | StudentHub AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=4) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css', v=10) }}">
+</head>
+<body>
+    <nav class="navbar">
+        <a class="logo" href="{{ url_for('home') }}">StudentHub AI</a>
+        <ul class="nav-links">
+            <li><a href="{{ url_for('home') }}">Home</a></li>
+            <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+            <li><a class="active" href="{{ url_for('notes') }}" aria-current="page">Notes</a></li>
+            <li><a href="{{ url_for('chatbot') }}">AI Career Mentor</a></li>
+            <li><a href="{{ url_for('account_center') }}">Account Centre</a></li>
+            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+        </ul>
+    </nav>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}<p class="auth-message {{ category }}" role="status">{{ message }}</p>{% endfor %}
+    {% endwith %}
+
+    <header class="notes-flow-hero">
+        <span class="section-kicker">{{ year }} · {{ branch }}</span>
+        <h1>Choose a subject</h1>
+        <p>Open a subject card to see the PDFs shared for it. Preview each PDF on StudentHub AI.</p>
+    </header>
+
+    <main class="notes-flow-shell">
+        <div class="notes-flow-heading">
+            <div><a class="notes-back-link" href="{{ url_for('note_branches', year=year) }}">← {{ year }} branches</a><span class="notes-step">STEP 3</span><h2>Subjects</h2></div>
+            <a class="notes-upload-shortcut" href="{{ url_for('notes', upload=1, branch=branch, year=year) }}">Share a PDF</a>
+        </div>
+
+        {% if subjects %}
+            <div class="notes-subject-list">
+                {% for item in subjects %}
+                    <details class="notes-subject-dropdown">
+                        <summary>
+                            <span class="notes-choice-icon" aria-hidden="true">📘</span>
+                            <span class="notes-choice-copy"><strong>{{ item.subject }}</strong><small>{{ item.notes|length }} PDF{% if item.notes|length != 1 %}s{% endif %} available</small></span>
+                            <span class="notes-dropdown-caret" aria-hidden="true">⌄</span>
+                        </summary>
+                        <div class="notes-pdf-list">
+                            {% for note in item.notes %}
+                                <article class="notes-pdf-row">
+                                    <span class="notes-file-icon" aria-hidden="true">PDF</span>
+                                    <span class="notes-choice-copy"><strong>{{ note.title }}</strong><small>{{ note.semester }} · {{ note.original_filename }}</small></span>
+                                    <a class="notes-preview-action" href="{{ url_for('preview_note', note_id=note.id, return_to=url_for('note_subjects', branch=branch, year=year)) }}">Preview</a>
+                                    <a class="notes-download-link" href="{{ url_for('download_note', note_id=note.id) }}">Download</a>
+                                </article>
+                            {% endfor %}
+                        </div>
+                    </details>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="notes-empty-state" role="status" aria-live="polite">
+                <span aria-hidden="true">📂</span>
+                <h3>Sorry, no PDFs found</h3>
+                <p>There are no notes available for {{ branch }} in {{ year }} yet. Please check back later.</p>
+            </div>
+        {% endif %}
+    </main>
+
+    <footer><p>© 2026 StudentHub AI | Developed by <strong>Utkarsh Jaiswal</strong></p></footer>
+</body>
+</html>

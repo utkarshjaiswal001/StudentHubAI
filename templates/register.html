@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Register | StudentHub AI</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=3) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css', v=4) }}">
+
+</head>
+
+<body>
+
+    <!-- Navigation -->
+
+    <nav class="navbar">
+
+        <div class="logo">
+            StudentHub AI
+        </div>
+
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a href="/notes">Notes</a></li>
+            <li><a href="/chatbot">AI Career Mentor</a></li>
+            <li><a href="/login">Login</a></li>
+        </ul>
+
+    </nav>
+
+
+    <!-- Register Form -->
+
+    <div class="form-container">
+
+        <div class="form-card">
+
+            <h1>Create Your Account</h1>
+
+            <p>Join StudentHub AI and start your learning journey.</p>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% for category, message in messages %}
+                    <p class="auth-message {{ category }}" role="status">{{ message }}</p>
+                {% endfor %}
+            {% endwith %}
+
+            <form action="{{ url_for('register', next=request.args.get('next', '')) }}" method="POST">
+
+                <input
+                    type="text"
+                    name="name"
+                    placeholder="Full Name"
+                    required
+                >
+
+                <input
+                    type="email"
+                    name="email"
+                    placeholder="Email Address"
+                    required
+                >
+
+                <input
+                    type="text"
+                    name="college"
+                    placeholder="College Name"
+                    required
+                >
+
+                <select name="branch" required>
+
+                    <option value="">Select Branch</option>
+
+                    <option>Computer Science</option>
+                    <option>Information Technology</option>
+                    <option>Electronics & Communication</option>
+                    <option>Electrical Engineering</option>
+                    <option>Mechanical Engineering</option>
+                    <option>Civil Engineering</option>
+                    <option>Other</option>
+
+                </select>
+
+                <select name="year" required>
+
+                    <option value="">Select Year</option>
+
+                    <option>1st Year</option>
+                    <option>2nd Year</option>
+                    <option>3rd Year</option>
+                    <option>4th Year</option>
+
+                </select>
+
+                <input
+                    type="password"
+                    name="password"
+                    placeholder="Create Password"
+                    required
+                >
+
+                <input
+                    type="password"
+                    name="confirm_password"
+                    placeholder="Confirm Password"
+                    required
+                >
+
+                <button type="submit">
+
+                    Register
+
+                </button>
+
+            </form>
+
+            <p class="bottom-text">
+
+                Already have an account?
+
+                <a href="{{ url_for('login', next=request.args.get('next', '')) }}">
+
+                    Login Here
+
+                </a>
+
+            </p>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Career Mentor | StudentHub AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=3) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css', v=8) }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">StudentHub AI</div>
+        <ul class="nav-links">
+            <li><a href="{{ url_for('home') }}">Home</a></li>
+            <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+            <li><a href="{{ url_for('notes') }}">Notes</a></li>
+            <li><a class="active" aria-current="page" href="{{ url_for('chatbot') }}">AI Career Mentor</a></li>
+            <li><a href="{{ url_for('account_center') }}">Account Centre</a></li>
+            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+        </ul>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-content">
+            <h1>🤖 AI Career Mentor</h1>
+            <p>Keep your career questions together and return to a conversation whenever you need.</p>
+        </div>
+    </section>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}<p class="auth-message {{ category }}" role="status">{{ message }}</p>{% endfor %}
+    {% endwith %}
+
+    <main class="mentor-chat-layout">
+        <aside class="mentor-history-panel" aria-labelledby="mentor-history-title">
+            <div class="mentor-history-heading">
+                <div>
+                    <span class="section-kicker">YOUR CAREER JOURNEY</span>
+                    <h2 id="mentor-history-title">Conversations</h2>
+                </div>
+                <a class="notes-preview-action" href="{{ url_for('chatbot') }}">New chat</a>
+            </div>
+            {% if conversations %}
+                <ul class="mentor-conversation-list">
+                    {% for conversation in conversations %}
+                        <li>
+                            <a class="{% if current_conversation and current_conversation.id == conversation.id %}current{% endif %}"
+                               href="{{ url_for('chatbot', conversation_id=conversation.id) }}">
+                                <strong>{{ conversation.title }}</strong>
+                                <span>{{ conversation.updated_at }}</span>
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <div class="mentor-history-empty">
+                    <span aria-hidden="true">💬</span>
+                    <p>Your saved conversations will appear here.</p>
+                </div>
+            {% endif %}
+            <a class="account-inline-link" href="{{ url_for('account_center') }}">View all in Account Centre →</a>
+        </aside>
+
+        <section class="mentor-conversation-panel" aria-labelledby="conversation-title">
+            <header class="mentor-conversation-heading">
+                <span class="section-kicker">SAVED TO YOUR ACCOUNT</span>
+                <h2 id="conversation-title">{% if current_conversation %}{{ current_conversation.title }}{% else %}Start a conversation{% endif %}</h2>
+            </header>
+            <div class="mentor-connection-note" role="status">
+                {% if ai_configured %}
+                    AI replies are available. If you choose to share a message, it and up to 11 recent messages in this conversation are sent to OpenAI to generate a response. OpenAI API usage may incur charges.
+                {% else %}
+                    Your questions are saved to your account. AI replies need a locally configured OpenAI API key; no conversation text is sent to an AI provider until you configure one and choose to share it.
+                {% endif %}
+            </div>
+
+            <div class="mentor-message-list" aria-live="polite">
+                {% if messages %}
+                    {% for message in messages %}
+                        <article class="mentor-message {{ message.role }}">
+                            <span class="mentor-message-label">{% if message.role == 'user' %}You{% else %}StudentHub AI Mentor{% endif %}</span>
+                            <p>{{ message.content }}</p>
+                            <time>{{ message.created_at }}</time>
+                        </article>
+                    {% endfor %}
+                {% else %}
+                    <div class="mentor-welcome-message">
+                        <span aria-hidden="true">👋</span>
+                        <div>
+                            <h3>What are you working toward?</h3>
+                            <p>Save a question about career paths, skills, projects, or placement preparation. You can continue the thread later from here or your Account Centre.</p>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <form class="mentor-message-form" method="POST" action="{{ url_for('chatbot') }}">
+                {% if current_conversation %}<input type="hidden" name="conversation_id" value="{{ current_conversation.id }}">{% endif %}
+                <label for="mentor-question">Your question</label>
+                <textarea id="mentor-question" name="question" maxlength="2000" rows="3" placeholder="e.g. What should I focus on to prepare for a software engineering placement?" required></textarea>
+                {% if ai_configured %}
+                    <label class="mentor-consent"><input type="checkbox" name="ai_consent" value="yes"> Send this message and recent conversation context to OpenAI for an AI reply.</label>
+                {% endif %}
+                <div class="mentor-compose-footer">
+                    <span>Up to 2,000 characters. Messages are saved in your account history.</span>
+                    <button class="notes-primary-button" type="submit">{% if ai_configured %}Send question{% else %}Save question{% endif %}</button>
+                </div>
+            </form>
+        </section>
+    </main>
+
+    <footer><p>© 2026 StudentHub AI | Developed by <strong>Utkarsh Jaiswal</strong></p></footer>
+</body>
+</html>

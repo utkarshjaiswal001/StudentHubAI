@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AKTU Notes | StudentHub AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=4) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css', v=10) }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">StudentHub AI</div>
+        <ul class="nav-links">
+            <li><a href="{{ url_for('home') }}">Home</a></li>
+            <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+            <li><a class="active" href="{{ url_for('notes') }}" aria-current="page">Notes</a></li>
+            <li><a href="{{ url_for('chatbot') }}">AI Career Mentor</a></li>
+            <li><a href="{{ url_for('account_center') }}">Account Centre</a></li>
+            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+        </ul>
+    </nav>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            <p class="auth-message {{ category }}" role="status">{{ message }}</p>
+        {% endfor %}
+    {% endwith %}
+
+    <section class="hero">
+        <div class="hero-content">
+            <h1>College Notes</h1>
+            <p>Choose your year and branch to browse subjects, then preview the matching study PDFs.</p>
+        </div>
+    </section>
+
+    <section class="notes-workspace">
+        <main class="notes-main-column">
+            <section class="notes-panel" aria-labelledby="find-notes-title">
+                <div class="notes-panel-heading">
+                    <span class="section-kicker">AKTU STUDY LIBRARY</span>
+                    <h2 id="find-notes-title">Find your notes</h2>
+                    <p>Choose your course details or search directly by subject.</p>
+                </div>
+                <form class="notes-filter-form" action="{{ url_for('notes') }}" method="GET">
+                    <input type="hidden" name="search" value="1">
+                    <div class="notes-filter-grid">
+                        <div class="notes-field">
+                            <label for="filter-year">Year</label>
+                            <select id="filter-year" name="year">
+                                <option value="">All years</option>
+                                {% for year in note_years %}
+                                    <option value="{{ year }}" {% if filters.year == year %}selected{% endif %}>{{ year }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="notes-field">
+                            <label for="filter-branch">Branch</label>
+                            <select id="filter-branch" name="branch">
+                                <option value="">All branches</option>
+                                {% for branch in note_branches %}
+                                    <option value="{{ branch }}" {% if filters.branch == branch %}selected{% endif %}>{{ branch }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="notes-field">
+                            <label for="filter-semester">Semester</label>
+                            <select id="filter-semester" name="semester">
+                                <option value="">All semesters</option>
+                                {% for semester in note_semesters %}
+                                    <option value="{{ semester }}" {% if filters.semester == semester %}selected{% endif %}>{{ semester }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="notes-field">
+                            <label for="filter-subject">Subject</label>
+                            <input id="filter-subject" name="subject" value="{{ filters.subject }}" placeholder="e.g. Data Structures">
+                        </div>
+                    </div>
+                    <div class="notes-filter-actions">
+                        <button class="notes-primary-button" type="submit">Search Notes</button>
+                        <a class="notes-reset-link" href="{{ url_for('notes') }}">Clear filters</a>
+                    </div>
+                </form>
+            </section>
+
+            {% if show_note_results %}
+            <section class="notes-results" aria-labelledby="available-notes-title">
+                <div class="notes-results-heading">
+                    <div>
+                        <span class="section-kicker">YOUR SEARCH</span>
+                        <h2 id="available-notes-title">Available notes</h2>
+                    </div>
+                    <span class="notes-result-count">{{ notes|length }} found</span>
+                </div>
+                {% if notes %}
+                    <div class="notes-result-list">
+                        {% for note in notes %}
+                            <article class="notes-result-card">
+                                <div class="notes-file-icon" aria-hidden="true">PDF</div>
+                                <div class="notes-result-copy">
+                                    <h3><a class="notes-preview-link" href="{{ url_for('preview_note', note_id=note.id, return_to=request.full_path) }}">{{ note.title }}</a></h3>
+                                    <p>{{ note.subject }} · {{ note.branch }} · {{ note.year }} · {{ note.semester }}</p>
+                                </div>
+                                <div class="notes-result-actions">
+                                    <a class="notes-preview-action" href="{{ url_for('preview_note', note_id=note.id, return_to=request.full_path) }}">Preview</a>
+                                    <a class="notes-download-link" href="{{ url_for('download_note', note_id=note.id) }}">Download</a>
+                                </div>
+                            </article>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="notes-empty-state">
+                        <span aria-hidden="true">📚</span>
+                        <h3>No notes match this search yet</h3>
+                        <p>Try another subject or add a PDF to start the shared library.</p>
+                    </div>
+                {% endif %}
+            </section>
+            {% endif %}
+
+            <section class="notes-panel notes-upload-panel" aria-labelledby="upload-notes-title">
+                <div class="notes-panel-heading">
+                    <span class="section-kicker">SHARE WITH STUDENTS</span>
+                    <h2 id="upload-notes-title">Add a PDF to the library</h2>
+                    <p>Signed-in students can share course PDFs up to 20 MB.</p>
+                </div>
+                <form class="notes-upload-form" action="{{ url_for('upload_note') }}" method="POST" enctype="multipart/form-data">
+                    <div class="notes-field">
+                        <label for="note-title">Note title</label>
+                        <input id="note-title" name="title" maxlength="120" placeholder="e.g. Unit 1 — Python Basics" required>
+                    </div>
+                    <div class="notes-field">
+                        <label for="upload-subject">Subject</label>
+                        <input id="upload-subject" name="subject" maxlength="100" placeholder="e.g. Python Programming" required>
+                    </div>
+                    <div class="notes-filter-grid notes-upload-details">
+                        <div class="notes-field">
+                            <label for="upload-branch">Branch</label>
+                            <select id="upload-branch" name="branch" required>
+                                <option value="">Choose a branch</option>
+                                {% for branch in note_branches %}<option value="{{ branch }}">{{ branch }}</option>{% endfor %}
+                            </select>
+                        </div>
+                        <div class="notes-field">
+                            <label for="upload-year">Year</label>
+                            <select id="upload-year" name="year" required>
+                                <option value="">Choose a year</option>
+                                {% for year in note_years %}<option value="{{ year }}">{{ year }}</option>{% endfor %}
+                            </select>
+                        </div>
+                        <div class="notes-field">
+                            <label for="upload-semester">Semester</label>
+                            <select id="upload-semester" name="semester" required>
+                                <option value="">Choose semester</option>
+                                {% for semester in note_semesters %}<option value="{{ semester }}">{{ semester }}</option>{% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="notes-field">
+                        <label for="note-pdf">PDF file</label>
+                        <input id="note-pdf" name="pdf" type="file" accept="application/pdf,.pdf" required>
+                    </div>
+                    <button class="notes-secondary-button" type="submit">Upload Notes PDF</button>
+                </form>
+            </section>
+        </main>
+
+        <aside class="notes-suggestions" aria-labelledby="suggested-notes-title">
+            <div class="suggestions-heading">
+                <span class="suggestions-icon" aria-hidden="true">✦</span>
+                <div>
+                    <span class="section-kicker">KEEP EXPLORING</span>
+                    <h2 id="suggested-notes-title">Suggested notes</h2>
+                </div>
+            </div>
+            <p class="suggestions-intro">Other subjects you may want to explore.</p>
+            <ul class="suggestion-list">
+                {% if suggested_notes %}
+                    {% for suggestion in suggested_notes %}
+                        <li>
+                            <a href="{{ url_for('notes', branch=filters.branch, year=filters.year, semester=filters.semester, subject=suggestion.subject) }}">
+                                <span class="suggestion-subject">{{ suggestion.subject }}</span>
+                                <span class="suggestion-detail">{{ suggestion.note_count }} PDF{% if suggestion.note_count != 1 %}s{% endif %} shared</span>
+                                <span class="suggestion-arrow" aria-hidden="true">↗</span>
+                            </a>
+                        </li>
+                    {% endfor %}
+                {% else %}
+                    {% for subject in suggested_subjects %}
+                        <li>
+                            <a href="{{ url_for('notes', branch=filters.branch, year=filters.year, semester=filters.semester, subject=subject) }}">
+                                <span class="suggestion-subject">{{ subject }}</span>
+                                <span class="suggestion-detail">Search this subject</span>
+                                <span class="suggestion-arrow" aria-hidden="true">↗</span>
+                            </a>
+                        </li>
+                    {% endfor %}
+                {% endif %}
+            </ul>
+            {% if not suggested_notes %}
+                <p class="suggestions-note">As students share PDFs, this box will prioritize subjects already in the library.</p>
+            {% endif %}
+        </aside>
+    </section>
+
+    <section class="features">
+        <h2>Coming Soon</h2>
+        <div class="card-container">
+            <div class="card">
+                <h3>📄 Previous Year Papers</h3>
+                <p>Download previous year question papers.</p>
+            </div>
+            <div class="card">
+                <h3>📝 Handwritten Notes</h3>
+                <p>Access handwritten notes uploaded by toppers.</p>
+            </div>
+            <div class="card">
+                <h3>🎥 Video Lectures</h3>
+                <p>Watch curated lectures topic-wise.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer><p>© 2026 StudentHub AI | Developed by <strong>Utkarsh Jaiswal</strong></p></footer>
+</body>
+</html>

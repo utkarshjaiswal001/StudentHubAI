@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Dashboard | StudentHub AI</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=3) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css', v=6) }}">
+
+</head>
+
+<body>
+
+    <!-- Navigation -->
+
+    <nav class="navbar">
+
+        <div class="logo">
+            StudentHub AI
+        </div>
+
+        <ul class="nav-links">
+            <li><a href="/">Home</a></li>
+            <li><a class="active" href="/dashboard" aria-current="page">Dashboard</a></li>
+            <li><a href="/notes">Notes</a></li>
+            <li><a href="/chatbot">AI Career Mentor</a></li>
+            <li><a href="{{ url_for('account_center') }}">Account Centre</a></li>
+            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+        </ul>
+
+    </nav>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            <p class="auth-message {{ category }}" role="status">{{ message }}</p>
+        {% endfor %}
+    {% endwith %}
+
+
+    <!-- Welcome -->
+
+    <section class="hero">
+
+        <div class="hero-content">
+
+            <h1>Welcome{% if current_user_name %}, {{ current_user_name }}{% endif %}!</h1>
+
+            <p>
+
+                Your one-stop platform for Notes,
+                AI Career Guidance,
+                and Placement Preparation.
+
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <!-- Dashboard Cards -->
+
+    <section class="features">
+
+        <h2>Explore StudentHub AI</h2>
+
+        <div class="card-container">
+
+            <!-- Notes -->
+
+            <div class="card">
+
+                <h3>📚 College Notes</h3>
+
+                <p>
+
+                    Browse semester-wise notes,
+                    previous year papers,
+                    and important study materials.
+
+                </p>
+
+                <a href="/notes" class="card-btn">
+
+                    Open Notes
+
+                </a>
+
+            </div>
+
+
+            <!-- AI Career Mentor -->
+
+            <div class="card">
+
+                <h3>🤖 AI Career Mentor</h3>
+
+                <p>
+
+                    Ask career questions,
+                    get learning roadmaps,
+                    placement guidance,
+                    and skill recommendations.
+
+                </p>
+
+                <a href="/chatbot" class="card-btn">
+
+                    Ask AI
+
+                </a>
+
+            </div>
+
+
+            <!-- Resume -->
+
+            <div class="card">
+
+                <h3>📄 Resume Analyzer</h3>
+
+                <p>
+
+                    Upload your resume and receive
+                    AI-powered suggestions.
+
+                </p>
+
+                <button disabled>
+
+                    Coming Soon
+
+                </button>
+
+            </div>
+
+
+            <!-- Interview -->
+
+            <div class="card">
+
+                <h3>🎤 Interview Preparation</h3>
+
+                <p>
+
+                    Practice interview questions,
+                    coding rounds,
+                    HR questions,
+                    and aptitude.
+
+                </p>
+
+                <button disabled>
+
+                    Coming Soon
+
+                </button>
+
+            </div>
+
+
+            <!-- Placement -->
+
+            <div class="card">
+
+                <h3>💼 Placement Preparation</h3>
+
+                <p>
+
+                    Learn company-wise preparation,
+                    eligibility,
+                    hiring process,
+                    and important resources.
+
+                </p>
+
+                <button disabled>
+
+                    Coming Soon
+
+                </button>
+
+            </div>
+
+
+            <!-- Internship -->
+
+            <div class="card">
+
+                <h3>🌍 Internship Portal</h3>
+
+                <p>
+
+                    Find internships,
+                    remote opportunities,
+                    and training programs.
+
+                </p>
+
+                <button disabled>
+
+                    Coming Soon
+
+                </button>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- Footer -->
+
+    <footer>
+
+        <p>
+
+            © 2026 StudentHub AI |
+            Developed by <strong>Utkarsh Jaiswal</strong>
+
+        </p>
+
+    </footer>
+
+</body>
+
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ note.title }} | StudentHub AI Notes</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=4) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css', v=10) }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">StudentHub AI</div>
+        <ul class="nav-links">
+            <li><a href="{{ url_for('home') }}">Home</a></li>
+            <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+            <li><a class="active" aria-current="page" href="{{ url_for('notes') }}">Notes</a></li>
+            <li><a href="{{ url_for('chatbot') }}">AI Career Mentor</a></li>
+            <li><a href="{{ url_for('account_center') }}">Account Centre</a></li>
+            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+        </ul>
+    </nav>
+
+    <main class="note-preview-page">
+        <header class="note-preview-heading">
+            <a class="notes-reset-link" href="{{ back_url }}">← Back to Notes</a>
+            <div class="note-preview-title-row">
+                <div>
+                    <span class="section-kicker">STUDENTHUB NOTES PREVIEW</span>
+                    <h1>{{ note.title }}</h1>
+                    <p>{{ note.subject }} · {{ note.branch }} · {{ note.year }} · {{ note.semester }}</p>
+                </div>
+                <a class="notes-download-link" href="{{ url_for('download_note', note_id=note.id) }}">Download PDF</a>
+            </div>
+        </header>
+        <section class="note-preview-frame" aria-label="PDF notes preview">
+            <iframe src="{{ url_for('serve_note_preview', note_id=note.id) }}" title="Preview of {{ note.title }} PDF">
+                <p>Your browser cannot display this PDF inline. <a href="{{ url_for('download_note', note_id=note.id) }}">Download it instead</a>.</p>
+            </iframe>
+        </section>
+    </main>
+</body>
+</html>

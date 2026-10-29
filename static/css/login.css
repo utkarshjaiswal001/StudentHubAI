@@ -1,0 +1,172 @@
+/* Login and registration page styles. Load after style.css. */
+
+html {
+    min-height: 100%;
+}
+
+body {
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+}
+
+.navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+}
+
+.navbar .nav-links {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.navbar .nav-links a {
+    display: inline-block;
+    padding: 9px 12px;
+    border-radius: 10px;
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.navbar .nav-links a:hover {
+    color: var(--primary-dark);
+    background: rgba(109, 93, 252, 0.09);
+}
+
+.navbar .nav-links a.active {
+    color: var(--primary-dark);
+    background: rgba(109, 93, 252, 0.13);
+}
+
+.form-container {
+    flex: 1 0 auto;
+    width: 100%;
+    min-height: min-content;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 56px 20px;
+}
+
+.form-card {
+    width: min(100%, 470px);
+    padding: clamp(28px, 5vw, 44px);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 22px 60px rgba(43, 47, 100, 0.14);
+}
+
+.form-card h1 {
+    margin-bottom: 8px;
+    color: var(--dark);
+    font-size: clamp(27px, 5vw, 34px);
+    line-height: 1.2;
+}
+
+.form-card > p:not(.auth-message) {
+    margin-bottom: 24px;
+    color: var(--muted);
+}
+
+.form-card form {
+    display: grid;
+    gap: 15px;
+}
+
+.form-card input,
+.form-card select {
+    width: 100%;
+    min-height: 50px;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    outline: none;
+    background: #fbfbff;
+    color: var(--dark);
+    font-size: 15px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-card input:focus,
+.form-card select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(109, 93, 252, 0.12);
+}
+
+.form-card form button {
+    min-height: 51px;
+    margin-top: 4px;
+    padding: 12px 18px;
+    border: 0;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    box-shadow: 0 9px 22px rgba(109, 93, 252, 0.22);
+    color: var(--white);
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-card form button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 13px 27px rgba(109, 93, 252, 0.28);
+}
+
+.form-card .bottom-text {
+    margin: 22px 0 0;
+    color: var(--muted);
+    text-align: center;
+}
+
+.form-card .bottom-text a {
+    color: var(--primary-dark);
+    font-weight: 800;
+}
+
+.form-card .bottom-text a:hover {
+    text-decoration: underline;
+}
+
+.form-card .auth-message {
+    width: 100%;
+    margin: 0 0 16px;
+}
+
+@media (max-width: 600px) {
+    .navbar {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .navbar .nav-links {
+        width: 100%;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+    }
+
+    .form-container {
+        padding: 32px 16px;
+    }
+
+    .form-card {
+        border-radius: 19px;
+    }
+}
+
+@media (max-height: 700px) {
+    .form-container {
+        align-items: flex-start;
+    }
+}

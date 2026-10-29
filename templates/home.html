@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>StudentHub AI | Your Student & Career Companion</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css', v=5) }}">
+</head>
+
+<body data-authenticated="{{ 'true' if is_logged_in else 'false' }}">
+
+    <!-- =========================
+         NAVIGATION
+    ========================== -->
+
+    <header class="navbar">
+
+        <a href="#home" class="logo">
+            StudentHub AI
+        </a>
+
+        <nav id="primaryNavigation" class="nav-menu" aria-label="Main navigation">
+
+            <a href="#home" class="nav-link active">Home</a>
+
+            <a href="#why-studenthub" class="nav-link">
+                Why Us
+            </a>
+
+            <a href="#services" class="nav-link">
+                Services
+            </a>
+
+            <a href="#how-it-works" class="nav-link">
+                How It Works
+            </a>
+
+            <a href="#career-mentor" class="nav-link">
+                AI Mentor
+            </a>
+
+            <a href="#suggestions" class="nav-link">
+                Suggestions
+            </a>
+
+            {% if is_logged_in %}
+                <a href="{{ url_for('dashboard') }}" class="nav-button">Dashboard</a>
+                <a href="{{ url_for('account_center') }}" class="nav-button">Account Centre</a>
+                <a href="{{ url_for('logout') }}" class="nav-button">Logout</a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="nav-button login-button">Login</a>
+                <a href="{{ url_for('register') }}" class="nav-button register-button">Register</a>
+            {% endif %}
+
+        </nav>
+
+        <button class="menu-toggle"
+                type="button"
+                aria-controls="primaryNavigation"
+                aria-expanded="false"
+                aria-label="Open navigation menu">
+            ☰
+        </button>
+
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            <p class="auth-message {{ category }}" role="status">{{ message }}</p>
+        {% endfor %}
+    {% endwith %}
+
+
+    <main>
+
+        <!-- =========================
+             HERO SECTION
+        ========================== -->
+
+        <section id="home" class="hero-section page-section">
+
+            <div class="hero-content">
+
+                <div class="hero-badge">
+                    🎓 Built for Students
+                </div>
+
+                <h1>
+                    StudentHub AI
+                </h1>
+
+                <h2>
+                    Learn Smarter. Prepare Better. Build Your Career.
+                </h2>
+
+                <p class="hero-description">
+                    One platform to discover academic notes,
+                    explore career opportunities, and get
+                    personalized guidance from your AI Career Mentor.
+                </p>
+
+                <div class="hero-actions">
+
+                    <a href="#services" class="primary-button">
+                        Explore StudentHub AI
+                    </a>
+
+                    <a href="#career-mentor" class="secondary-button">
+                        Meet AI Career Mentor
+                    </a>
+
+                </div>
+
+            </div>
+
+
+            <!-- Large service showcase -->
+
+            <div class="service-showcase">
+
+                <div class="showcase-heading">
+
+                    <span class="showcase-label">
+                        Everything you need
+                    </span>
+
+                    <h3>
+                        Your student journey, all in one place.
+                    </h3>
+
+                    <p>
+                        Hover over a service to discover what
+                        StudentHub AI can help you with.
+                    </p>
+
+                </div>
+
+
+                <div class="service-grid">
+
+
+                    <!-- Notes -->
+
+                    <a class="service-card service-notes"
+                       href="{{ url_for('notes') }}">
+
+                        <div class="service-icon">
+                            📚
+                        </div>
+
+                        <h4>
+                            College Notes
+                        </h4>
+
+                        <p>
+                            Organized academic resources.
+                        </p>
+
+                        <div class="service-popup">
+
+                            <strong>
+                                📚 College Notes
+                            </strong>
+
+                            <span>
+                                Find study material using
+                                university, branch, year,
+                                semester and subject.
+                            </span>
+
+                            <small>
+                                Available in the current version
+                            </small>
+
+                        </div>
+
+                    </a>
+
+
+                    <!-- AI Mentor -->
+
+                    <article class="service-card service-ai"
+                             data-service="mentor"
+                             role="button"
+                             tabindex="0">
+
+                        <div class="service-icon">
+                            🤖
+                        </div>
+
+                        <h4>
+                            AI Career Mentor
+                        </h4>
+
+                        <p>
+                            Guidance for your career journey.
+                        </p>
+
+                        <div class="service-popup">
+
+                            <strong>
+                                🤖 AI Career Mentor
+                            </strong>
+
+                            <span>
+                                Ask about career paths, skills,
+                                projects, roadmaps, placements
+                                and interviews.
+                            </span>
+
+                            <small>
+                                Core StudentHub AI feature
+                            </small>
+
+                        </div>
+
+                    </article>
+
+
+                    <!-- Placement -->
+
+                    <article class="service-card service-placement"
+                             data-service="placement"
+                             role="button"
+                             tabindex="0">
+
+                        <div class="service-icon">
+                            💼
+                        </div>
+
+                        <h4>
+                            Placement Guidance
+                        </h4>
+
+                        <p>
+                            Prepare smarter for placements.
+                        </p>
+
+                        <div class="service-popup">
+
+                            <strong>
+                                💼 Placement Guidance
+                            </strong>
+
+                            <span>
+                                Learn what skills, topics and
+                                preparation strategies can help
+                                you move toward your target role.
+                            </span>
+
+                            <small>
+                                Guidance through AI Mentor
+                            </small>
+
+                        </div>
+
+                    </article>
+
+
+                    <!-- Resume -->
+
+                    <article class="service-card service-resume"
+                             data-service="resume"
+                             role="button"
+                             tabindex="0">
+
+                        <div class="service-icon">
+                            📄
+                        </div>
+
+                        <h4>
+                            AI Resume Analyzer
+                        </h4>
+
+                        <p>
+                            Improve your resume for future roles.
+                        </p>
+
+                        <div class="service-popup">
+
+                            <strong>
+                                📄 AI Resume Analyzer
+                            </strong>
+
+                            <span>
+                                Future feature for resume review,
+                                suggestions and ATS-oriented
+                                improvement.
+                            </span>
+
+                            <small>
+                                Coming soon
+                            </small>
+
+                        </div>
+
+                    </article>
+
+
+                    <!-- Interview -->
+
+                    <article class="service-card service-interview"
+                             data-service="interview"
+                             role="button"
+                             tabindex="0">
+
+                        <div class="service-icon">
+                            🎤
+                        </div>
+
+                        <h4>
+                            Interview Preparation
+                        </h4>
+
+                        <p>
+                            Prepare for technical and HR rounds.
+                        </p>
+
+                        <div class="service-popup">
+
+                            <strong>
+                                🎤 Interview Preparation
+                            </strong>
+
+                            <span>
+                                Future mock interviews,
+                                technical questions and
+                                preparation assistance.
+                            </span>
+
+                            <small>
+                                Coming soon
+                            </small>
+
+                        </div>
+
+                    </article>
+
+
+                    <!-- Internship -->
+
+                    <article class="service-card service-internship"
+                             data-service="internship"
+                             role="button"
+                             tabindex="0">
+
+                        <div class="service-icon">
+                            🌐
+                        </div>
+
+                        <h4>
+                            Internship Opportunities
+                        </h4>
+
+                        <p>
+                            Discover future learning opportunities.
+                        </p>
+
+                        <div class="service-popup">
+
+                            <strong>
+                                🌐 Internship Opportunities
+                            </strong>
+
+                            <span>
+                                Future platform for discovering
+                                relevant internships and
+                                training opportunities.
+                            </span>
+
+                            <small>
+                                Coming soon
+                            </small>
+
+                        </div>
+
+                    </article>
+
+                </div>
+
+                <p id="serviceNotice" class="service-notice" role="status" aria-live="polite"></p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             WHY STUDENTHUB
+        ========================== -->
+
+        <section id="why-studenthub"
+                 class="content-section page-section">
+
+            <div class="section-heading">
+
+                <span class="section-label">
+                    Why StudentHub AI?
+                </span>
+
+                <h2>
+                    Stop searching everywhere.
+                    Start finding everything in one place.
+                </h2>
+
+                <p>
+                    Students often have to search multiple platforms
+                    for academic notes, career advice, project ideas,
+                    placement preparation and learning resources.
+                    StudentHub AI is designed to bring those needs
+                    together into one student-focused platform.
+                </p>
+
+            </div>
+
+
+            <div class="reason-grid">
+
+                <div class="reason-card">
+                    <span>📚</span>
+                    <h3>Study Resources</h3>
+                    <p>
+                        Find academic material through a structured
+                        university and semester-based system.
+                    </p>
+                </div>
+
+                <div class="reason-card">
+                    <span>🤖</span>
+                    <h3>AI Guidance</h3>
+                    <p>
+                        Get career-focused guidance instead of
+                        generic chatbot answers.
+                    </p>
+                </div>
+
+                <div class="reason-card">
+                    <span>🎯</span>
+                    <h3>Career Direction</h3>
+                    <p>
+                        Understand what to learn, what to build
+                        and how to prepare for your target role.
+                    </p>
+                </div>
+
+                <div class="reason-card">
+                    <span>🧭</span>
+                    <h3>Student First</h3>
+                    <p>
+                        Everything is designed around the actual
+                        journey of an engineering student.
+                    </p>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             SERVICES SECTION
+        ========================== -->
+
+        <section id="services"
+                 class="content-section services-section page-section">
+
+            <div class="section-heading">
+
+                <span class="section-label">
+                    Our Services
+                </span>
+
+                <h2>
+                    Built around the needs of students.
+                </h2>
+
+                <p>
+                    StudentHub AI focuses on the features that can
+                    make your academic and career journey easier.
+                </p>
+
+            </div>
+
+
+            <div class="feature-grid">
+
+                <div class="feature-box active-feature">
+
+                    <div class="feature-icon">
+                        📚
+                    </div>
+
+                    <h3>
+                        College Notes
+                    </h3>
+
+                    <p>
+                        Organized notes based on your academic
+                        structure.
+                    </p>
+
+                    <span class="status available">
+                        Available
+                    </span>
+
+                </div>
+
+
+                <div class="feature-box active-feature">
+
+                    <div class="feature-icon">
+                        🤖
+                    </div>
+
+                    <h3>
+                        AI Career Mentor
+                    </h3>
+
+                    <p>
+                        Career roadmaps, skills, projects,
+                        placements and interview guidance.
+                    </p>
+
+                    <span class="status available">
+                        Available
+                    </span>
+
+                </div>
+
+
+                <div class="feature-box upcoming">
+
+                    <div class="feature-icon">
+                        📄
+                    </div>
+
+                    <h3>
+                        Resume Analyzer
+                    </h3>
+
+                    <p>
+                        Future AI-powered resume analysis
+                        and improvement suggestions.
+                    </p>
+
+                    <span class="status">
+                        Coming Soon
+                    </span>
+
+                </div>
+
+
+                <div class="feature-box upcoming">
+
+                    <div class="feature-icon">
+                        🎤
+                    </div>
+
+                    <h3>
+                        Mock Interviews
+                    </h3>
+
+                    <p>
+                        Future technical and HR interview
+                        practice with feedback.
+                    </p>
+
+                    <span class="status">
+                        Coming Soon
+                    </span>
+
+                </div>
+
+
+                <div class="feature-box upcoming">
+
+                    <div class="feature-icon">
+                        💼
+                    </div>
+
+                    <h3>
+                        Placement Preparation
+                    </h3>
+
+                    <p>
+                        Future company-focused preparation,
+                        hiring process and placement tracking.
+                    </p>
+
+                    <span class="status">
+                        Coming Soon
+                    </span>
+
+                </div>
+
+
+                <div class="feature-box upcoming">
+
+                    <div class="feature-icon">
+                        🧑‍💻
+                    </div>
+
+                    <h3>
+                        Coding Practice
+                    </h3>
+
+                    <p>
+                        Future coding practice and
+                        skill-building resources.
+                    </p>
+
+                    <span class="status">
+                        Coming Soon
+                    </span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             HOW IT WORKS
+        ========================== -->
+
+        <section id="how-it-works"
+                 class="content-section process-section page-section">
+
+            <div class="section-heading">
+
+                <span class="section-label">
+                    Simple Student Journey
+                </span>
+
+                <h2>
+                    How StudentHub AI Works
+                </h2>
+
+            </div>
+
+
+            <div class="process-grid">
+
+                <div class="process-card">
+                    <div class="process-number">01</div>
+                    <h3>Register</h3>
+                    <p>
+                        Create your StudentHub AI account.
+                    </p>
+                </div>
+
+                <div class="process-card">
+                    <div class="process-number">02</div>
+                    <h3>Explore</h3>
+                    <p>
+                        Access the services available to you.
+                    </p>
+                </div>
+
+                <div class="process-card">
+                    <div class="process-number">03</div>
+                    <h3>Study</h3>
+                    <p>
+                        Find notes according to your
+                        academic requirements.
+                    </p>
+                </div>
+
+                <div class="process-card">
+                    <div class="process-number">04</div>
+                    <h3>Ask AI</h3>
+                    <p>
+                        Use the Career Mentor for personalized
+                        career guidance.
+                    </p>
+                </div>
+
+                <div class="process-card">
+                    <div class="process-number">05</div>
+                    <h3>Prepare</h3>
+                    <p>
+                        Follow your roadmap and prepare
+                        for your target career.
+                    </p>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             AI CAREER MENTOR PREVIEW
+        ========================== -->
+
+        <section id="career-mentor"
+                 class="mentor-section page-section">
+
+            <div class="mentor-wrapper">
+
+                <div class="mentor-intro">
+
+                    <span class="section-label">
+                        🤖 Your AI Career Mentor
+                    </span>
+
+                    <h2>
+                        Don't know what to prepare?
+                        Just ask.
+                    </h2>
+
+                    <p>
+                        From career selection to skills, projects,
+                        roadmaps, placement preparation and
+                        interviews — your AI mentor is designed
+                        to guide you step by step.
+                    </p>
+
+
+                    <div class="prompt-list">
+
+                        <button class="prompt-chip">
+                            🚀 I want to become an AI Engineer
+                        </button>
+
+                        <button class="prompt-chip">
+                            📊 Give me a Data Science roadmap
+                        </button>
+
+                        <button class="prompt-chip">
+                            💼 How should I prepare for placements?
+                        </button>
+
+                        <button class="prompt-chip">
+                            🐍 Give me Python interview questions
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Chatbox -->
+
+                <div class="chat-container">
+
+                    <div class="chat-header">
+
+                        <div class="chat-avatar">
+                            🤖
+                        </div>
+
+                        <div>
+                            <h3>
+                                StudentHub Quick Help
+                            </h3>
+
+                            <span>
+                                Short questions · Subject notes
+                            </span>
+                        </div>
+
+                        <div class="online-dot"></div>
+
+                    </div>
+
+
+                    <div class="chat-messages">
+
+                        <div class="chat-message bot-message">
+
+                            <div class="message-icon">
+                                🤖
+                            </div>
+
+                            <div class="message-content">
+
+                                <strong>StudentHub AI</strong>
+                                <p>Hi! Ask a quick question about a core subject, or ask me to find notes. You can move the thread to the full Mentor whenever you need more help.</p>
+
+                            </div>
+
+                        </div>
+
+                        {% for exchange in quick_history %}
+                            <div class="chat-message user-message">
+                                <div class="message-content"><strong>You</strong><p>{{ exchange.question }}</p></div>
+                            </div>
+                            <div class="chat-message bot-message">
+                                <div class="message-icon">🤖</div>
+                                <div class="message-content"><strong>Quick Help</strong><p>{{ exchange.answer }}</p></div>
+                            </div>
+                        {% endfor %}
+
+                        {% if quick_result and quick_result.intent == 'notes' %}
+                            <div class="quick-result-card" role="status">
+                                <p>{{ quick_result.answer }}</p>
+                                {% if quick_result.login_url %}
+                                    <a class="quick-result-link" href="{{ quick_result.login_url }}">Log in to see notes →</a>
+                                {% elif quick_notes %}
+                                    <ul>
+                                        {% for note in quick_notes %}
+                                            <li><a href="{{ url_for('preview_note', note_id=note.id) }}"><strong>{{ note.title }}</strong><span>{{ note.subject }} · {{ note.branch }} · {{ note.year }} · {{ note.semester }}</span></a></li>
+                                        {% endfor %}
+                                    </ul>
+                                {% elif quick_result.subject %}
+                                    <a class="quick-result-link" href="{{ url_for('notes', subject=quick_result.subject) }}">Open Notes search →</a>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+
+                    </div>
+
+
+                    <form class="chat-input-area" action="{{ url_for('quick_help') }}" method="POST">
+
+                        <textarea
+                            id="mentorInput"
+                            name="question"
+                            rows="3"
+                            maxlength="2000"
+                            placeholder="Ask a quick subject question or find notes..."
+                            required
+                            aria-label="Career question"></textarea>
+
+                        <button type="submit"
+                                class="send-button"
+                                aria-label="Send message">
+                            ➤
+                        </button>
+
+                    </form>
+
+                    {% if quick_history %}
+                        <form class="quick-continue-form" action="{{ url_for('continue_quick_help') }}" method="POST">
+                            {% for exchange in quick_history %}
+                                <input type="hidden" name="quick_questions" value="{{ exchange.question }}">
+                                <input type="hidden" name="quick_answers" value="{{ exchange.answer }}">
+                            {% endfor %}
+                            <button type="submit">Continue this conversation in the full AI Mentor →</button>
+                        </form>
+                    {% endif %}
+
+                    <p class="login-hint">
+                        Quick Help answers common subject questions locally. Longer discussions are saved in the full Mentor. {% if ai_configured %}Select the sharing option there to request an AI reply.{% else %}AI replies can be enabled later by configuring an API key.{% endif %}
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             FUTURE SCOPE
+        ========================== -->
+
+        <section id="future"
+                 class="content-section future-section page-section">
+
+            <div class="section-heading">
+
+                <span class="section-label">
+                    Our Vision
+                </span>
+
+                <h2>
+                    What comes next?
+                </h2>
+
+                <p>
+                    The current version focuses on Notes and
+                    AI Career Mentoring. These are some of the
+                    features planned for the future major project.
+                </p>
+
+            </div>
+
+
+            <div class="future-grid">
+
+                <div class="future-card">
+                    <span>📄</span>
+                    <h3>AI Resume Analyzer</h3>
+                    <p>
+                        Resume analysis, improvement suggestions
+                        and future ATS support.
+                    </p>
+                </div>
+
+                <div class="future-card">
+                    <span>🎤</span>
+                    <h3>AI Mock Interviews</h3>
+                    <p>
+                        Practice interviews with personalized
+                        feedback.
+                    </p>
+                </div>
+
+                <div class="future-card">
+                    <span>🌐</span>
+                    <h3>Internship Opportunities</h3>
+                    <p>
+                        Discover relevant internship opportunities.
+                    </p>
+                </div>
+
+                <div class="future-card">
+                    <span>📈</span>
+                    <h3>Progress Tracking</h3>
+                    <p>
+                        Track learning and career preparation.
+                    </p>
+                </div>
+
+                <div class="future-card">
+                    <span>🏢</span>
+                    <h3>Company Preparation</h3>
+                    <p>
+                        Prepare according to company-specific
+                        hiring patterns.
+                    </p>
+                </div>
+
+                <div class="future-card">
+                    <span>💻</span>
+                    <h3>Coding Practice</h3>
+                    <p>
+                        Build coding skills through guided practice.
+                    </p>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =========================
+             SUGGESTION BOX
+        ========================== -->
+
+        <section id="suggestions"
+                 class="suggestion-section page-section">
+
+            <div class="suggestion-card">
+
+                <div class="suggestion-icon">
+                    💡
+                </div>
+
+                <span class="section-label">
+                    Your Ideas Matter
+                </span>
+
+                <h2>
+                    Have a suggestion for StudentHub AI?
+                </h2>
+
+                <p>
+                    Tell us what you would like us to improve,
+                    add, or change.
+                </p>
+
+                <form id="suggestionForm" action="{{ url_for('submit_suggestion') }}" method="POST">
+
+                    <textarea
+                        id="suggestionText"
+                        name="suggestion"
+                        rows="5"
+                        maxlength="2000"
+                        placeholder="Write your suggestion here..."
+                        required></textarea>
+
+                    <div class="suggestion-bottom">
+
+                        <span class="suggestion-note">
+                            Help us build something students actually need.
+                        </span>
+
+                        <button type="submit"
+                                class="primary-button">
+                            Submit Suggestion
+                        </button>
+
+                    </div>
+
+                </form>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <!-- =========================
+         FOOTER
+    ========================== -->
+
+    <footer class="footer">
+
+        <div class="footer-content">
+
+            <div class="footer-brand">
+
+                <h3>
+                    StudentHub AI
+                </h3>
+
+                <p>
+                    Learn smarter. Prepare better.
+                    Build your career.
+                </p>
+
+            </div>
+
+
+            <div class="footer-links">
+
+                <h4>
+                    Quick Links
+                </h4>
+
+                <a href="#home">Home</a>
+                <a href="#services">Services</a>
+                <a href="#career-mentor">AI Mentor</a>
+                {% if is_logged_in %}
+                    <a href="{{ url_for('dashboard') }}">Dashboard</a>
+                    <a href="{{ url_for('logout') }}">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}">Login</a>
+                    <a href="{{ url_for('register') }}">Register</a>
+                {% endif %}
+
+            </div>
+
+
+            <div class="footer-links">
+
+                <h4>
+                    StudentHub AI
+                </h4>
+
+                <a href="#why-studenthub">
+                    Why StudentHub
+                </a>
+
+                <a href="#how-it-works">
+                    How It Works
+                </a>
+
+                <a href="#future">
+                    Future Scope
+                </a>
+
+                <a href="#suggestions">
+                    Suggestions
+                </a>
+
+            </div>
+
+        </div>
+
+
+        <div class="footer-bottom">
+
+            <p>
+                © 2026 StudentHub AI.
+                Developed by <strong>Utkarsh Jaiswal</strong>.
+            </p>
+
+        </div>
+
+    </footer>
+
+
+    <!-- =========================
+         LOGIN REQUIRED MODAL
+    ========================== -->
+
+    <div id="loginModal"
+         class="modal-overlay"
+         aria-hidden="true">
+
+        <div class="modal-box">
+
+            <button class="modal-close"
+                    aria-label="Close">
+                ×
+            </button>
+
+            <div class="modal-icon">
+                🔐
+            </div>
+
+            <h2>
+                Login Required
+            </h2>
+
+            <p id="modalMessage">
+                Please login or register to use this service.
+            </p>
+
+            <div class="modal-actions">
+
+                <a href="/login"
+                   class="primary-button">
+                    Login
+                </a>
+
+                <a href="/register"
+                   class="secondary-button">
+                    Register
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <script src="{{ url_for('static', filename='css/js/script.js', v=6) }}" defer></script>
+
+</body>
+
+</html>
