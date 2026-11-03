@@ -10,7 +10,6 @@
 
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=3) }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css', v=6) }}">
-
 </head>
 
 <body>
@@ -28,8 +27,7 @@
             <li><a class="active" href="/dashboard" aria-current="page">Dashboard</a></li>
             <li><a href="/notes">Notes</a></li>
             <li><a href="/chatbot">AI Career Mentor</a></li>
-            <li><a href="{{ url_for('account_center') }}">Account Centre</a></li>
-            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+            {% include "_profile_menu.html" %}
         </ul>
 
     </nav>
@@ -47,7 +45,7 @@
 
         <div class="hero-content">
 
-            <h1>Welcome{% if current_user_name %}, {{ current_user_name }}{% endif %}!</h1>
+            <h1>Your StudentHub Dashboard</h1>
 
             <p>
 

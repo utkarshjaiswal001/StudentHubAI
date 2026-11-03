@@ -290,26 +290,20 @@ serviceCards.forEach((card) => {
             card.dataset.service;
 
         if (isAuthenticated) {
-            const destinations = {
-                notes: "/notes",
-                mentor: "/chatbot",
-                placement: "/chatbot"
-            };
-            if (destinations[service]) {
-                window.location.href = destinations[service];
+            const targetUrl = card.dataset.targetUrl;
+            if (targetUrl) {
+                window.location.href = targetUrl;
                 return;
             }
         }
 
-        if (service === "mentor") {
-
-            openLoginModal(
-                "Please login or register to use the AI Career Mentor."
-            );
-
+        const loginUrl = card.dataset.loginUrl;
+        if (loginUrl) {
+            window.location.href = loginUrl;
+            return;
         }
 
-        else if (service === "placement") {
+        if (service === "placement") {
 
             openLoginModal(
                 "Please login or register to access personalized placement guidance."
@@ -416,4 +410,20 @@ if (homeLink) {
         "active"
     );
 
+}
+
+// A back-button restore may otherwise show the logged-out navigation snapshot.
+window.addEventListener("pageshow", (event) => {
+    const navigation = performance.getEntriesByType("navigation")[0];
+    if (event.persisted || navigation?.type === "back_forward") {
+        window.location.reload();
+    }
+});
+
+const welcomeToast = document.querySelector(".welcome-toast");
+if (welcomeToast) {
+    const dismissWelcomeToast = () => welcomeToast.remove();
+    welcomeToast.querySelector(".welcome-toast-close")
+        ?.addEventListener("click", dismissWelcomeToast);
+    window.setTimeout(dismissWelcomeToast, 10000);
 }

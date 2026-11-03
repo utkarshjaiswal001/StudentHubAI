@@ -1,0 +1,10 @@
+<li class="nav-profile">
+    <details class="profile-menu">
+        <summary>{{ current_user_name }} <span aria-hidden="true">⌄</span></summary>
+        <div class="profile-menu-panel">
+            <a href="{{ url_for('account_center') }}">Account Centre</a>
+            <a href="{{ url_for('home') }}#suggestions">Report an issue</a>
+            <a class="profile-logout" href="{{ url_for('logout') }}">Logout</a>
+        </div>
+    </details>
+</li>

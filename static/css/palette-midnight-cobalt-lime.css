@@ -1,0 +1,67 @@
+/* Active palette: Midnight Black, Electric Cobalt, Acid Lime.
+   The prior purple/cyan/pink palette is retained as --classic-* in style.css. */
+:root {
+    --palette-midnight: #030407;
+    --palette-cobalt: #1558c9;
+    --palette-lime: #d4ff24;
+}
+
+html, body {
+    background: var(--palette-midnight) !important;
+    color: var(--palette-lime) !important;
+}
+
+body * {
+    color: var(--palette-lime) !important;
+    background-color: var(--palette-midnight) !important;
+    background-image: none !important;
+    border-color: var(--palette-cobalt) !important;
+}
+
+body *::before, body *::after {
+    background-color: var(--palette-midnight) !important;
+    background-image: none !important;
+    border-color: var(--palette-cobalt) !important;
+}
+
+.navbar, .nav-menu, .nav-links, .profile-menu-panel,
+.service-showcase, .service-card, .service-popup,
+.future-card, .feature-box, .reason-card, .process-card,
+.suggestion-card, .mentor-wrapper, .chat-container,
+.account-section-panel, .account-profile-panel, .account-stat,
+.notes-card, .notes-panel, .auth-card, .login-card, .register-card,
+.dashboard-card, .notes-suggestions, .note-card, .quick-result-card {
+    background: #030407 !important;
+    border-color: var(--palette-cobalt) !important;
+}
+
+.hero-section {
+    background:
+        radial-gradient(ellipse at 78% 20%, rgba(21,88,201,.4), transparent 38%),
+        linear-gradient(125deg, #030407 0%, #030407 62%, #1558c9 100%) !important;
+}
+
+.primary-button, .service-status.available, .future-status, .status.available {
+    background: var(--palette-lime) !important;
+    color: var(--palette-midnight) !important;
+}
+
+.secondary-button, .nav-link.active, .menu-toggle,
+.service-icon, .feature-icon, .account-avatar, .process-number {
+    background: var(--palette-cobalt) !important;
+    color: var(--palette-lime) !important;
+}
+
+.service-status.coming-soon, .status {
+    background: var(--palette-cobalt) !important;
+    color: var(--palette-lime) !important;
+}
+
+.profile-menu-panel .profile-logout { color: var(--palette-lime) !important; }
+input, textarea, select {
+    background: #030407 !important;
+    color: var(--palette-lime) !important;
+    border-color: var(--palette-cobalt) !important;
+}
+input::placeholder, textarea::placeholder { color: var(--palette-lime) !important; opacity: .75; }
+::selection { background: var(--palette-cobalt); color: var(--palette-lime); }

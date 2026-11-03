@@ -67,6 +67,7 @@ SUGGESTED_SUBJECTS = [
     "Machine Learning",
 ]
 OPENAI_MODEL = os.environ.get("OPENAI_MODEL", "gpt-6-astra")
+MAX_CONVERSATION_HISTORY = 80
 
 
 def generate_mentor_reply(conversation_id):
@@ -200,10 +201,18 @@ def init_db():
             """CREATE TABLE IF NOT EXISTS suggestions (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+                category TEXT NOT NULL DEFAULT 'other',
                 message TEXT NOT NULL CHECK (length(message) <= 2000),
                 created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
             )"""
         )
+        suggestion_columns = {
+            row["name"] for row in get_db().execute("PRAGMA table_info(suggestions)")
+        }
+        if "category" not in suggestion_columns:
+            get_db().execute(
+                "ALTER TABLE suggestions ADD COLUMN category TEXT NOT NULL DEFAULT 'other'"
+            )
         get_db().execute(
             """CREATE INDEX IF NOT EXISTS idx_mentor_conversations_user_recent
                ON mentor_conversations (user_id, updated_at DESC, id DESC)"""
@@ -329,6 +338,15 @@ def inject_user_state():
     }
 
 
+@app.after_request
+def prevent_stale_home_after_login(response):
+    # Session-specific navigation must not be restored from a stale browser cache.
+    if request.endpoint == "home" or session.get("user_id") is not None:
+        response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        response.headers["Pragma"] = "no-cache"
+    return response
+
+
 @app.route("/")
 def home():
     quick_result = session.pop("home_quick_result", None)
@@ -348,6 +366,7 @@ def home():
         quick_result=quick_result,
         quick_notes=quick_notes,
         quick_history=session.get("home_quick_history", []),
+        welcome_message=session.pop("welcome_message", None),
     )
 
 
@@ -364,17 +383,21 @@ def health_check():
 @app.route("/suggestion", methods=["POST"])
 def submit_suggestion():
     suggestion = request.form.get("suggestion", "").strip()
+    category = request.form.get("category", "other").strip().lower()
+    allowed_categories = {"broken_link", "login", "notes", "mentor", "other"}
     if not suggestion:
-        flash("Write a suggestion before submitting.", "error")
+        flash("Describe the issue before submitting.", "error")
     elif len(suggestion) > 2000:
-        flash("Keep suggestions under 2,000 characters.", "error")
+        flash("Keep your report under 2,000 characters.", "error")
+    elif category not in allowed_categories:
+        flash("Choose a valid issue category.", "error")
     else:
         get_db().execute(
-            "INSERT INTO suggestions (user_id, message) VALUES (?, ?)",
-            (session.get("user_id"), suggestion),
+            "INSERT INTO suggestions (user_id, category, message) VALUES (?, ?, ?)",
+            (session.get("user_id"), category, suggestion),
         )
         get_db().commit()
-        flash("Thanks! Your suggestion was saved.", "success")
+        flash("Thanks—your issue report was submitted.", "success")
     return redirect(url_for("home", _anchor="suggestions"))
 
 
@@ -480,7 +503,7 @@ def resume_home_conversation():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if session.get("user_id") is not None:
-        return redirect(url_for("dashboard"))
+        return redirect(url_for("home"))
 
     if request.method == "POST":
         email = request.form.get("email", "").strip().lower()
@@ -498,8 +521,8 @@ def login():
                 session["pending_home_exchanges"] = pending_exchanges
             session["user_id"] = user["id"]
             session["user_name"] = user["name"]
-            next_url = request.args.get("next")
-            return redirect(next_url if is_safe_local_url(next_url) else url_for("dashboard"))
+            session["welcome_message"] = f"Welcome back, {user['name']}!"
+            return redirect(url_for("home"))
 
     return render_template("login.html")
 
@@ -507,7 +530,7 @@ def login():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if session.get("user_id") is not None:
-        return redirect(url_for("dashboard"))
+        return redirect(url_for("home"))
 
     if request.method == "POST":
         name = request.form.get("name", "").strip()
@@ -542,9 +565,8 @@ def register():
                     session["pending_home_exchanges"] = pending_exchanges
                 session["user_id"] = cursor.lastrowid
                 session["user_name"] = name
-                flash("Your account is ready. Welcome to StudentHub AI!", "success")
-                next_url = request.args.get("next")
-                return redirect(next_url if is_safe_local_url(next_url) else url_for("dashboard"))
+                session["welcome_message"] = f"Welcome, {name}! Your account is ready."
+                return redirect(url_for("home"))
 
     return render_template("register.html")
 
@@ -591,9 +613,13 @@ def account_center():
                    ORDER BY m.id DESC LIMIT 1) AS latest_message
            FROM mentor_conversations AS c
            WHERE c.user_id = ?
-           ORDER BY c.updated_at DESC, c.id DESC LIMIT 8""",
-        (session["user_id"],),
+           ORDER BY c.updated_at DESC, c.id DESC LIMIT ?""",
+        (session["user_id"], MAX_CONVERSATION_HISTORY),
     ).fetchall()
+    conversation_count = db.execute(
+        "SELECT COUNT(*) FROM mentor_conversations WHERE user_id = ?",
+        (session["user_id"],),
+    ).fetchone()[0]
     note_count = db.execute(
         "SELECT COUNT(DISTINCT note_id) FROM note_activity WHERE user_id = ?",
         (session["user_id"],),
@@ -603,6 +629,7 @@ def account_center():
         user=user,
         recent_notes=recent_notes,
         conversations=conversations,
+        conversation_count=conversation_count,
         note_count=note_count,
     )
 
@@ -634,9 +661,20 @@ def notes():
         )
 
     if not search_requested and not filters["year"] and not filters["branch"]:
+        suggested_notes = db.execute(
+            """SELECT subject, COUNT(*) AS note_count
+               FROM study_notes GROUP BY lower(subject)
+               ORDER BY note_count DESC, MAX(created_at) DESC LIMIT 5"""
+        ).fetchall()
+        suggested_subjects = [
+            subject for subject in SUGGESTED_SUBJECTS
+            if subject.casefold() not in {row["subject"].casefold() for row in suggested_notes}
+        ][:5] if not suggested_notes else []
         return render_template(
             "notes_catalog.html",
             note_years=NOTE_YEARS,
+            suggested_notes=suggested_notes,
+            suggested_subjects=suggested_subjects,
         )
 
     if not search_requested and filters["year"] and not filters["branch"]:
@@ -988,10 +1026,19 @@ def chatbot():
             flash("Your question was saved. Add an OpenAI API key locally to enable Mentor replies.", "success")
         return redirect(url_for("chatbot", conversation_id=conversation_id))
 
+    conversation_search = request.args.get("q", "").strip()[:100]
+    search_pattern = f"%{conversation_search}%"
     conversations = db.execute(
         """SELECT id, title, updated_at FROM mentor_conversations
-           WHERE user_id = ? ORDER BY updated_at DESC, id DESC LIMIT 20""",
-        (session["user_id"],),
+           WHERE user_id = ?
+             AND (? = '' OR lower(title) LIKE lower(?) OR EXISTS (
+                 SELECT 1 FROM mentor_messages AS m
+                 WHERE m.conversation_id = mentor_conversations.id
+                   AND lower(m.content) LIKE lower(?)
+             ))
+           ORDER BY updated_at DESC, id DESC LIMIT ?""",
+        (session["user_id"], conversation_search, search_pattern, search_pattern,
+         MAX_CONVERSATION_HISTORY),
     ).fetchall()
     conversation_id = request.args.get("conversation_id", type=int)
     current_conversation = None
@@ -1011,6 +1058,7 @@ def chatbot():
     return render_template(
         "chatbot.html",
         conversations=conversations,
+        conversation_search=conversation_search,
         current_conversation=current_conversation,
         messages=messages,
         ai_configured=bool(os.environ.get("OPENAI_API_KEY", "").strip()),

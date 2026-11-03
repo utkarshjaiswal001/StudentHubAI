@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Career Mentor | StudentHub AI</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=3) }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css', v=8) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css', v=9) }}">
 </head>
 <body>
     <nav class="navbar">
@@ -15,8 +15,7 @@
             <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
             <li><a href="{{ url_for('notes') }}">Notes</a></li>
             <li><a class="active" aria-current="page" href="{{ url_for('chatbot') }}">AI Career Mentor</a></li>
-            <li><a href="{{ url_for('account_center') }}">Account Centre</a></li>
-            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+            {% include "_profile_menu.html" %}
         </ul>
     </nav>
 
@@ -40,6 +39,12 @@
                 </div>
                 <a class="notes-preview-action" href="{{ url_for('chatbot') }}">New chat</a>
             </div>
+            <form class="mentor-history-search" method="GET" action="{{ url_for('chatbot') }}" role="search">
+                <label class="visually-hidden" for="conversationSearch">Search conversations</label>
+                <input id="conversationSearch" type="search" name="q" value="{{ conversation_search }}" placeholder="Search conversations…" maxlength="100">
+                <button type="submit">Search</button>
+                {% if conversation_search %}<a href="{{ url_for('chatbot') }}">Clear</a>{% endif %}
+            </form>
             {% if conversations %}
                 <ul class="mentor-conversation-list">
                     {% for conversation in conversations %}
@@ -55,7 +60,7 @@
             {% else %}
                 <div class="mentor-history-empty">
                     <span aria-hidden="true">💬</span>
-                    <p>Your saved conversations will appear here.</p>
+                    <p>{% if conversation_search %}No conversations match “{{ conversation_search }}”. Try another search.{% else %}Your saved conversations will appear here.{% endif %}</p>
                 </div>
             {% endif %}
             <a class="account-inline-link" href="{{ url_for('account_center') }}">View all in Account Centre →</a>

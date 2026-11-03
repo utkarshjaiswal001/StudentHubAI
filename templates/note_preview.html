@@ -15,8 +15,7 @@
             <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
             <li><a class="active" aria-current="page" href="{{ url_for('notes') }}">Notes</a></li>
             <li><a href="{{ url_for('chatbot') }}">AI Career Mentor</a></li>
-            <li><a href="{{ url_for('account_center') }}">Account Centre</a></li>
-            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+            {% include "_profile_menu.html" %}
         </ul>
     </nav>
 

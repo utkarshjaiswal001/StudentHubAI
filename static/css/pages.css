@@ -242,6 +242,52 @@ footer {
     padding: 34px 6% 76px;
 }
 
+.notes-catalog-layout {
+    width: min(1240px, 92%);
+    margin: 34px auto 72px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(260px, 310px);
+    align-items: start;
+    gap: 22px;
+}
+
+.notes-catalog-layout .notes-flow-shell { width: 100%; margin: 0; }
+
+.notes-flow-recommendations {
+    position: sticky;
+    top: 98px;
+    padding: 22px;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: var(--white);
+    box-shadow: var(--shadow);
+}
+
+.notes-flow-recommendations h2 { margin: 3px 0 6px; color: var(--dark); font-size: 20px; }
+.notes-flow-recommendations > p { margin: 0 0 16px; color: var(--muted); font-size: 13px; }
+.notes-flow-recommendations ul { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.notes-flow-recommendations li a { display: grid; gap: 3px; padding: 10px 12px; border-radius: 11px; background: #f5f4ff; }
+.notes-flow-recommendations li a:hover { background: #eceaff; }
+.notes-flow-recommendations li strong { color: var(--dark); font-size: 13px; }
+.notes-flow-recommendations li span { color: var(--muted); font-size: 11px; }
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.mentor-history-search { display: flex; flex-wrap: wrap; gap: 7px; margin: 14px 0; }
+.mentor-history-search input { min-width: 0; flex: 1 1 100%; padding: 10px 11px; border: 1px solid var(--border); border-radius: 10px; font: inherit; }
+.mentor-history-search button,
+.mentor-history-search a { display: inline-flex; align-items: center; justify-content: center; padding: 8px 11px; border: 1px solid var(--border); border-radius: 9px; background: var(--white); color: var(--primary-dark); font: inherit; font-size: 12px; font-weight: 800; cursor: pointer; }
+
 .notes-flow-heading {
     display: flex;
     align-items: center;
@@ -887,6 +933,9 @@ footer {
 }
 
 @media (max-width: 850px) {
+    .notes-catalog-layout { grid-template-columns: 1fr; }
+    .notes-flow-recommendations { position: static; }
+
     .notes-workspace {
         grid-template-columns: minmax(0, 1fr) 280px;
         gap: 16px;
@@ -1139,6 +1188,14 @@ footer {
     margin: 0;
     padding: 0;
     list-style: none;
+}
+
+.account-conversation-list,
+.mentor-conversation-list {
+    max-height: min(68vh, 720px);
+    overflow-y: auto;
+    padding-right: 4px;
+    scrollbar-gutter: stable;
 }
 
 .account-activity-list li {
