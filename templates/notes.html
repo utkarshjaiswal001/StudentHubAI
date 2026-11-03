@@ -28,7 +28,7 @@
     <section class="hero">
         <div class="hero-content">
             <h1>College Notes</h1>
-            <p>Choose your year and branch to browse subjects, then preview the matching study PDFs.</p>
+            <p>Choose your year and branch to browse subjects, then preview the matching study files.</p>
         </div>
     </section>
 
@@ -38,7 +38,7 @@
                 <div class="notes-panel-heading">
                     <span class="section-kicker">AKTU STUDY LIBRARY</span>
                     <h2 id="find-notes-title">Find your notes</h2>
-                    <p>Choose your course details or search directly by subject.</p>
+            <p>Choose your course details or search directly by subject. Preview PDFs and PowerPoint notes here.</p>
                     {% if is_owner %}
                     <a class="notes-upload-shortcut" href="{{ url_for('upload_note') }}">＋ Upload notes to the library</a>
                     {% endif %}
@@ -98,7 +98,7 @@
                     <div class="notes-result-list">
                         {% for note in notes %}
                             <article class="notes-result-card">
-                                <div class="notes-file-icon" aria-hidden="true">PDF</div>
+                                <div class="notes-file-icon" aria-hidden="true">{{ note.original_filename.rsplit('.', 1)[-1]|upper }}</div>
                                 <div class="notes-result-copy">
                                     <h3><a class="notes-preview-link" href="{{ url_for('preview_note', note_id=note.id, return_to=request.full_path) }}">{{ note.title }}</a></h3>
                                     <p>{{ note.subject }} · {{ note.branch }} · {{ note.year }} · {{ note.semester }}</p>
@@ -137,7 +137,7 @@
                         <li>
                             <a href="{{ url_for('notes', branch=filters.branch, year=filters.year, semester=filters.semester, subject=suggestion.subject) }}">
                                 <span class="suggestion-subject">{{ suggestion.subject }}</span>
-                                <span class="suggestion-detail">{{ suggestion.note_count }} PDF{% if suggestion.note_count != 1 %}s{% endif %} shared</span>
+                                <span class="suggestion-detail">{{ suggestion.note_count }} file{% if suggestion.note_count != 1 %}s{% endif %} shared</span>
                                 <span class="suggestion-arrow" aria-hidden="true">↗</span>
                             </a>
                         </li>

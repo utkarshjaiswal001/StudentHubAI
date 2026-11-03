@@ -22,7 +22,7 @@
     <header class="notes-flow-hero">
         <span class="section-kicker">OWNER LIBRARY TOOLS</span>
         <h1>Upload study notes</h1>
-        <p>Add a PDF to the shared library. Students can then preview or download it from this site.</p>
+        <p>Add a PDF or PowerPoint file to the shared library. Students can preview it here and download the original.</p>
     </header>
 
     <main class="owner-upload-wrap">
@@ -68,9 +68,9 @@
                     </select>
                 </div>
                 <div class="notes-field owner-upload-wide">
-                    <label for="note-pdf">PDF file</label>
-                    <input id="note-pdf" name="pdf" type="file" accept="application/pdf,.pdf" required>
-                    <small>PDF only, up to 20 MB. The file will be stored outside the public static folder.</small>
+                    <label for="note-file">PDF or PowerPoint file</label>
+                    <input id="note-file" name="file" type="file" accept="application/pdf,.pdf,application/vnd.openxmlformats-officedocument.presentationml.presentation,.pptx" required>
+                    <small>PDF or PPTX, up to 20 MB. PowerPoint previews show slide text; the original deck stays available to download.</small>
                 </div>
             </div>
             <div class="owner-upload-actions">

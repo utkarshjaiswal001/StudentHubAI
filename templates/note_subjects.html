@@ -26,7 +26,7 @@
     <header class="notes-flow-hero">
         <span class="section-kicker">{{ year }} · {{ branch }}</span>
         <h1>Choose a subject</h1>
-        <p>Open a subject card to see the PDFs shared for it. Preview each PDF on StudentHub AI.</p>
+        <p>Open a subject card to see its study files. Preview each file on StudentHub AI.</p>
     </header>
 
     <main class="notes-flow-shell">
@@ -40,13 +40,13 @@
                     <details class="notes-subject-dropdown">
                         <summary>
                             <span class="notes-choice-icon" aria-hidden="true">📘</span>
-                            <span class="notes-choice-copy"><strong>{{ item.subject }}</strong><small>{{ item.notes|length }} PDF{% if item.notes|length != 1 %}s{% endif %} available</small></span>
+                            <span class="notes-choice-copy"><strong>{{ item.subject }}</strong><small>{{ item.notes|length }} file{% if item.notes|length != 1 %}s{% endif %} available</small></span>
                             <span class="notes-dropdown-caret" aria-hidden="true">⌄</span>
                         </summary>
                         <div class="notes-pdf-list">
                             {% for note in item.notes %}
                                 <article class="notes-pdf-row">
-                                    <span class="notes-file-icon" aria-hidden="true">PDF</span>
+                                    <span class="notes-file-icon" aria-hidden="true">{{ note.original_filename.rsplit('.', 1)[-1]|upper }}</span>
                                     <span class="notes-choice-copy"><strong>{{ note.title }}</strong><small>{{ note.semester }} · {{ note.original_filename }}</small></span>
                                     <a class="notes-preview-action" href="{{ url_for('preview_note', note_id=note.id, return_to=url_for('note_subjects', branch=branch, year=year)) }}">Preview</a>
                                     <a class="notes-download-link" href="{{ url_for('download_note', note_id=note.id) }}">Download</a>
@@ -59,7 +59,7 @@
         {% else %}
             <div class="notes-empty-state" role="status" aria-live="polite">
                 <span aria-hidden="true">📂</span>
-                <h3>Sorry, no PDFs found</h3>
+                <h3>No notes found</h3>
                 <p>There are no notes available for {{ branch }} in {{ year }} yet. Please check back later.</p>
             </div>
         {% endif %}

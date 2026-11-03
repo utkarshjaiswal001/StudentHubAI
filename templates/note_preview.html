@@ -28,14 +28,30 @@
                     <h1>{{ note.title }}</h1>
                     <p>{{ note.subject }} · {{ note.branch }} · {{ note.year }} · {{ note.semester }}</p>
                 </div>
-                <a class="notes-download-link" href="{{ url_for('download_note', note_id=note.id) }}">Download PDF</a>
+                <a class="notes-download-link" href="{{ url_for('download_note', note_id=note.id) }}">Download {{ 'PowerPoint' if is_pptx else 'PDF' }}</a>
             </div>
         </header>
+        {% if is_pptx %}
+        <section class="pptx-text-preview" aria-label="PowerPoint slide text preview">
+            <p class="pptx-preview-note">This on-site preview shows extracted slide text. Download the PowerPoint for its original layout, images, and animations.</p>
+            {% if pptx_slides %}
+                {% for slide in pptx_slides %}
+                <article class="pptx-slide-card">
+                    <h2>Slide {{ slide.number }}</h2>
+                    {% if slide.text %}<p>{{ slide.text }}</p>{% else %}<p class="pptx-slide-empty">No selectable text on this slide.</p>{% endif %}
+                </article>
+                {% endfor %}
+            {% else %}
+                <p class="pptx-slide-empty">A text preview could not be generated. You can still download the original presentation.</p>
+            {% endif %}
+        </section>
+        {% else %}
         <section class="note-preview-frame" aria-label="PDF notes preview">
             <iframe src="{{ url_for('serve_note_preview', note_id=note.id) }}" title="Preview of {{ note.title }} PDF">
                 <p>Your browser cannot display this PDF inline. <a href="{{ url_for('download_note', note_id=note.id) }}">Download it instead</a>.</p>
             </iframe>
         </section>
+        {% endif %}
     </main>
 </body>
 </html>

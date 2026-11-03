@@ -1,7 +1,10 @@
 import os
+import re
 import secrets
 import sqlite3
 import uuid
+import zipfile
+import xml.etree.ElementTree as ET
 from functools import wraps
 from pathlib import Path
 from urllib.parse import urljoin, urlparse
@@ -48,6 +51,7 @@ app.config["UPLOAD_FOLDER"] = os.environ.get(
 )
 app.config["OWNER_EMAIL"] = os.environ.get("OWNER_EMAIL", "").strip().lower()
 MAX_NOTE_FILE_SIZE = 20 * 1024 * 1024
+PPTX_MAX_UNPACKED_SIZE = 100 * 1024 * 1024
 app.config["MAX_CONTENT_LENGTH"] = MAX_NOTE_FILE_SIZE + 1024 * 1024
 
 NOTE_BRANCHES = [
@@ -72,6 +76,65 @@ SUGGESTED_SUBJECTS = [
 ]
 OPENAI_MODEL = os.environ.get("OPENAI_MODEL", "gpt-6.1-sol")
 MAX_CONVERSATION_HISTORY = 80
+
+
+def validate_pptx_stream(stream):
+    """Check a PPTX ZIP container without extracting its contents to disk."""
+    stream.seek(0)
+    try:
+        with zipfile.ZipFile(stream) as archive:
+            entries = archive.infolist()
+            names = {entry.filename for entry in entries}
+            total_size = sum(entry.file_size for entry in entries)
+            slide_names = [
+                entry.filename for entry in entries
+                if re.fullmatch(r"ppt/slides/slide\d+\.xml", entry.filename)
+            ]
+            if (
+                "[Content_Types].xml" not in names
+                or "ppt/presentation.xml" not in names
+                or not slide_names
+                or len(slide_names) > 100
+                or total_size > PPTX_MAX_UNPACKED_SIZE
+            ):
+                return False
+            for entry_name in ("[Content_Types].xml", "ppt/presentation.xml", slide_names[0]):
+                entry = archive.getinfo(entry_name)
+                if entry.file_size > 2 * 1024 * 1024:
+                    return False
+                ET.fromstring(archive.read(entry_name))
+        return True
+    except (OSError, ValueError, zipfile.BadZipFile, zipfile.LargeZipFile, ET.ParseError):
+        return False
+    finally:
+        stream.seek(0)
+
+
+def extract_pptx_slide_text(file_path):
+    """Return a small, same-site text preview for a PowerPoint presentation."""
+    slides = []
+    namespace = {"a": "http://schemas.openxmlformats.org/drawingml/2006/main"}
+    try:
+        with zipfile.ZipFile(file_path) as archive:
+            names = sorted(
+                (name for name in archive.namelist()
+                 if re.fullmatch(r"ppt/slides/slide\d+\.xml", name)),
+                key=lambda name: int(re.search(r"slide(\d+)\.xml$", name).group(1)),
+            )[:100]
+            for name in names:
+                info = archive.getinfo(name)
+                if info.file_size > 2 * 1024 * 1024:
+                    continue
+                root = ET.fromstring(archive.read(name))
+                text = " ".join(
+                    item.text.strip() for item in root.findall(".//a:t", namespace)
+                    if item.text and item.text.strip()
+                )[:4000]
+                number = int(re.search(r"slide(\d+)\.xml$", name).group(1))
+                slides.append({"number": number, "text": text})
+    except (OSError, ValueError, zipfile.BadZipFile, ET.ParseError):
+        return []
+    return slides
 
 
 def generate_mentor_reply(conversation_id):
@@ -179,15 +242,6 @@ def init_db():
         user_columns = {row["name"] for row in get_db().execute("PRAGMA table_info(users)")}
         if "is_owner" not in user_columns:
             get_db().execute("ALTER TABLE users ADD COLUMN is_owner INTEGER NOT NULL DEFAULT 0")
-        owner_email = app.config.get("OWNER_EMAIL", "").strip().lower()
-        existing_owner = get_db().execute(
-            "SELECT 1 FROM users WHERE is_owner = 1 LIMIT 1"
-        ).fetchone()
-        if owner_email and existing_owner is None:
-            get_db().execute(
-                "UPDATE users SET is_owner = 1 WHERE lower(email) = ?",
-                (owner_email,),
-            )
         get_db().execute(
             """CREATE TABLE IF NOT EXISTS study_notes (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -580,6 +634,9 @@ def login():
             session["user_id"] = user["id"]
             session["user_name"] = user["name"]
             session["welcome_message"] = f"Welcome back, {user['name']}!"
+            next_url = request.args.get("next", "")
+            if is_safe_local_url(next_url):
+                return redirect(next_url)
             return redirect(url_for("home"))
 
     return render_template("login.html")
@@ -689,6 +746,53 @@ def account_center():
         conversations=conversations,
         conversation_count=conversation_count,
         note_count=note_count,
+    )
+
+
+@app.route("/admin")
+@owner_required
+def admin_access():
+    db = get_db()
+    stats = {
+        "students": db.execute("SELECT COUNT(*) FROM users").fetchone()[0],
+        "notes": db.execute("SELECT COUNT(*) FROM study_notes").fetchone()[0],
+        "conversations": db.execute("SELECT COUNT(*) FROM mentor_conversations").fetchone()[0],
+    }
+    conversations = db.execute(
+        """SELECT c.id, c.title, c.updated_at, u.name AS student_name,
+                  u.branch, u.year,
+                  (SELECT m.content FROM mentor_messages AS m
+                   WHERE m.conversation_id = c.id
+                   ORDER BY m.id DESC LIMIT 1) AS latest_message
+           FROM mentor_conversations AS c
+           JOIN users AS u ON u.id = c.user_id
+           ORDER BY c.updated_at DESC, c.id DESC LIMIT ?""",
+        (MAX_CONVERSATION_HISTORY,),
+    ).fetchall()
+    selected_id = request.args.get("conversation_id", type=int)
+    selected_conversation = None
+    selected_messages = []
+    if selected_id:
+        selected_conversation = db.execute(
+            """SELECT c.id, c.title, c.updated_at, u.name AS student_name,
+                      u.branch, u.year
+               FROM mentor_conversations AS c
+               JOIN users AS u ON u.id = c.user_id WHERE c.id = ?""",
+            (selected_id,),
+        ).fetchone()
+        if selected_conversation is None:
+            abort(404)
+        selected_messages = db.execute(
+            """SELECT role, content, created_at FROM mentor_messages
+               WHERE conversation_id = ? ORDER BY id DESC LIMIT 200""",
+            (selected_id,),
+        ).fetchall()[::-1]
+    return render_template(
+        "admin.html", stats=stats, conversations=conversations,
+        selected_conversation=selected_conversation,
+        selected_messages=selected_messages,
+        ai_model=OPENAI_MODEL,
+        ai_configured=bool(os.environ.get("OPENAI_API_KEY", "").strip()),
     )
 
 
@@ -879,7 +983,7 @@ def note_subjects():
 @app.route("/notes/upload", methods=["GET", "POST"])
 @owner_required
 def upload_note():
-    """Allow only the designated owner account to add PDFs to the shared library."""
+    """Allow only the designated owner account to add course files to the library."""
     csrf_token = session.setdefault("owner_upload_csrf", secrets.token_urlsafe(32))
     if request.method == "POST":
         if not secrets.compare_digest(request.form.get("csrf_token", ""), csrf_token):
@@ -890,32 +994,38 @@ def upload_note():
         branch = request.form.get("branch", "").strip()
         year = request.form.get("year", "").strip()
         semester = request.form.get("semester", "").strip()
-        uploaded_pdf = request.files.get("pdf")
+        uploaded_file = request.files.get("file")
         if not title or len(title) > 120 or not subject or len(subject) > 100:
             flash("Enter a title (up to 120 characters) and subject (up to 100 characters).", "error")
         elif branch not in NOTE_BRANCHES or year not in NOTE_YEARS or semester not in NOTE_SEMESTERS:
             flash("Choose a valid branch, year, and semester.", "error")
-        elif uploaded_pdf is None or not uploaded_pdf.filename:
-            flash("Choose a PDF file to upload.", "error")
+        elif uploaded_file is None or not uploaded_file.filename:
+            flash("Choose a PDF or PowerPoint (.pptx) file to upload.", "error")
         else:
-            original_filename = secure_filename(uploaded_pdf.filename)
-            uploaded_size = uploaded_pdf.stream.seek(0, os.SEEK_END)
-            uploaded_pdf.stream.seek(0)
-            pdf_signature = uploaded_pdf.stream.read(5)
-            uploaded_pdf.stream.seek(0)
-            if not original_filename or Path(original_filename).suffix.lower() != ".pdf":
-                flash("Choose a file with a .pdf extension.", "error")
+            original_filename = secure_filename(uploaded_file.filename)
+            extension = Path(original_filename).suffix.lower() if original_filename else ""
+            uploaded_size = uploaded_file.stream.seek(0, os.SEEK_END)
+            uploaded_file.stream.seek(0)
+            file_signature = uploaded_file.stream.read(5)
+            uploaded_file.stream.seek(0)
+            if extension not in {".pdf", ".pptx"}:
+                flash("Choose a PDF or PowerPoint (.pptx) file.", "error")
             elif uploaded_size > MAX_NOTE_FILE_SIZE:
-                flash("PDF files must be smaller than 20 MB.", "error")
-            elif pdf_signature != b"%PDF-":
+                flash("Files must be smaller than 20 MB.", "error")
+            elif extension == ".pdf" and file_signature != b"%PDF-":
                 flash("The selected file is not a valid PDF.", "error")
+            elif extension == ".pptx" and (
+                not file_signature.startswith(b"PK")
+                or not validate_pptx_stream(uploaded_file.stream)
+            ):
+                flash("The selected file is not a valid PowerPoint presentation.", "error")
             else:
-                uploaded_pdf.stream.seek(0)
-                stored_filename = f"{uuid.uuid4().hex}.pdf"
+                uploaded_file.stream.seek(0)
+                stored_filename = f"{uuid.uuid4().hex}{extension}"
                 upload_folder = Path(app.config["UPLOAD_FOLDER"])
                 upload_folder.mkdir(parents=True, exist_ok=True)
                 destination = upload_folder / stored_filename
-                uploaded_pdf.save(destination)
+                uploaded_file.save(destination)
                 try:
                     db = get_db()
                     db.execute(
@@ -933,7 +1043,7 @@ def upload_note():
                     app.logger.exception("Owner note upload could not be saved")
                     flash("The note could not be saved. Please try again.", "error")
                 else:
-                    flash("Your PDF is now available in the public notes library.", "success")
+                    flash("Your file is now available in the public notes library.", "success")
                     return redirect(url_for("notes"))
     return render_template(
         "upload.html",
@@ -949,6 +1059,9 @@ def upload_note():
 def grant_library_owner(email):
     """Grant the private notes-owner role from a trusted project shell."""
     email = email.strip().lower()
+    configured_owner = app.config.get("OWNER_EMAIL", "").strip().lower()
+    if configured_owner and email != configured_owner:
+        raise click.ClickException("Only the configured owner account may receive notes-admin access.")
     db = get_db()
     owner = db.execute("SELECT id FROM users WHERE email = ? COLLATE NOCASE", (email,)).fetchone()
     if owner is None:
@@ -971,18 +1084,24 @@ def library_cli():
 @click.option("--branch", required=True, type=click.Choice(NOTE_BRANCHES, case_sensitive=True))
 @click.option("--year", required=True, type=click.Choice(NOTE_YEARS, case_sensitive=True))
 @click.option("--semester", required=True, type=click.Choice(NOTE_SEMESTERS, case_sensitive=True))
-@click.option("--pdf", required=True, type=click.Path(exists=True, dir_okay=False, path_type=Path))
-def add_library_note(owner_email, title, subject, branch, year, semester, pdf):
-    """Add one validated PDF to the shared library (owner shell only)."""
+@click.option("--file", "--pdf", "notes_file", required=True, type=click.Path(exists=True, dir_okay=False, path_type=Path))
+def add_library_note(owner_email, title, subject, branch, year, semester, notes_file):
+    """Add one validated PDF or PPTX to the shared library (owner shell only)."""
     title = title.strip()
     subject = subject.strip()
     if not title or len(title) > 120 or not subject or len(subject) > 100:
         raise click.ClickException("Title (1-120 characters) and subject (1-100 characters) are required.")
-    if pdf.suffix.lower() != ".pdf" or pdf.stat().st_size > MAX_NOTE_FILE_SIZE:
-        raise click.ClickException("Choose a PDF file smaller than 20 MB.")
-    with pdf.open("rb") as source:
-        if source.read(5) != b"%PDF-":
+    extension = notes_file.suffix.lower()
+    if extension not in {".pdf", ".pptx"} or notes_file.stat().st_size > MAX_NOTE_FILE_SIZE:
+        raise click.ClickException("Choose a PDF or PPTX file smaller than 20 MB.")
+    with notes_file.open("rb") as source:
+        signature = source.read(5)
+        if extension == ".pdf" and signature != b"%PDF-":
             raise click.ClickException("The selected file is not a valid PDF.")
+        if extension == ".pptx" and (
+            not signature.startswith(b"PK") or not validate_pptx_stream(source)
+        ):
+            raise click.ClickException("The selected file is not a valid PowerPoint presentation.")
 
     with app.app_context():
         owner = get_db().execute(
@@ -992,14 +1111,14 @@ def add_library_note(owner_email, title, subject, branch, year, semester, pdf):
         if owner is None:
             raise click.ClickException("Create the owner account first; no account matches --owner-email.")
 
-        original_filename = secure_filename(pdf.name)
+        original_filename = secure_filename(notes_file.name)
         if not original_filename:
             raise click.ClickException("The PDF filename is invalid.")
-        stored_filename = f"{uuid.uuid4().hex}.pdf"
+        stored_filename = f"{uuid.uuid4().hex}{extension}"
         upload_folder = Path(app.config["UPLOAD_FOLDER"])
         upload_folder.mkdir(parents=True, exist_ok=True)
         destination = upload_folder / stored_filename
-        destination.write_bytes(pdf.read_bytes())
+        destination.write_bytes(notes_file.read_bytes())
         try:
             cursor = get_db().execute(
                 """INSERT INTO study_notes
@@ -1044,20 +1163,25 @@ def download_note(note_id):
 
     file_path = Path(app.config["UPLOAD_FOLDER"]) / note["stored_filename"]
     if not file_path.is_file():
-        flash("That PDF is currently unavailable.", "error")
+        flash("That notes file is currently unavailable.", "error")
         return redirect(url_for("notes"))
     record_note_activity(note_id, "download")
     return send_file(
         file_path,
         as_attachment=True,
         download_name=note["original_filename"],
+        mimetype=(
+            "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+            if Path(note["original_filename"]).suffix.lower() == ".pptx"
+            else "application/pdf"
+        ),
     )
 
 
 @app.route("/notes/<int:note_id>/preview")
 def preview_note(note_id):
     note = get_db().execute(
-        "SELECT id, title, subject, branch, year, semester, stored_filename FROM study_notes WHERE id = ?",
+        "SELECT id, title, subject, branch, year, semester, stored_filename, original_filename FROM study_notes WHERE id = ?",
         (note_id,),
     ).fetchone()
     if note is None:
@@ -1066,7 +1190,7 @@ def preview_note(note_id):
 
     file_path = Path(app.config["UPLOAD_FOLDER"]) / note["stored_filename"]
     if not file_path.is_file():
-        flash("That PDF is currently unavailable.", "error")
+        flash("That notes file is currently unavailable.", "error")
         return redirect(url_for("notes"))
     record_note_activity(note_id, "preview")
     return_to = request.args.get("return_to", "")
@@ -1076,7 +1200,12 @@ def preview_note(note_id):
         back_url = url_for("note_subjects", branch=note["branch"], year=note["year"])
     else:
         back_url = url_for("notes")
-    return render_template("note_preview.html", note=note, back_url=back_url)
+    is_pptx = Path(note["original_filename"]).suffix.lower() == ".pptx"
+    pptx_slides = extract_pptx_slide_text(file_path) if is_pptx else []
+    return render_template(
+        "note_preview.html", note=note, back_url=back_url,
+        is_pptx=is_pptx, pptx_slides=pptx_slides,
+    )
 
 
 @app.route("/notes/<int:note_id>/file")
@@ -1091,12 +1220,16 @@ def serve_note_preview(note_id):
 
     file_path = Path(app.config["UPLOAD_FOLDER"]) / note["stored_filename"]
     if not file_path.is_file():
-        flash("That PDF is currently unavailable.", "error")
+        flash("That notes file is currently unavailable.", "error")
         return redirect(url_for("notes"))
+    is_pptx = Path(note["original_filename"]).suffix.lower() == ".pptx"
     response = send_file(
         file_path,
-        mimetype="application/pdf",
-        as_attachment=False,
+        mimetype=(
+            "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+            if is_pptx else "application/pdf"
+        ),
+        as_attachment=is_pptx,
         download_name=note["original_filename"],
     )
     response.headers["X-Content-Type-Options"] = "nosniff"
@@ -1106,7 +1239,7 @@ def serve_note_preview(note_id):
 
 @app.errorhandler(413)
 def upload_too_large(_error):
-    flash("PDF files must be smaller than 20 MB.", "error")
+    flash("Files must be smaller than 20 MB.", "error")
     return redirect(url_for("notes"))
 
 

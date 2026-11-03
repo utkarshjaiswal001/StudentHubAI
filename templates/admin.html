@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Access | StudentHub AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=5) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css', v=13) }}">
+</head>
+<body>
+    <nav class="navbar">
+        <a class="logo" href="{{ url_for('home') }}">StudentHub AI</a>
+        <ul class="nav-links">
+            <li><a href="{{ url_for('home') }}">Home</a></li>
+            <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+            <li><a href="{{ url_for('notes') }}">Notes</a></li>
+            <li><a href="{{ url_for('chatbot') }}">AI Career Mentor</a></li>
+            {% include "_profile_menu.html" %}
+        </ul>
+    </nav>
+
+    <header class="notes-flow-hero admin-hero">
+        <span class="section-kicker">OWNER DASHBOARD</span>
+        <h1>Admin Access</h1>
+        <p>Manage the shared notes library, review saved Mentor conversations, and check AI reply configuration.</p>
+    </header>
+
+    <main class="admin-access-page">
+        <section class="admin-perks-grid" aria-label="Admin tools and status">
+            <article class="admin-perk-card">
+                <span class="admin-perk-icon" aria-hidden="true">📚</span>
+                <h2>Notes library</h2>
+                <p>{{ stats.notes }} shared file{% if stats.notes != 1 %}s{% endif %}. Add a PDF or PowerPoint deck for students to browse.</p>
+                <a class="notes-primary-button" href="{{ url_for('upload_note') }}">Upload notes</a>
+            </article>
+            <article class="admin-perk-card">
+                <span class="admin-perk-icon" aria-hidden="true">🤖</span>
+                <h2>AI Mentor status</h2>
+                {% if ai_configured %}
+                    <p><strong class="admin-status-ready">API key configured</strong><br>Model setting: {{ ai_model }}. Key validity and live provider availability are not checked from this page.</p>
+                {% else %}
+                    <p><strong class="admin-status-offline">AI replies not configured</strong><br>The app saves Mentor messages, but it cannot generate provider replies until a private API key is configured.</p>
+                {% endif %}
+                <a class="admin-text-link" href="{{ url_for('chatbot') }}">Open AI Mentor settings</a>
+            </article>
+            <article class="admin-perk-card">
+                <span class="admin-perk-icon" aria-hidden="true">💬</span>
+                <h2>Student conversations</h2>
+                <p>{{ stats.conversations }} saved conversation{% if stats.conversations != 1 %}s{% endif %} across {{ stats.students }} student account{% if stats.students != 1 %}s{% endif %}. Browse the latest 80 and open a thread to review its latest 200 messages.</p>
+                <a class="admin-text-link" href="#admin-conversations">Review conversations ↓</a>
+            </article>
+        </section>
+
+        <section class="admin-conversation-layout" id="admin-conversations" aria-labelledby="admin-conversations-title">
+            <div class="admin-conversation-list">
+                <header class="admin-section-heading">
+                    <span class="section-kicker">MENTOR HISTORY</span>
+                    <h2 id="admin-conversations-title">Recent conversations</h2>
+                </header>
+                {% if conversations %}
+                    {% for item in conversations %}
+                    <a class="admin-conversation-link {% if selected_conversation and selected_conversation.id == item.id %}selected{% endif %}" href="{{ url_for('admin_access', conversation_id=item.id) }}#admin-conversations">
+                        <strong>{{ item.title }}</strong>
+                        <span>{{ item.student_name }} · {{ item.branch }} · {{ item.year }}</span>
+                        <small>{{ item.latest_message or 'No messages yet' }}</small>
+                    </a>
+                    {% endfor %}
+                {% else %}
+                    <p class="admin-empty-state">No saved Mentor conversations yet.</p>
+                {% endif %}
+            </div>
+
+            <div class="admin-conversation-detail">
+                {% if selected_conversation %}
+                    <header class="admin-section-heading">
+                        <a class="admin-text-link" href="{{ url_for('admin_access') }}#admin-conversations">← All conversations</a>
+                        <span class="section-kicker">{{ selected_conversation.student_name }} · {{ selected_conversation.branch }} · {{ selected_conversation.year }}</span>
+                        <h2>{{ selected_conversation.title }}</h2>
+                        <p>Saved {{ selected_conversation.updated_at }}. Showing the latest 200 messages.</p>
+                    </header>
+                    <div class="admin-message-list">
+                        {% for message in selected_messages %}
+                        <article class="admin-message {{ message.role }}">
+                            <span>{{ 'Student' if message.role == 'user' else 'AI Mentor' }}</span>
+                            <p>{{ message.content }}</p>
+                            <time>{{ message.created_at }}</time>
+                        </article>
+                        {% else %}
+                        <p class="admin-empty-state">This conversation has no messages.</p>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="admin-detail-placeholder">
+                        <span aria-hidden="true">✦</span>
+                        <h2>Conversation review</h2>
+                        <p>Select a thread to read its saved messages. This page is read-only.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </section>
+    </main>
+    <footer><p>© 2026 StudentHub AI | Developed by <strong>Utkarsh Jaiswal</strong></p></footer>
+</body>
+</html>

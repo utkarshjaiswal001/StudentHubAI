@@ -16,22 +16,22 @@ Open [http://127.0.0.1:5000/](http://127.0.0.1:5000/). Check [http://127.0.0.1:5
 
 - SQLite is connected automatically when the Flask app starts. The default database is `instance/studenthub.sqlite3`; set `DATABASE_PATH` in a local `.env` file to change it.
 - Tables are created and compatible schema updates are applied automatically. Existing accounts, notes metadata, issue reports, activity, and Mentor conversations persist between restarts.
-- The notes library is public and read-only to visitors: they can browse, preview, and download its PDFs without signing in. Only the account configured by `OWNER_EMAIL` can open the website's **Upload study notes** page; visitors and other signed-in accounts cannot upload or edit shared notes. PDFs are stored under `instance/uploads` by default, outside the public static directory.
-- `OWNER_EMAIL` in the private `.env` can bootstrap the initial notes-owner role for an existing account. That account can upload from the profile menu or Notes page. For trusted shell maintenance, add a PDF with:
+- The notes library is public and read-only to visitors: they can browse, preview, and download its PDFs and PowerPoint files without signing in. Only the account with the database owner role can open **Admin Access** and upload files; visitors and other signed-in accounts cannot upload or edit shared notes. Files are stored under `instance/uploads` by default, outside the public static directory.
+- Set `OWNER_EMAIL` in the private `.env` to the one designated owner address. Once that account exists, grant its role from a trusted shell using `grant-library-owner`; the command refuses any address other than the configured owner. The owner can then use **Admin Access** or the Notes page to upload. For shell maintenance, add a PDF or PPTX with:
 
   ```powershell
-  .\.venv\Scripts\python.exe -m flask --app app library add --owner-email "you@example.com" --title "Unit 1 Notes" --subject DBMS --branch "Computer Science Engineering" --year "2nd Year" --semester "Semester 3" --pdf "C:\path\to\notes.pdf"
+  .\.venv\Scripts\python.exe -m flask --app app library add --owner-email "you@example.com" --title "Unit 1 Notes" --subject DBMS --branch "Computer Science Engineering" --year "2nd Year" --semester "Semester 3" --file "C:\path\to\notes.pdf"
   ```
 
-  To assign the owner role to a different existing account from a trusted shell, use:
+  To grant the configured owner's role after the account exists, use:
 
   ```powershell
   .\.venv\Scripts\python.exe -m flask --app app grant-library-owner --email "you@example.com"
   ```
 
-  Then sign in as that account. This grants the role to one account only.
+  Sign in as the configured owner account to use the Admin Access dashboard. The dashboard shows note upload, AI key/model configuration status, and read-only access to recent saved Mentor conversations. It does not test whether an API key is valid or contact the provider.
 
-  Remove an item and its stored PDF with `.\.venv\Scripts\python.exe -m flask --app app library remove 12`, replacing `12` with the note ID. These commands require shell access to the project/host; they are not available to website visitors.
+  Remove an item and its stored file with `.\.venv\Scripts\python.exe -m flask --app app library remove 12`, replacing `12` with the note ID. These commands require shell access to the project/host; they are not available to website visitors.
 - Account registration, each student's own Mentor messages, activity, and issue reports still create their own application records. Visitors cannot edit another account's records or the shared notes library.
 - Keep `.env`, the `instance` directory, uploads, and database files private and out of Git. Back up the database and uploads together if you need to preserve the complete notes library.
 - The separate database supplied with the Claude reference project uses a different notes schema. Do not point this app at that file without a deliberate data migration.

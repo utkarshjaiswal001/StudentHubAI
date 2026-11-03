@@ -43,7 +43,7 @@
                 </a>
             {% endfor %}
         </div>
-        <aside class="notes-flow-tip"><span aria-hidden="true">✦</span><p>Choose a year and branch to browse the owner-curated subject library. Available PDFs open here on StudentHub AI.</p></aside>
+        <aside class="notes-flow-tip"><span aria-hidden="true">✦</span><p>Choose a year and branch to browse the owner-curated subject library. PDFs and PowerPoint notes open here on StudentHub AI.</p></aside>
     </main>
     <aside class="notes-flow-recommendations" aria-labelledby="notes-recommendations-title">
         <span class="section-kicker">WORTH A LOOK</span>
@@ -52,7 +52,7 @@
         <ul>
             {% if suggested_notes %}
                 {% for item in suggested_notes %}
-                    <li><a href="{{ url_for('notes', subject=item.subject) }}"><strong>{{ item.subject }}</strong><span>{{ item.note_count }} shared PDF{% if item.note_count != 1 %}s{% endif %}</span></a></li>
+                    <li><a href="{{ url_for('notes', subject=item.subject) }}"><strong>{{ item.subject }}</strong><span>{{ item.note_count }} shared file{% if item.note_count != 1 %}s{% endif %}</span></a></li>
                 {% endfor %}
             {% else %}
                 {% for subject in suggested_subjects %}
