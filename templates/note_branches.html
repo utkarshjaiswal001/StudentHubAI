@@ -32,7 +32,6 @@
     <main class="notes-flow-shell">
         <div class="notes-flow-heading">
             <div><a class="notes-back-link" href="{{ url_for('notes') }}">← All years</a><span class="notes-step">STEP 2</span><h2>{{ year }} branches</h2></div>
-            <a class="notes-upload-shortcut" href="{{ url_for('notes', upload=1) }}">Share a PDF</a>
         </div>
         <div class="notes-branch-grid">
             {% for branch in branches %}
@@ -44,7 +43,7 @@
                 </a>
             {% endfor %}
         </div>
-        <aside class="notes-flow-tip"><span aria-hidden="true">✦</span><p>Choose the branch you want to explore; course notes appear on the next page.</p></aside>
+        <aside class="notes-flow-tip"><span aria-hidden="true">✦</span><p>Choose the branch you want to explore; available course notes appear on the next page.</p></aside>
     </main>
 
     <footer><p>© 2026 StudentHub AI | Developed by <strong>Utkarsh Jaiswal</strong></p></footer>

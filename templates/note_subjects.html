@@ -32,7 +32,6 @@
     <main class="notes-flow-shell">
         <div class="notes-flow-heading">
             <div><a class="notes-back-link" href="{{ url_for('note_branches', year=year) }}">← {{ year }} branches</a><span class="notes-step">STEP 3</span><h2>Subjects</h2></div>
-            <a class="notes-upload-shortcut" href="{{ url_for('notes', upload=1, branch=branch, year=year) }}">Share a PDF</a>
         </div>
 
         {% if subjects %}

@@ -84,7 +84,7 @@
                     <div><span class="section-kicker">YOUR CAREER JOURNEY</span><h2 id="mentor-history-title">Mentor conversations</h2></div>
                     <a href="{{ url_for('chatbot') }}">Open mentor →</a>
                 </div>
-                <p class="account-disclosure">Your questions are saved in your account. {% if ai_configured %}You can choose to share a message and recent context for an AI reply in the Mentor.{% else %}AI replies can be enabled later by configuring an API key.{% endif %}</p>
+                <p class="account-disclosure">Your questions are saved in your account. {% if ai_configured %}You can choose to share a message, recent context, and your saved branch/year for an AI reply in the Mentor.{% else %}AI replies can be enabled later by configuring an API key.{% endif %}</p>
                 {% if conversations %}
                     <ul class="account-conversation-list">
                         {% for conversation in conversations %}

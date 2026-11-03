@@ -73,9 +73,9 @@
             </header>
             <div class="mentor-connection-note" role="status">
                 {% if ai_configured %}
-                    AI replies are available. If you choose to share a message, it and up to 11 recent messages in this conversation are sent to OpenAI to generate a response. OpenAI API usage may incur charges.
+                    AI replies are available. If you opt in, your message, up to 11 recent messages, and your saved study branch/year are sent to OpenAI for this reply. API usage may incur charges.
                 {% else %}
-                    Your questions are saved to your account. AI replies need a locally configured OpenAI API key; no conversation text is sent to an AI provider until you configure one and choose to share it.
+                    Your questions are saved to your account. AI replies need a configured OpenAI API key; no conversation or profile details are sent to an AI provider unless replies are configured and you opt in.
                 {% endif %}
             </div>
 
@@ -104,7 +104,7 @@
                 <label for="mentor-question">Your question</label>
                 <textarea id="mentor-question" name="question" maxlength="2000" rows="3" placeholder="e.g. What should I focus on to prepare for a software engineering placement?" required></textarea>
                 {% if ai_configured %}
-                    <label class="mentor-consent"><input type="checkbox" name="ai_consent" value="yes"> Send this message and recent conversation context to OpenAI for an AI reply.</label>
+                    <label class="mentor-consent"><input type="checkbox" name="ai_consent" value="yes"> Send this message, recent conversation context, and my saved branch/year to OpenAI for this reply.</label>
                 {% endif %}
                 <div class="mentor-compose-footer">
                     <span>Up to 2,000 characters. Messages are saved in your account history.</span>

@@ -39,6 +39,9 @@
                     <span class="section-kicker">AKTU STUDY LIBRARY</span>
                     <h2 id="find-notes-title">Find your notes</h2>
                     <p>Choose your course details or search directly by subject.</p>
+                    {% if is_owner %}
+                    <a class="notes-upload-shortcut" href="{{ url_for('upload_note') }}">＋ Upload notes to the library</a>
+                    {% endif %}
                 </div>
                 <form class="notes-filter-form" action="{{ url_for('notes') }}" method="GET">
                     <input type="hidden" name="search" value="1">
@@ -111,57 +114,12 @@
                     <div class="notes-empty-state">
                         <span aria-hidden="true">📚</span>
                         <h3>No notes match this search yet</h3>
-                        <p>Try another subject or add a PDF to start the shared library.</p>
+                        <p>Try another subject or check back as the owner updates the library.</p>
                     </div>
                 {% endif %}
             </section>
             {% endif %}
 
-            <section class="notes-panel notes-upload-panel" aria-labelledby="upload-notes-title">
-                <div class="notes-panel-heading">
-                    <span class="section-kicker">SHARE WITH STUDENTS</span>
-                    <h2 id="upload-notes-title">Add a PDF to the library</h2>
-                    <p>Signed-in students can share course PDFs up to 20 MB.</p>
-                </div>
-                <form class="notes-upload-form" action="{{ url_for('upload_note') }}" method="POST" enctype="multipart/form-data">
-                    <div class="notes-field">
-                        <label for="note-title">Note title</label>
-                        <input id="note-title" name="title" maxlength="120" placeholder="e.g. Unit 1 — Python Basics" required>
-                    </div>
-                    <div class="notes-field">
-                        <label for="upload-subject">Subject</label>
-                        <input id="upload-subject" name="subject" maxlength="100" placeholder="e.g. Python Programming" required>
-                    </div>
-                    <div class="notes-filter-grid notes-upload-details">
-                        <div class="notes-field">
-                            <label for="upload-branch">Branch</label>
-                            <select id="upload-branch" name="branch" required>
-                                <option value="">Choose a branch</option>
-                                {% for branch in note_branches %}<option value="{{ branch }}">{{ branch }}</option>{% endfor %}
-                            </select>
-                        </div>
-                        <div class="notes-field">
-                            <label for="upload-year">Year</label>
-                            <select id="upload-year" name="year" required>
-                                <option value="">Choose a year</option>
-                                {% for year in note_years %}<option value="{{ year }}">{{ year }}</option>{% endfor %}
-                            </select>
-                        </div>
-                        <div class="notes-field">
-                            <label for="upload-semester">Semester</label>
-                            <select id="upload-semester" name="semester" required>
-                                <option value="">Choose semester</option>
-                                {% for semester in note_semesters %}<option value="{{ semester }}">{{ semester }}</option>{% endfor %}
-                            </select>
-                        </div>
-                    </div>
-                    <div class="notes-field">
-                        <label for="note-pdf">PDF file</label>
-                        <input id="note-pdf" name="pdf" type="file" accept="application/pdf,.pdf" required>
-                    </div>
-                    <button class="notes-secondary-button" type="submit">Upload Notes PDF</button>
-                </form>
-            </section>
         </main>
 
         <aside class="notes-suggestions" aria-labelledby="suggested-notes-title">
@@ -197,7 +155,7 @@
                 {% endif %}
             </ul>
             {% if not suggested_notes %}
-                <p class="suggestions-note">As students share PDFs, this box will prioritize subjects already in the library.</p>
+                <p class="suggestions-note">Recommendations update as the owner-curated notes library grows.</p>
             {% endif %}
         </aside>
     </section>
@@ -211,7 +169,7 @@
             </div>
             <div class="card">
                 <h3>📝 Handwritten Notes</h3>
-                <p>Access handwritten notes uploaded by toppers.</p>
+                <p>Explore an owner-curated collection of handwritten study material.</p>
             </div>
             <div class="card">
                 <h3>🎥 Video Lectures</h3>

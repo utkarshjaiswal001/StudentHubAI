@@ -33,7 +33,6 @@
     <main class="notes-flow-shell">
         <div class="notes-flow-heading">
             <div><span class="notes-step">STEP 1</span><h2>Select your year</h2></div>
-            <a class="notes-upload-shortcut" href="{{ url_for('notes', upload=1) }}">Share a PDF</a>
         </div>
         <div class="notes-year-grid">
             {% for year in note_years %}
@@ -44,7 +43,7 @@
                 </a>
             {% endfor %}
         </div>
-        <aside class="notes-flow-tip"><span aria-hidden="true">✦</span><p>Choose a year and branch to browse its subjects. Shared PDFs will appear inside each subject.</p></aside>
+        <aside class="notes-flow-tip"><span aria-hidden="true">✦</span><p>Choose a year and branch to browse the owner-curated subject library. Available PDFs open here on StudentHub AI.</p></aside>
     </main>
     <aside class="notes-flow-recommendations" aria-labelledby="notes-recommendations-title">
         <span class="section-kicker">WORTH A LOOK</span>

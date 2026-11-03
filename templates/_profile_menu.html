@@ -1,10 +1,16 @@
+{% if is_logged_in %}
 <li class="nav-profile">
     <details class="profile-menu">
         <summary>{{ current_user_name }} <span aria-hidden="true">⌄</span></summary>
         <div class="profile-menu-panel">
             <a href="{{ url_for('account_center') }}">Account Centre</a>
+            {% if is_owner %}<a href="{{ url_for('upload_note') }}">Upload study notes</a>{% endif %}
             <a href="{{ url_for('home') }}#suggestions">Report an issue</a>
             <a class="profile-logout" href="{{ url_for('logout') }}">Logout</a>
         </div>
     </details>
 </li>
+{% else %}
+<li><a href="{{ url_for('login') }}">Login</a></li>
+<li><a href="{{ url_for('register') }}">Register</a></li>
+{% endif %}

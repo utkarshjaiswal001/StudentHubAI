@@ -6,8 +6,10 @@ from functools import wraps
 from pathlib import Path
 from urllib.parse import urljoin, urlparse
 
+import click
 from flask import (
     Flask,
+    abort,
     flash,
     g,
     redirect,
@@ -44,7 +46,9 @@ app.config["DATABASE"] = os.environ.get(
 app.config["UPLOAD_FOLDER"] = os.environ.get(
     "UPLOAD_FOLDER", str(Path(app.instance_path) / "uploads")
 )
-app.config["MAX_CONTENT_LENGTH"] = 20 * 1024 * 1024
+app.config["OWNER_EMAIL"] = os.environ.get("OWNER_EMAIL", "").strip().lower()
+MAX_NOTE_FILE_SIZE = 20 * 1024 * 1024
+app.config["MAX_CONTENT_LENGTH"] = MAX_NOTE_FILE_SIZE + 1024 * 1024
 
 NOTE_BRANCHES = [
     "Common (1st Year)",
@@ -66,7 +70,7 @@ SUGGESTED_SUBJECTS = [
     "Artificial Intelligence",
     "Machine Learning",
 ]
-OPENAI_MODEL = os.environ.get("OPENAI_MODEL", "gpt-6-astra")
+OPENAI_MODEL = os.environ.get("OPENAI_MODEL", "gpt-6.1-sol")
 MAX_CONVERSATION_HISTORY = 80
 
 
@@ -82,6 +86,19 @@ def generate_mentor_reply(conversation_id):
         return None, "Install the project requirements to enable AI replies. Your question was saved."
 
     db = get_db()
+    student_profile = db.execute(
+        """SELECT u.branch, u.year
+           FROM mentor_conversations AS c
+           JOIN users AS u ON u.id = c.user_id
+           WHERE c.id = ?""",
+        (conversation_id,),
+    ).fetchone()
+    profile_context = ""
+    if student_profile:
+        profile_context = (
+            "\nStudent's saved academic profile (share only for this opted-in reply): "
+            f"stream/branch: {student_profile['branch']}; study year: {student_profile['year']}."
+        )
     recent_messages = db.execute(
         """SELECT role, content FROM mentor_messages WHERE conversation_id = ?
            ORDER BY id DESC LIMIT 12""",
@@ -96,10 +113,21 @@ def generate_mentor_reply(conversation_id):
             model=OPENAI_MODEL,
             input=input_messages,
             instructions=(
-                "You are StudentHub AI's career mentor for engineering students. "
-                "Give practical, supportive, accurate guidance. Use clear steps and "
-                "ask a focused follow-up question when useful. Do not claim certainty "
-                "about placements, salaries, or hiring outcomes."
+                "You are StudentHub AI's friendly study and career mentor for engineering students. "
+                "Hold a natural, useful conversation and answer the question asked; do not force "
+                "career advice into ordinary chat. Use clear language, practical examples, and "
+                "step-by-step explanations for study questions. When a student asks about career "
+                "options, use their saved stream/year and the conversation's stated interests to "
+                "compare relevant core-field and adjacent-field paths. For example, for ECE, "
+                "consider embedded systems/firmware, VLSI/FPGA, telecom/IoT, and software/IT "
+                "paths; explain what each involves, the skills to build, a starter project, and "
+                "a realistic next step. Do not assume a student must stay in their stream or "
+                "switch to IT, and do not stereotype based on their profile. If key information "
+                "such as interests, preferred work, or time available is missing, give useful "
+                "initial options and ask one focused follow-up to narrow them. Be honest about "
+                "uncertainty, avoid invented course requirements or hiring claims, and never "
+                "promise placements, salaries, or outcomes."
+                f"{profile_context}"
             ),
             max_output_tokens=600,
             store=False,
@@ -148,6 +176,18 @@ def init_db():
                 created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
             )"""
         )
+        user_columns = {row["name"] for row in get_db().execute("PRAGMA table_info(users)")}
+        if "is_owner" not in user_columns:
+            get_db().execute("ALTER TABLE users ADD COLUMN is_owner INTEGER NOT NULL DEFAULT 0")
+        owner_email = app.config.get("OWNER_EMAIL", "").strip().lower()
+        existing_owner = get_db().execute(
+            "SELECT 1 FROM users WHERE is_owner = 1 LIMIT 1"
+        ).fetchone()
+        if owner_email and existing_owner is None:
+            get_db().execute(
+                "UPDATE users SET is_owner = 1 WHERE lower(email) = ?",
+                (owner_email,),
+            )
         get_db().execute(
             """CREATE TABLE IF NOT EXISTS study_notes (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -235,6 +275,22 @@ def login_required(view):
     return wrapped_view
 
 
+def owner_required(view):
+    @wraps(view)
+    def wrapped_view(**kwargs):
+        if session.get("user_id") is None:
+            flash("Please log in with the notes owner account to upload notes.", "info")
+            return redirect(url_for("login", next=request.full_path.rstrip("?")))
+        owner = get_db().execute(
+            "SELECT is_owner FROM users WHERE id = ?", (session["user_id"],)
+        ).fetchone()
+        if owner is None or not owner["is_owner"]:
+            abort(403)
+        return view(**kwargs)
+
+    return wrapped_view
+
+
 def is_safe_local_url(target):
     if not target:
         return False
@@ -244,10 +300,13 @@ def is_safe_local_url(target):
 
 
 def record_note_activity(note_id, action):
+    user_id = session.get("user_id")
+    if user_id is None:
+        return
     db = get_db()
     db.execute(
         "INSERT INTO note_activity (user_id, note_id, action) VALUES (?, ?, ?)",
-        (session["user_id"], note_id, action),
+        (user_id, note_id, action),
     )
     db.commit()
 
@@ -331,8 +390,15 @@ def extract_note_subject(question):
 
 @app.context_processor
 def inject_user_state():
+    user_is_owner = False
+    if session.get("user_id") is not None:
+        owner = get_db().execute(
+            "SELECT is_owner FROM users WHERE id = ?", (session["user_id"],)
+        ).fetchone()
+        user_is_owner = bool(owner and owner["is_owner"])
     return {
         "is_logged_in": session.get("user_id") is not None,
+        "is_owner": user_is_owner,
         "current_user_name": session.get("user_name"),
         "ai_configured": bool(os.environ.get("OPENAI_API_KEY", "").strip()),
     }
@@ -351,7 +417,7 @@ def prevent_stale_home_after_login(response):
 def home():
     quick_result = session.pop("home_quick_result", None)
     quick_notes = []
-    if quick_result and quick_result.get("note_ids") and session.get("user_id"):
+    if quick_result and quick_result.get("note_ids"):
         note_ids = quick_result["note_ids"]
         placeholders = ", ".join("?" for _ in note_ids)
         found = get_db().execute(
@@ -417,14 +483,6 @@ def quick_help():
             answer = "Tell me the subject name too, for example: find DBMS notes."
             session["home_quick_result"] = {
                 "question": question, "answer": answer, "intent": "notes",
-            }
-        elif not session.get("user_id"):
-            session["home_quick_result"] = {
-                "question": question,
-                "answer": "Sign in to search the notes library and open PDFs.",
-                "intent": "notes",
-                "subject": note_subject,
-                "login_url": url_for("login", next=url_for("notes", subject=note_subject)),
             }
         else:
             matching_notes = get_db().execute(
@@ -635,7 +693,6 @@ def account_center():
 
 
 @app.route("/notes")
-@login_required
 def notes():
     db = get_db()
     filters = {
@@ -651,7 +708,6 @@ def notes():
 
     search_requested = bool(
         request.args.get("search")
-        or request.args.get("upload")
         or filters["subject"]
         or filters["semester"]
     )
@@ -759,7 +815,6 @@ def notes():
 
 
 @app.route("/notes/branches")
-@login_required
 def note_branches():
     year = request.args.get("year", "").strip()
     if year not in NOTE_YEARS:
@@ -792,7 +847,6 @@ def note_branches():
 
 
 @app.route("/notes/subjects")
-@login_required
 def note_subjects():
     branch = request.args.get("branch", "").strip()
     year = request.args.get("year", "").strip()
@@ -822,82 +876,163 @@ def note_subjects():
     )
 
 
-@app.route("/notes/upload", methods=["POST"])
-@login_required
+@app.route("/notes/upload", methods=["GET", "POST"])
+@owner_required
 def upload_note():
-    uploaded_file = request.files.get("pdf")
-    title = request.form.get("title", "").strip()
-    branch = request.form.get("branch", "").strip()
-    year = request.form.get("year", "").strip()
-    semester = request.form.get("semester", "").strip()
-    subject = request.form.get("subject", "").strip()
-    upload_succeeded = False
+    """Allow only the designated owner account to add PDFs to the shared library."""
+    csrf_token = session.setdefault("owner_upload_csrf", secrets.token_urlsafe(32))
+    if request.method == "POST":
+        if not secrets.compare_digest(request.form.get("csrf_token", ""), csrf_token):
+            abort(400, "Upload form expired. Please reload and try again.")
 
-    if not uploaded_file or not uploaded_file.filename:
-        flash("Choose a PDF file to upload.", "error")
-    elif (
-        not title
-        or not subject
-        or len(title) > 120
-        or len(subject) > 100
-        or branch not in NOTE_BRANCHES
-        or year not in NOTE_YEARS
-        or semester not in NOTE_SEMESTERS
-    ):
-        flash("Complete the title and valid course details before uploading.", "error")
-    else:
-        original_filename = secure_filename(uploaded_file.filename)
-        if not original_filename or Path(original_filename).suffix.lower() != ".pdf":
-            flash("Only PDF files with a valid file name can be added.", "error")
+        title = request.form.get("title", "").strip()
+        subject = request.form.get("subject", "").strip()
+        branch = request.form.get("branch", "").strip()
+        year = request.form.get("year", "").strip()
+        semester = request.form.get("semester", "").strip()
+        uploaded_pdf = request.files.get("pdf")
+        if not title or len(title) > 120 or not subject or len(subject) > 100:
+            flash("Enter a title (up to 120 characters) and subject (up to 100 characters).", "error")
+        elif branch not in NOTE_BRANCHES or year not in NOTE_YEARS or semester not in NOTE_SEMESTERS:
+            flash("Choose a valid branch, year, and semester.", "error")
+        elif uploaded_pdf is None or not uploaded_pdf.filename:
+            flash("Choose a PDF file to upload.", "error")
         else:
-            signature = uploaded_file.stream.read(5)
-            uploaded_file.stream.seek(0)
-            if signature != b"%PDF-":
-                flash("This file does not appear to be a valid PDF.", "error")
+            original_filename = secure_filename(uploaded_pdf.filename)
+            uploaded_size = uploaded_pdf.stream.seek(0, os.SEEK_END)
+            uploaded_pdf.stream.seek(0)
+            pdf_signature = uploaded_pdf.stream.read(5)
+            uploaded_pdf.stream.seek(0)
+            if not original_filename or Path(original_filename).suffix.lower() != ".pdf":
+                flash("Choose a file with a .pdf extension.", "error")
+            elif uploaded_size > MAX_NOTE_FILE_SIZE:
+                flash("PDF files must be smaller than 20 MB.", "error")
+            elif pdf_signature != b"%PDF-":
+                flash("The selected file is not a valid PDF.", "error")
             else:
+                uploaded_pdf.stream.seek(0)
                 stored_filename = f"{uuid.uuid4().hex}.pdf"
                 upload_folder = Path(app.config["UPLOAD_FOLDER"])
                 upload_folder.mkdir(parents=True, exist_ok=True)
                 destination = upload_folder / stored_filename
-                uploaded_file.save(destination)
+                uploaded_pdf.save(destination)
                 try:
-                    get_db().execute(
+                    db = get_db()
+                    db.execute(
                         """INSERT INTO study_notes
                            (title, branch, year, semester, subject, stored_filename,
                             original_filename, uploaded_by)
                            VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
-                        (
-                            title,
-                            branch,
-                            year,
-                            semester,
-                            subject,
-                            stored_filename,
-                            original_filename,
-                            session["user_id"],
-                        ),
+                        (title, branch, year, semester, subject, stored_filename,
+                         original_filename, session["user_id"]),
                     )
-                    get_db().commit()
-                    upload_succeeded = True
+                    db.commit()
                 except sqlite3.Error:
+                    db.rollback()
                     destination.unlink(missing_ok=True)
-                    raise
-                flash("Your PDF was added to the AKTU notes library.", "success")
-
-    if upload_succeeded:
-        return redirect(url_for("note_subjects", branch=branch, year=year))
-    return redirect(
-        url_for(
-            "notes",
-            upload=1,
-            branch=branch if branch in NOTE_BRANCHES else None,
-            year=year if year in NOTE_YEARS else None,
-        )
+                    app.logger.exception("Owner note upload could not be saved")
+                    flash("The note could not be saved. Please try again.", "error")
+                else:
+                    flash("Your PDF is now available in the public notes library.", "success")
+                    return redirect(url_for("notes"))
+    return render_template(
+        "upload.html",
+        csrf_token=csrf_token,
+        note_branches=NOTE_BRANCHES,
+        note_years=NOTE_YEARS,
+        note_semesters=NOTE_SEMESTERS,
     )
 
 
+@app.cli.command("grant-library-owner")
+@click.option("--email", required=True, help="Email of an existing account to make the notes owner.")
+def grant_library_owner(email):
+    """Grant the private notes-owner role from a trusted project shell."""
+    email = email.strip().lower()
+    db = get_db()
+    owner = db.execute("SELECT id FROM users WHERE email = ? COLLATE NOCASE", (email,)).fetchone()
+    if owner is None:
+        raise click.ClickException("No existing account matches that email.")
+    db.execute("UPDATE users SET is_owner = 0")
+    db.execute("UPDATE users SET is_owner = 1 WHERE id = ?", (owner["id"],))
+    db.commit()
+    click.echo("Notes owner access granted to the existing account.")
+
+
+@app.cli.group("library")
+def library_cli():
+    """Manage the shared notes library from a trusted owner shell."""
+
+
+@library_cli.command("add")
+@click.option("--owner-email", required=True, help="Existing owner account email for the upload record.")
+@click.option("--title", required=True, help="Display title for the PDF.")
+@click.option("--subject", required=True, help="Course subject.")
+@click.option("--branch", required=True, type=click.Choice(NOTE_BRANCHES, case_sensitive=True))
+@click.option("--year", required=True, type=click.Choice(NOTE_YEARS, case_sensitive=True))
+@click.option("--semester", required=True, type=click.Choice(NOTE_SEMESTERS, case_sensitive=True))
+@click.option("--pdf", required=True, type=click.Path(exists=True, dir_okay=False, path_type=Path))
+def add_library_note(owner_email, title, subject, branch, year, semester, pdf):
+    """Add one validated PDF to the shared library (owner shell only)."""
+    title = title.strip()
+    subject = subject.strip()
+    if not title or len(title) > 120 or not subject or len(subject) > 100:
+        raise click.ClickException("Title (1-120 characters) and subject (1-100 characters) are required.")
+    if pdf.suffix.lower() != ".pdf" or pdf.stat().st_size > MAX_NOTE_FILE_SIZE:
+        raise click.ClickException("Choose a PDF file smaller than 20 MB.")
+    with pdf.open("rb") as source:
+        if source.read(5) != b"%PDF-":
+            raise click.ClickException("The selected file is not a valid PDF.")
+
+    with app.app_context():
+        owner = get_db().execute(
+            "SELECT id FROM users WHERE email = ? COLLATE NOCASE",
+            (owner_email.strip(),),
+        ).fetchone()
+        if owner is None:
+            raise click.ClickException("Create the owner account first; no account matches --owner-email.")
+
+        original_filename = secure_filename(pdf.name)
+        if not original_filename:
+            raise click.ClickException("The PDF filename is invalid.")
+        stored_filename = f"{uuid.uuid4().hex}.pdf"
+        upload_folder = Path(app.config["UPLOAD_FOLDER"])
+        upload_folder.mkdir(parents=True, exist_ok=True)
+        destination = upload_folder / stored_filename
+        destination.write_bytes(pdf.read_bytes())
+        try:
+            cursor = get_db().execute(
+                """INSERT INTO study_notes
+                   (title, branch, year, semester, subject, stored_filename,
+                    original_filename, uploaded_by)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                (title, branch, year, semester, subject, stored_filename,
+                 original_filename, owner["id"]),
+            )
+            get_db().commit()
+        except sqlite3.Error:
+            destination.unlink(missing_ok=True)
+            raise
+        click.echo(f"Added notes item {cursor.lastrowid}: {title}")
+
+
+@library_cli.command("remove")
+@click.argument("note_id", type=int)
+def remove_library_note(note_id):
+    """Remove one notes item and its stored PDF (owner shell only)."""
+    with app.app_context():
+        note = get_db().execute(
+            "SELECT stored_filename, title FROM study_notes WHERE id = ?", (note_id,)
+        ).fetchone()
+        if note is None:
+            raise click.ClickException("No notes item exists with that ID.")
+        get_db().execute("DELETE FROM study_notes WHERE id = ?", (note_id,))
+        get_db().commit()
+        (Path(app.config["UPLOAD_FOLDER"]) / note["stored_filename"]).unlink(missing_ok=True)
+        click.echo(f"Removed notes item {note_id}: {note['title']}")
+
+
 @app.route("/notes/<int:note_id>/download")
-@login_required
 def download_note(note_id):
     note = get_db().execute(
         "SELECT stored_filename, original_filename FROM study_notes WHERE id = ?",
@@ -920,7 +1055,6 @@ def download_note(note_id):
 
 
 @app.route("/notes/<int:note_id>/preview")
-@login_required
 def preview_note(note_id):
     note = get_db().execute(
         "SELECT id, title, subject, branch, year, semester, stored_filename FROM study_notes WHERE id = ?",
@@ -946,7 +1080,6 @@ def preview_note(note_id):
 
 
 @app.route("/notes/<int:note_id>/file")
-@login_required
 def serve_note_preview(note_id):
     note = get_db().execute(
         "SELECT stored_filename, original_filename FROM study_notes WHERE id = ?",

@@ -594,9 +594,7 @@
                         {% if quick_result and quick_result.intent == 'notes' %}
                             <div class="quick-result-card" role="status">
                                 <p>{{ quick_result.answer }}</p>
-                                {% if quick_result.login_url %}
-                                    <a class="quick-result-link" href="{{ quick_result.login_url }}">Log in to see notes →</a>
-                                {% elif quick_notes %}
+                                {% if quick_notes %}
                                     <ul>
                                         {% for note in quick_notes %}
                                             <li><a href="{{ url_for('preview_note', note_id=note.id) }}"><strong>{{ note.title }}</strong><span>{{ note.subject }} · {{ note.branch }} · {{ note.year }} · {{ note.semester }}</span></a></li>
