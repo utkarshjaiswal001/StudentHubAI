@@ -7,7 +7,7 @@ import zipfile
 import xml.etree.ElementTree as ET
 from functools import wraps
 from pathlib import Path
-from urllib.parse import urljoin, urlparse
+from urllib.parse import unquote, urlsplit, urlunsplit
 
 import click
 from flask import (
@@ -65,6 +65,18 @@ NOTE_BRANCHES = [
 ]
 NOTE_YEARS = ["1st Year", "2nd Year", "3rd Year", "4th Year"]
 NOTE_SEMESTERS = [f"Semester {number}" for number in range(1, 9)]
+# Keep existing profile choices valid while also accepting the notes-library branch names.
+REGISTRATION_BRANCHES = [
+    "Computer Science",
+    "Computer Science Engineering",
+    "Information Technology",
+    "Electronics & Communication",
+    "Electrical Engineering",
+    "Mechanical Engineering",
+    "Civil Engineering",
+    "Other",
+]
+EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 SUGGESTED_SUBJECTS = [
     "Python Programming",
     "Data Structures",
@@ -345,12 +357,35 @@ def owner_required(view):
     return wrapped_view
 
 
-def is_safe_local_url(target):
-    if not target:
-        return False
-    host_url = urlparse(request.host_url)
-    redirect_url = urlparse(urljoin(request.host_url, target))
-    return redirect_url.scheme in ("http", "https") and host_url.netloc == redirect_url.netloc
+def safe_local_path(target):
+    """Return a same-site path for redirects, or None for anything unsafe."""
+    target = (target or "").strip()
+    if not target or not target.startswith("/") or target.startswith("//"):
+        return None
+    decoded = unquote(target)
+    if "\\" in target or "\\" in decoded:
+        return None
+    if any(ord(character) < 32 or ord(character) == 127 for character in decoded):
+        return None
+    try:
+        parts = urlsplit(target)
+    except ValueError:
+        return None
+    if parts.scheme or parts.netloc:
+        return None
+    return urlunsplit(("", "", parts.path, parts.query, parts.fragment))
+
+
+def get_csrf_token():
+    token = session.get("csrf_token")
+    if not token:
+        token = secrets.token_urlsafe(32)
+        session["csrf_token"] = token
+    return token
+
+
+def contains_control_characters(value):
+    return any(ord(character) < 32 or ord(character) == 127 for character in value)
 
 
 def record_note_activity(note_id, action):
@@ -455,13 +490,25 @@ def inject_user_state():
         "is_owner": user_is_owner,
         "current_user_name": session.get("user_name"),
         "ai_configured": bool(os.environ.get("OPENAI_API_KEY", "").strip()),
+        "csrf_token": get_csrf_token(),
     }
+
+
+@app.before_request
+def protect_state_changing_requests():
+    if request.method not in {"POST", "PUT", "PATCH", "DELETE"}:
+        return None
+    expected = session.get("csrf_token")
+    supplied = request.form.get("csrf_token", "")
+    if not expected or not supplied or not secrets.compare_digest(supplied, expected):
+        abort(400, "Your form session expired. Please reload the page and try again.")
+    return None
 
 
 @app.after_request
 def prevent_stale_home_after_login(response):
     # Session-specific navigation must not be restored from a stale browser cache.
-    if request.endpoint == "home" or session.get("user_id") is not None:
+    if request.endpoint in {"home", "login", "register"} or session.get("user_id") is not None:
         response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
         response.headers["Pragma"] = "no-cache"
     return response
@@ -634,8 +681,8 @@ def login():
             session["user_id"] = user["id"]
             session["user_name"] = user["name"]
             session["welcome_message"] = f"Welcome back, {user['name']}!"
-            next_url = request.args.get("next", "")
-            if is_safe_local_url(next_url):
+            next_url = safe_local_path(request.args.get("next"))
+            if next_url:
                 return redirect(next_url)
             return redirect(url_for("home"))
 
@@ -658,10 +705,20 @@ def register():
 
         if not all((name, email, college, branch, year, password, confirm_password)):
             flash("Please complete every field.", "error")
+        elif not 2 <= len(name) <= 80 or contains_control_characters(name):
+            flash("Enter a name between 2 and 80 characters.", "error")
+        elif len(email) > 254 or not EMAIL_PATTERN.fullmatch(email):
+            flash("Enter a valid email address.", "error")
+        elif not 2 <= len(college) <= 120 or contains_control_characters(college):
+            flash("Enter a college name between 2 and 120 characters.", "error")
+        elif branch not in REGISTRATION_BRANCHES:
+            flash("Choose a valid branch.", "error")
+        elif year not in NOTE_YEARS:
+            flash("Choose a valid year.", "error")
         elif password != confirm_password:
             flash("The passwords do not match.", "error")
-        elif len(password) < 8:
-            flash("Use a password with at least 8 characters.", "error")
+        elif not 8 <= len(password) <= 128:
+            flash("Use a password with 8 to 128 characters.", "error")
         else:
             db = get_db()
             try:
@@ -686,7 +743,7 @@ def register():
     return render_template("register.html")
 
 
-@app.route("/logout", methods=["GET", "POST"])
+@app.route("/logout", methods=["POST"])
 def logout():
     session.clear()
     flash("You have been logged out.", "info")
@@ -984,11 +1041,7 @@ def note_subjects():
 @owner_required
 def upload_note():
     """Allow only the designated owner account to add course files to the library."""
-    csrf_token = session.setdefault("owner_upload_csrf", secrets.token_urlsafe(32))
     if request.method == "POST":
-        if not secrets.compare_digest(request.form.get("csrf_token", ""), csrf_token):
-            abort(400, "Upload form expired. Please reload and try again.")
-
         title = request.form.get("title", "").strip()
         subject = request.form.get("subject", "").strip()
         branch = request.form.get("branch", "").strip()
@@ -1047,7 +1100,6 @@ def upload_note():
                     return redirect(url_for("notes"))
     return render_template(
         "upload.html",
-        csrf_token=csrf_token,
         note_branches=NOTE_BRANCHES,
         note_years=NOTE_YEARS,
         note_semesters=NOTE_SEMESTERS,
@@ -1060,7 +1112,9 @@ def grant_library_owner(email):
     """Grant the private notes-owner role from a trusted project shell."""
     email = email.strip().lower()
     configured_owner = app.config.get("OWNER_EMAIL", "").strip().lower()
-    if configured_owner and email != configured_owner:
+    if not configured_owner:
+        raise click.ClickException("Set OWNER_EMAIL in the environment before granting owner access.")
+    if email != configured_owner:
         raise click.ClickException("Only the configured owner account may receive notes-admin access.")
     db = get_db()
     owner = db.execute("SELECT id FROM users WHERE email = ? COLLATE NOCASE", (email,)).fetchone()
@@ -1193,8 +1247,8 @@ def preview_note(note_id):
         flash("That notes file is currently unavailable.", "error")
         return redirect(url_for("notes"))
     record_note_activity(note_id, "preview")
-    return_to = request.args.get("return_to", "")
-    if is_safe_local_url(return_to):
+    return_to = safe_local_path(request.args.get("return_to"))
+    if return_to:
         back_url = return_to
     elif note["branch"] in NOTE_BRANCHES and note["year"] in NOTE_YEARS:
         back_url = url_for("note_subjects", branch=note["branch"], year=note["year"])

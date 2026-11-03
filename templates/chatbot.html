@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Career Mentor | StudentHub AI</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=3) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=4) }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css', v=9) }}">
 </head>
 <body>
@@ -101,6 +101,7 @@
             </div>
 
             <form class="mentor-message-form" method="POST" action="{{ url_for('chatbot') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                 {% if current_conversation %}<input type="hidden" name="conversation_id" value="{{ current_conversation.id }}">{% endif %}
                 <label for="mentor-question">Your question</label>
                 <textarea id="mentor-question" name="question" maxlength="2000" rows="3" placeholder="e.g. What should I focus on to prepare for a software engineering placement?" required></textarea>

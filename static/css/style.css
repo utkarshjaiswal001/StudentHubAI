@@ -323,15 +323,24 @@ select {
     background: #fff;
     box-shadow: 0 14px 36px rgba(31, 35, 72, .18);
 }
-.profile-menu-panel a {
+.profile-menu-panel a,
+.profile-menu-panel button {
     display: block;
+    width: 100%;
     padding: 11px 12px;
+    border: 0;
     border-radius: 9px;
+    background: transparent;
     color: var(--dark);
+    font-family: inherit;
     font-size: 14px;
     font-weight: 650;
+    text-align: left;
+    cursor: pointer;
 }
-.profile-menu-panel a:hover { background: rgba(109, 93, 252, .08); }
+.profile-menu-panel a:hover,
+.profile-menu-panel button:hover { background: rgba(109, 93, 252, .08); }
+.profile-menu-panel .profile-logout-form { margin: 0; padding: 0; }
 .profile-menu-panel .profile-logout {
     margin-top: 5px;
     border-top: 1px solid #ececf4;
@@ -2055,6 +2064,42 @@ select {
 }
 
 .footer-links a:hover {
+
+    color:
+        var(--white);
+}
+
+.footer-logout-form {
+
+    margin: 0;
+    padding: 0;
+}
+
+.footer-logout-button {
+
+    padding: 0;
+
+    border: 0;
+
+    background: transparent;
+
+    color:
+        #b9bdd9;
+
+    font-family: inherit;
+
+    font-size:
+        13px;
+
+    text-align: left;
+
+    cursor: pointer;
+
+    transition:
+        color .2s ease;
+}
+
+.footer-logout-button:hover {
 
     color:
         var(--white);

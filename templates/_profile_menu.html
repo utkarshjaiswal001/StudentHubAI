@@ -6,7 +6,10 @@
             <a href="{{ url_for('account_center') }}">Account Centre</a>
             {% if is_owner %}<a href="{{ url_for('admin_access') }}">Admin Access</a>{% endif %}
             <a href="{{ url_for('home') }}#suggestions">Report an issue</a>
-            <a class="profile-logout" href="{{ url_for('logout') }}">Logout</a>
+            <form class="profile-logout-form" action="{{ url_for('logout') }}" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <button type="submit" class="profile-logout">Logout</button>
+            </form>
         </div>
     </details>
 </li>

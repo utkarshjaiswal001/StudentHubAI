@@ -33,9 +33,12 @@ The app can run on PythonAnywhere's free Flask-capable web app. Its home filesys
    os.environ["DATABASE_PATH"] = "/home/YOUR_USERNAME/studenthub-data/studenthub.sqlite3"
    os.environ["UPLOAD_FOLDER"] = "/home/YOUR_USERNAME/studenthub-data/uploads"
    os.environ["SESSION_COOKIE_SECURE"] = "true"
+   os.environ["OWNER_EMAIL"] = "YOUR_OWNER_ACCOUNT_EMAIL"
 
    from app import app as application
    ```
+
+   `OWNER_EMAIL` must match an existing account's email before you run `grant-library-owner`; the command now refuses to grant the owner role when this variable is missing. Register that account through the website first.
 
 5. Click **Reload** on the Web tab, then visit `https://YOUR_USERNAME.pythonanywhere.com/`. Open `/health` to confirm Flask can reach its database, then try registration, login/logout, and the Notes pages.
 

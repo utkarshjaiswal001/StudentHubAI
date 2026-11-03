@@ -8,7 +8,7 @@
 
     <title>Register | StudentHub AI</title>
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=3) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=4) }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css', v=4) }}">
 </head>
 
@@ -49,6 +49,8 @@
             {% endwith %}
 
             <form action="{{ url_for('register', next=request.args.get('next', '')) }}" method="POST">
+
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
 
                 <input
                     type="text"

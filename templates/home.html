@@ -8,7 +8,7 @@
     <title>StudentHub AI | Your Student & Career Companion</title>
 
     <link rel="stylesheet"
-          href="{{ url_for('static', filename='css/style.css', v=17) }}">
+          href="{{ url_for('static', filename='css/style.css', v=18) }}">
 </head>
 
 <body data-authenticated="{{ 'true' if is_logged_in else 'false' }}">
@@ -50,7 +50,10 @@
                         <a href="{{ url_for('account_center') }}">Account Centre</a>
                         {% if is_owner %}<a href="{{ url_for('admin_access') }}">Admin Access</a>{% endif %}
                         <a href="#suggestions">Report an issue</a>
-                        <a class="profile-logout" href="{{ url_for('logout') }}">Logout</a>
+                        <form class="profile-logout-form" action="{{ url_for('logout') }}" method="POST">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            <button type="submit" class="profile-logout">Logout</button>
+                        </form>
                     </div>
                 </details>
             {% else %}
@@ -612,6 +615,8 @@
 
                     <form class="chat-input-area" action="{{ url_for('quick_help') }}" method="POST">
 
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
                         <textarea
                             id="mentorInput"
                             name="question"
@@ -631,6 +636,7 @@
 
                     {% if quick_history %}
                         <form class="quick-continue-form" action="{{ url_for('continue_quick_help') }}" method="POST">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                             {% for exchange in quick_history %}
                                 <input type="hidden" name="quick_questions" value="{{ exchange.question }}">
                                 <input type="hidden" name="quick_answers" value="{{ exchange.answer }}">
@@ -752,6 +758,8 @@
 
                 <form id="suggestionForm" action="{{ url_for('submit_suggestion') }}" method="POST">
 
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
                     <label class="suggestion-field-label" for="suggestionCategory">What needs attention?</label>
                     <select id="suggestionCategory" name="category" required>
                         <option value="" disabled selected>Choose an issue type</option>
@@ -825,7 +833,10 @@
                 <a href="#career-mentor">AI Mentor</a>
                 {% if is_logged_in %}
                     <a href="{{ url_for('dashboard') }}">Dashboard</a>
-                    <a href="{{ url_for('logout') }}">Logout</a>
+                    <form class="footer-logout-form" action="{{ url_for('logout') }}" method="POST">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                        <button type="submit" class="footer-logout-button">Logout</button>
+                    </form>
                 {% else %}
                     <a href="{{ url_for('login') }}">Login</a>
                     <a href="{{ url_for('register') }}">Register</a>
