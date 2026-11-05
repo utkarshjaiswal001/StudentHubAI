@@ -6,6 +6,7 @@
     <title>Edit Note | StudentHub AI</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=6) }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css', v=19) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css', v=1) }}">
 </head>
 <body>
     <nav class="navbar">
@@ -41,13 +42,6 @@
                     <label for="note-title">Title</label>
                     <input id="note-title" name="title" maxlength="120" required value="{{ form.title }}">
                 </div>
-                <div class="notes-field owner-upload-wide">
-                    <label for="note-subject-pick">Subject</label>
-                    <select id="note-subject-pick" hidden aria-describedby="note-subject-help"></select>
-                    <input id="note-subject" name="subject" maxlength="100" required value="{{ form.subject }}" aria-label="Subject name" list="known-subjects" autocomplete="off">
-                    <small id="note-subject-help">Subjects follow the AKTU syllabus for the chosen branch, year and semester. Pick “Other” for a subject that isn't listed.</small>
-                    <datalist id="known-subjects">{% for subject in known_subjects %}<option value="{{ subject }}">{% endfor %}</datalist>
-                </div>
                 <div class="notes-field">
                     <label for="note-branch">Branch</label>
                     <select id="note-branch" name="branch" required>
@@ -66,6 +60,13 @@
                     <select id="note-semester" name="semester" required>
                         {% for semester in note_semesters %}<option value="{{ semester }}" {% if form.semester == semester %}selected{% endif %}>{{ semester }}</option>{% endfor %}
                     </select>
+                </div>
+                <div class="notes-field owner-upload-wide">
+                    <label for="note-subject-pick">Subject</label>
+                    <select id="note-subject-pick" hidden aria-describedby="note-subject-help"></select>
+                    <input id="note-subject" name="subject" maxlength="100" required value="{{ form.subject }}" aria-label="Subject name" list="known-subjects" autocomplete="off">
+                    <small id="note-subject-help">Subjects follow the AKTU syllabus for the chosen branch, year and semester. Pick “Other” for a subject that isn't listed.</small>
+                    <datalist id="known-subjects">{% for subject in known_subjects %}<option value="{{ subject }}">{% endfor %}</datalist>
                 </div>
             </div>
             <div class="owner-upload-actions">

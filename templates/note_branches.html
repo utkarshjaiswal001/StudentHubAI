@@ -6,6 +6,7 @@
     <title>{{ year }} Branches | StudentHub AI</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=5) }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css', v=19) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css', v=1) }}">
 </head>
 <body>
     <nav class="navbar">
@@ -38,7 +39,7 @@
                 {% set stats = branch_stats.get(branch, {}) %}
                 <a class="notes-choice-card notes-branch-card" href="{{ notes_browse_url(branch, year) }}">
                     <span class="notes-choice-icon" aria-hidden="true">{% if 'Computer' in branch %}💻{% elif 'Information' in branch %}🖥️{% elif 'Electronics' in branch %}🔌{% elif 'Electrical' in branch %}⚡{% elif 'Mechanical' in branch %}⚙️{% elif 'Civil' in branch %}🏗️{% else %}📚{% endif %}</span>
-                    <span class="notes-choice-copy"><strong>{{ branch }}</strong><small>{% if branch == 'Common (1st Year)' %}Shared subjects for all branches · {% endif %}{% if stats %}{{ stats.subject_count }} subjects · {{ stats.pdf_count }} files{% else %}No notes found yet{% endif %}</small></span>
+                    <span class="notes-choice-copy"><strong>{{ branch }}</strong><small>{% if branch == 'Common (1st Year)' %}Shared subjects for all branches · {% endif %}{% if stats %}{{ stats.subject_count }} subject{% if stats.subject_count != 1 %}s{% endif %} · {{ stats.pdf_count }} file{% if stats.pdf_count != 1 %}s{% endif %}{% else %}No notes yet{% endif %}</small></span>
                     <span class="notes-choice-arrow" aria-hidden="true">→</span>
                 </a>
             {% endfor %}

@@ -1,0 +1,262 @@
+/* =========================================================
+   StudentHub AI: calm theme
+   Loaded last on every page. It only overrides colours, fonts,
+   shadows and spacing from style.css / pages.css / login.css,
+   so removing this one file brings the old look back.
+   ========================================================= */
+
+:root {
+    /* Softer indigo + teal instead of neon violet + pink. */
+    --primary: #5a5fd0;
+    --primary-dark: #4549b0;
+    --secondary: #2a9db0;
+    --accent: #3fa7c4;
+    --green: #2fa57a;
+    --dark: #1f2440;
+    --text: #3d4260;
+    --muted: #6b7090;
+    --background: #f5f6fb;
+    --white: #ffffff;
+    --border: #e3e5f0;
+
+    --shadow: 0 10px 30px rgba(40, 44, 90, .08);
+    --soft-shadow: 0 4px 16px rgba(40, 44, 90, .06);
+    --hero-gradient: linear-gradient(135deg, #353b86 0%, #4a52b4 48%, #2f7f9c 100%);
+    --button-gradient: linear-gradient(135deg, #5a5fd0, #3f8fc0);
+    --focus-ring: 0 0 0 3px rgba(90, 95, 208, .32);
+}
+
+/* ---------- Text: the system font is clearer than Arial ---------- */
+
+body {
+    font-family: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+    background:
+        radial-gradient(circle at 8% 0%, rgba(90, 95, 208, .06), transparent 30%),
+        radial-gradient(circle at 92% 10%, rgba(42, 157, 176, .06), transparent 30%),
+        var(--background);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4 {
+    color: inherit;
+    letter-spacing: -.01em;
+}
+
+/* Very heavy (900) text looks shouty; keep bold but calmer. */
+.logo,
+.hero-content h1,
+.hero-content h2,
+.primary-button,
+.secondary-button {
+    font-weight: 700;
+}
+
+.logo {
+    color: var(--primary-dark);
+    letter-spacing: -.02em;
+}
+
+/* ---------- Footer stays at the bottom on short pages ---------- */
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+body > footer,
+body > .footer {
+    margin-top: auto;
+}
+
+footer,
+.footer {
+    background: #1f2340;
+    color: #c9cce3;
+}
+
+/* ---------- Navigation ---------- */
+
+.navbar {
+    background: rgba(255, 255, 255, .92);
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 1px 0 rgba(40, 44, 90, .02);
+}
+
+.nav-links a:hover {
+    background: rgba(90, 95, 208, .08);
+}
+
+/* ---------- Page headers: deep, muted colours ---------- */
+
+.hero-section,
+.hero {
+    background:
+        radial-gradient(ellipse at 15% 10%, rgba(255, 255, 255, .10), transparent 35%),
+        radial-gradient(ellipse at 85% 90%, rgba(80, 190, 200, .16), transparent 40%),
+        var(--hero-gradient);
+}
+
+.hero-content h1 {
+    letter-spacing: -.03em;
+    text-shadow: none;
+}
+
+.hero-content p,
+.hero-description {
+    color: rgba(255, 255, 255, .86);
+}
+
+.hero-badge {
+    box-shadow: none;
+}
+
+/* ---------- Buttons ---------- */
+
+.primary-button,
+.notes-primary-button,
+.form-card button[type="submit"],
+.card-btn {
+    background: var(--button-gradient);
+    box-shadow: 0 6px 18px rgba(69, 73, 176, .20);
+}
+
+.secondary-button {
+    box-shadow: var(--soft-shadow);
+}
+
+.primary-button:hover,
+.secondary-button:hover,
+.notes-primary-button:hover {
+    transform: translateY(-1px);
+}
+
+/* Clear keyboard focus everywhere. */
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+}
+
+/* ---------- Cards: lighter shadows, gentle hover ---------- */
+
+.notes-choice-card,
+.notes-subject-dropdown,
+.account-profile-panel,
+.account-section-panel,
+.account-stats > *,
+.card,
+.form-card,
+.notes-panel,
+.owner-upload-card,
+.notes-suggestions {
+    border-color: var(--border);
+    box-shadow: var(--soft-shadow);
+}
+
+.notes-choice-card {
+    transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+
+.notes-choice-card:hover {
+    transform: translateY(-2px);
+    border-color: #cfd2ef;
+    box-shadow: var(--shadow);
+}
+
+.notes-subject-dropdown summary:hover,
+.notes-subject-dropdown[open] summary {
+    background: #f7f8fd;
+}
+
+.notes-subject-empty {
+    background: #fafbfd;
+    opacity: 1;
+}
+
+.notes-subject-empty strong {
+    color: #555a78;
+}
+
+/* Small labels above headings ("STEP 1", "AKTU STUDY LIBRARY"). */
+.section-kicker,
+.notes-step {
+    color: var(--secondary);
+    letter-spacing: .12em;
+}
+
+/* Home page feature cards: same soft pastel family instead of six colours. */
+.future-card:nth-child(n) {
+    background: linear-gradient(150deg, #f3f4ff, #ffffff 70%);
+    border-color: #e1e4f6;
+}
+
+.future-card:nth-child(3n + 2) {
+    background: linear-gradient(150deg, #eef8fb, #ffffff 70%);
+    border-color: #d8edf2;
+}
+
+.future-card:nth-child(3n) {
+    background: linear-gradient(150deg, #f1f8f4, #ffffff 70%);
+    border-color: #dcefe4;
+}
+
+/* ---------- Forms ---------- */
+
+input,
+select,
+textarea {
+    border-color: var(--border);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--primary);
+}
+
+/* ---------- Motion: shorter, and none if the user prefers less ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation: none !important;
+        transition: none !important;
+    }
+}
+
+/* Home page service cards: keep a hint of colour, fading to white. */
+.service-card {
+    border: 1px solid var(--border);
+    box-shadow: var(--soft-shadow);
+}
+.service-notes      { background: linear-gradient(150deg, #edf1ff, #ffffff 75%); }
+.service-ai         { background: linear-gradient(150deg, #f1efff, #ffffff 75%); }
+.service-placement  { background: linear-gradient(150deg, #fdf5e8, #ffffff 75%); }
+.service-resume     { background: linear-gradient(150deg, #ebf7f2, #ffffff 75%); }
+.service-interview  { background: linear-gradient(150deg, #fbf0f4, #ffffff 75%); }
+.service-internship { background: linear-gradient(150deg, #eaf6f9, #ffffff 75%); }
+.service-coding     { background: linear-gradient(150deg, #eef4fb, #ffffff 75%); }
+
+/* File picker button matches the other buttons. */
+input[type="file"]::file-selector-button {
+    margin-right: 12px;
+    padding: 7px 14px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: #f1f2fb;
+    color: var(--primary-dark);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+input[type="file"]::file-selector-button:hover {
+    background: #e7e9fa;
+}
