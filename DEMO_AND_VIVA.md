@@ -4,7 +4,7 @@
 
 - Double-click `Run StudentHub.bat` → browser opens http://127.0.0.1:5000
 - Have two browser windows: one **normal** (owner account), one **private/incognito** (student).
-- Upload 2–3 real notes in advance (e.g. a 1st-year Common subject and a 3rd-year ECE subject).
+- Upload 2–3 real notes in advance (e.g. a 1st-year Common subject and a subject from a later year).
 - Keep a test student account ready, or register one live.
 
 ## 2-minute demo script
@@ -12,13 +12,13 @@
 | Time | Do this | Say this |
 |---|---|---|
 | 0:00 | Home page | "StudentHub AI puts AKTU course notes and basic study help in one place." |
-| 0:15 | Notes → 3rd Year → ECE → Semester 5 → open a subject | "Students browse Year → Branch → Semester → Subject. 1st year skips the semester step because subjects are common." |
+| 0:15 | Notes → 3rd Year → any branch → Semester 5 → open a subject | "Students browse Year → Branch → Semester → Subject. Every official AKTU subject is listed with its code, for all six branches. 1st year skips the semester step." |
 | 0:35 | Preview a PDF, then Download | "Files open right here; downloads keep the original file." |
 | 0:45 | Student window: Account → **My notes** | "My notes jumps straight to the student's own branch and year." |
 | 0:55 | Owner window: Admin → Manage notes → Edit a note | "Only the owner can upload, edit, or delete notes. Uploads are checked: the semester must match the year." |
 | 1:15 | Admin → Issue reports → Mark closed | "Students report problems; the admin tracks and closes them." |
 | 1:25 | Student window: log out, enter a wrong password 5 times | "After 5 wrong passwords the account locks for 15 minutes — this blocks password guessing." |
-| 1:40 | Show terminal: run the tests | "47 automated tests check security rules, the notes flow, admin tools, and accounts." |
+| 1:40 | Show terminal: run the tests | "59 automated tests check security rules, the notes flow, admin tools, and accounts." |
 | 1:55 | — | "Future scope: free AI Mentor replies, email password reset, and searching inside PDFs." |
 
 Test command: `.\.venv\Scripts\python.exe -m unittest discover -s tests`
@@ -47,7 +47,10 @@ Only `.pdf` and `.pptx`, max 20 MB. PDFs must start with `%PDF-`; PPTX files are
 Tables: `users`, `study_notes`, `note_activity`, `mentor_conversations`, `mentor_messages`, `suggestions`, `login_attempts`. Foreign keys link records to users; deleting an account also deletes that student's chats and activity (ON DELETE CASCADE).
 
 **Q: Why does 1st year skip the semester step?**
-AKTU 1st-year subjects are common to all branches, so students go straight to the subject list. Each file still shows its semester label.
+In the new AKTU 1st-year scheme, sections take Physics and Chemistry in different semesters, so a fixed Sem 1 / Sem 2 split would confuse students. They go straight to the subject list: their branch's stream subjects plus the subjects common to every branch. Each file still shows its semester label.
+
+**Q: Where do the subject names come from?**
+From the official AKTU syllabus PDFs on aktu.ac.in, for all six branches: 1st year (2026-27 scheme), 2nd year (2023-24), 3rd year (2024-25) and 4th year (2025-26). They are stored in `data/aktu_subjects.json` with their subject codes. Open electives and labs are not listed; the owner can type those under "Other".
 
 **Q: What happens if a student forgets their password?**
 They report a login issue; the admin resets it to a temporary password from the Admin page. The student must choose a new password right after signing in. Email reset is future scope because free hosting restricts sending email.
@@ -56,7 +59,7 @@ They report a login issue; the admin resets it to a temporary password from the 
 Inserting SQL code through form fields. All queries use `?` placeholders, so user input is always treated as data, never as SQL.
 
 **Q: How did you test it?**
-47 automated tests using Python's `unittest` and Flask's test client, run against a temporary database. They cover login, registration, CSRF, owner-only access, the notes flow, upload rules, lockout, admin tools, and account settings.
+59 automated tests using Python's `unittest` and Flask's test client, run against a temporary database. They cover login, registration, CSRF, owner-only access, the notes flow, upload rules, lockout, admin tools, and account settings.
 
 **Q: How will you host it for free?**
 PythonAnywhere's free plan. The database and uploads live in the account's storage. The AI key is left empty so there are no costs.

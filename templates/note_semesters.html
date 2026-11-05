@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ branch }} Semesters | StudentHub AI</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=5) }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css', v=18) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css', v=19) }}">
 </head>
 <body>
     <nav class="navbar">
@@ -38,7 +38,7 @@
                 {% set stats = semester_stats.get(semester, {}) %}
                 <a class="notes-choice-card notes-branch-card" href="{{ url_for('note_subjects', branch=branch, year=year, semester=semester) }}">
                     <span class="notes-choice-icon" aria-hidden="true">🗓️</span>
-                    <span class="notes-choice-copy"><strong>{{ semester }}</strong><small>{% if stats %}{{ stats.subject_count }} subjects · {{ stats.pdf_count }} files{% else %}No notes found yet{% endif %}</small></span>
+                    <span class="notes-choice-copy"><strong>{{ semester }}</strong><small>{% if official_counts[semester] %}{{ official_counts[semester] }} AKTU subjects · {% endif %}{% if stats %}{{ stats.pdf_count }} file{% if stats.pdf_count != 1 %}s{% endif %}{% else %}No notes yet{% endif %}</small></span>
                     <span class="notes-choice-arrow" aria-hidden="true">→</span>
                 </a>
             {% endfor %}

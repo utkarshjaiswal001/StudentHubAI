@@ -1,3 +1,4 @@
+import json
 import os
 import re
 import secrets
@@ -91,6 +92,76 @@ def notes_browse_url(branch, year, semester=""):
 
 
 app.jinja_env.globals["notes_browse_url"] = notes_browse_url
+
+# Official AKTU subject list (code + name) per branch and semester, taken from
+# the syllabus PDFs on aktu.ac.in. 1st year is listed per branch (stream
+# subjects) plus "Common (1st Year)" subjects shared by every branch.
+AKTU_CATALOG = json.loads(
+    (Path(app.root_path) / "data" / "aktu_subjects.json").read_text(encoding="utf-8")
+)
+OFFICIAL_SUBJECT_NAMES = {
+    subject["name"].casefold(): subject["name"]
+    for subjects in [
+        *AKTU_CATALOG["first_year"].values(),
+        *(sem for sems in AKTU_CATALOG["semesters"].values() for sem in sems.values()),
+    ]
+    for subject in subjects
+}
+
+
+def official_subjects(branch, year, semester=""):
+    """AKTU subjects for a branch/year (and semester for 2nd-4th year), in syllabus order."""
+    if year == "1st Year":
+        common = AKTU_CATALOG["first_year"][COMMON_FIRST_YEAR_BRANCH]
+        if branch == COMMON_FIRST_YEAR_BRANCH:
+            return list(common)
+        return AKTU_CATALOG["first_year"].get(branch, []) + common
+    semesters = AKTU_CATALOG["semesters"].get(branch, {})
+    if semester:
+        return list(semesters.get(semester, []))
+    subjects, seen = [], set()
+    for sem in YEAR_SEMESTERS.get(year, []):
+        for subject in semesters.get(sem, []):
+            if subject["name"].casefold() not in seen:
+                seen.add(subject["name"].casefold())
+                subjects.append(subject)
+    return subjects
+
+
+def _subject_places():
+    """Map each official subject name to where it is taught (for Quick Help)."""
+    places = {}
+    for branch, subjects in AKTU_CATALOG["first_year"].items():
+        for subject in subjects:
+            places.setdefault(subject["name"].casefold(), []).append(
+                (subject["code"], subject["name"], branch, "1st Year", ""))
+    for branch, semesters in AKTU_CATALOG["semesters"].items():
+        for semester, subjects in semesters.items():
+            year = next(y for y, sems in YEAR_SEMESTERS.items() if semester in sems)
+            for subject in subjects:
+                places.setdefault(subject["name"].casefold(), []).append(
+                    (subject["code"], subject["name"], branch, year, semester))
+    # Longest names first so "Data Structure" doesn't hide a longer, more specific match.
+    return dict(sorted(places.items(), key=lambda item: -len(item[0])))
+
+
+AKTU_SUBJECT_PLACES = _subject_places()
+
+
+def subject_choices():
+    """Official subject names for every valid branch/year/semester, used by the upload form."""
+    choices = {}
+    for branch in NOTE_BRANCHES:
+        for year in NOTE_YEARS:
+            if branch == COMMON_FIRST_YEAR_BRANCH and year != "1st Year":
+                continue
+            for semester in YEAR_SEMESTERS[year]:
+                subjects = official_subjects(branch, year, "" if year == "1st Year" else semester)
+                if subjects:
+                    choices[f"{branch}|{year}|{semester}"] = [
+                        {"code": s["code"], "name": s["name"]} for s in subjects
+                    ]
+    return choices
 
 
 def note_assignment_error(branch, year, semester):
@@ -531,7 +602,7 @@ def quick_subject_answer(question):
         (("basic electrical", "beee", "electrical engineering basics"), "Basic Electrical Engineering covers DC circuits (KCL, KVL, network theorems), AC fundamentals and phasors, three-phase systems, transformers, and machines. Practise circuit numericals and phasor diagrams."),
         (("programming for problem solving", "c programming", " pps "), "Programming for Problem Solving (C) covers data types, operators, conditions, loops, functions, arrays, strings, pointers, structures, and file handling. Write and dry-run small programs daily."),
         (("engineering graphics", "engineering drawing", "autocad"), "Engineering Graphics covers projections of points, lines, planes and solids, sections, isometric views, and basic CAD. Practise neat drawings and visualise views step by step."),
-        # ECE core subjects
+        # Electronics core subjects
         (("signals and systems", "signal and system", "signals"), "Signals and Systems covers signal classification, LTI systems, convolution, Fourier series and transform, Laplace and Z-transform, and sampling. Practise convolution and transform problems with their properties."),
         (("analog communication", "digital communication", "communication system", "modulation"), "Communication Systems covers AM/FM modulation, noise, sampling and PCM, digital modulation (ASK, FSK, PSK, QAM), and basic information theory. Draw block diagrams and practise bandwidth and SNR numericals."),
         (("digital electronics", "digital logic", "logic gate", "flip flop", "k-map", "kmap"), "Digital Electronics covers number systems, Boolean algebra and K-maps, combinational circuits (adders, multiplexers), flip-flops, counters, and registers. Practise K-map simplification and timing diagrams."),
@@ -542,7 +613,31 @@ def quick_subject_answer(question):
         (("control system",), "Control Systems covers transfer functions, block diagram reduction, time response, stability (Routh-Hurwitz, root locus), and frequency response (Bode, Nyquist). Practise one example of each method."),
         (("vlsi", "cmos", "verilog", "fpga"), "VLSI Design covers MOS transistor theory, CMOS inverter and logic, fabrication basics, timing and power, and HDL design with Verilog. Write small Verilog modules and simulate them."),
         (("embedded system", "arduino", " iot ", "internet of things"), "Embedded Systems combine a microcontroller, sensors, and firmware. Start with C on a board like Arduino or STM32: GPIO, timers, interrupts, UART/I2C/SPI, then build a small IoT project."),
-        # Computer science subjects
+        # Electrical core subjects
+        (("electrical machine", "dc machine", "induction motor", "synchronous machine", "transformer"), "Electrical Machines cover DC machines, transformers, induction motors, and synchronous machines: construction, equivalent circuits, losses and efficiency, and speed-torque behaviour. Practise equivalent-circuit and efficiency numericals."),
+        (("power system", "power generation", "transmission and distribution", "load flow", "fault analysis"), "Power Systems covers generation, transmission line parameters, per-unit system, load flow, faults, stability, and protection. Learn the per-unit method well; most numericals depend on it."),
+        (("power electronics", "thyristor", "scr", "inverter", "chopper", "rectifier"), "Power Electronics covers power devices (diode, SCR, MOSFET, IGBT), rectifiers, choppers, inverters, and AC voltage controllers. Draw output waveforms for each circuit and practise average/RMS value numericals."),
+        (("measurement", "instrumentation"), "Electrical Measurements and Instrumentation cover errors, bridges, PMMC/moving-iron meters, wattmeters, energy meters, CTs/PTs, and the CRO. Learn the working principle and torque equation of each instrument."),
+        # Mechanical core subjects
+        (("thermodynamics", "entropy", "carnot"), "Thermodynamics covers systems and properties, the laws of thermodynamics, entropy, availability, and pure-substance properties. Use steam tables confidently and practise cycle numericals step by step."),
+        (("fluid mechanics", "fluid machinery", "bernoulli", "turbine", "pump"), "Fluid Mechanics covers fluid properties, statics, kinematics, Bernoulli's equation, flow through pipes, boundary layers, and turbines and pumps. Draw control volumes and keep units consistent in numericals."),
+        (("strength of material", "mechanics of solid", "mechanics of material", "bending moment", "shear force"), "Strength of Materials covers stress and strain, shear force and bending moment diagrams, bending and torsion, deflection, and columns. Practise SFD/BMD for every standard load case."),
+        (("manufacturing", "machining", "casting", "welding", "production"), "Manufacturing Technology covers casting, forming, welding, machining and machine tools, and modern methods like CNC and additive manufacturing. Learn each process with a labelled diagram, its uses, and its defects."),
+        (("heat transfer", "heat and mass", "conduction", "convection"), "Heat and Mass Transfer covers conduction, convection, radiation, fins, and heat exchangers (LMTD and NTU methods). Learn the standard equations and practise heat exchanger numericals."),
+        (("theory of machine", "kinematics of machine", "dynamics of machine", "gear", "cam ", "flywheel"), "Theory of Machines covers mechanisms, velocity and acceleration analysis, cams, gears and gear trains, flywheels, balancing, and governors. Practise velocity diagrams and gear-train ratio problems."),
+        # Civil core subjects
+        (("surveying", "levelling", "theodolite", "total station"), "Surveying covers chain and compass surveying, levelling, contouring, theodolite traversing, curves, and modern tools like total station and GPS. Practise level-book and traverse computations."),
+        (("structural analysis", "truss", "influence line", "indeterminate"), "Structural Analysis covers determinate and indeterminate structures, trusses, influence lines, and methods like slope-deflection and moment distribution. Practise one problem per method until the steps feel routine."),
+        (("concrete", "rcc", "reinforced", "limit state"), "Concrete structures cover concrete technology (mix design, workability, strength) and RCC design by the limit state method for beams, slabs, columns, and footings as per IS 456. Keep the IS code tables handy while practising."),
+        (("geotechnical", "soil mechanics", "foundation", "consolidation"), "Geotechnical Engineering covers soil properties and classification, permeability, compaction, consolidation, shear strength, earth pressure, and foundations. Practise phase-relationship and consolidation numericals."),
+        (("transportation", "highway", "pavement", "traffic"), "Transportation Engineering covers highway geometric design, pavement materials and design, traffic engineering, and railways and airports basics. Learn IRC standards for sight distance and superelevation."),
+        (("hydrology", "water resource", "irrigation", "environmental engineering", "water supply", "sewage"), "Water and environmental engineering cover hydrology, irrigation, water demand and treatment, sewage treatment, and pollution control. Draw flow diagrams of treatment plants and learn design criteria."),
+        # Computer science and IT subjects
+        (("software engineering", "sdlc"), "Software Engineering covers SDLC models, requirements (SRS), design, testing types, maintenance, and project management (estimation, risk). Compare models like Waterfall, Spiral, and Agile with examples."),
+        (("web technology", "web development", "html", "javascript"), "Web Technology covers HTML, CSS, JavaScript, the DOM, HTTP, server-side programming, and databases. Build a small working site end to end; it teaches more than reading."),
+        (("cloud computing", "virtualization"), "Cloud Computing covers service models (IaaS, PaaS, SaaS), deployment models, virtualization, storage, and security. Relate each concept to a real service such as a free-tier cloud account."),
+        (("compiler", "automata", "theory of computation", "toc "), "Theory of Computation and Compiler Design cover finite automata, regular expressions, grammars, pushdown automata, Turing machines, and the phases of a compiler. Practise DFA/NFA construction and parsing tables."),
+        (("design and analysis of algorithm", " daa ", "algorithm design"), "Algorithms cover asymptotic analysis, divide and conquer, greedy methods, dynamic programming, backtracking, graph algorithms, and NP-completeness. Trace each algorithm by hand on a small input."),
         (("data structure", "dsa"), "A data structure organizes information so a program can use it efficiently. Start with arrays, linked lists, stacks, queues, trees, hash maps, and graphs; compare their time and space costs."),
         (("dbms", "database", "sql"), "A DBMS stores and retrieves structured data. For coursework and interviews, focus on keys, joins, normalization, transactions, ACID properties, and indexes."),
         (("operating system", " os ", " os?"), "An operating system manages processes, memory, files, and devices. A useful study order is processes and threads, scheduling, synchronization, memory management, and deadlocks."),
@@ -555,7 +650,27 @@ def quick_subject_answer(question):
     for keywords, answer in quick_answers:
         if any(keyword in padded for keyword in keywords):
             return answer
-    return "I can give quick pointers on 1st-year subjects, ECE and CS core subjects, and placement basics. For a longer explanation or a multi-step plan, continue this thread in the full AI Mentor."
+    syllabus_answer = aktu_subject_answer(text)
+    if syllabus_answer:
+        return syllabus_answer
+    return "I can give quick pointers on 1st-year subjects, core subjects of every branch, and placement basics. For a longer explanation or a multi-step plan, continue this thread in the full AI Mentor."
+
+
+def aktu_subject_answer(text):
+    """Tell students where an AKTU subject they named sits in the syllabus and the Notes library."""
+    for name_key, places in AKTU_SUBJECT_PLACES.items():
+        if len(name_key) >= 6 and name_key in text:
+            code, name = places[0][0], places[0][1]
+            where = "; ".join(
+                f"{branch}, {year}" + (f", {semester}" if semester else "")
+                for _code, _name, branch, year, semester in places[:4]
+            )
+            more = " and more" if len(places) > 4 else ""
+            return (
+                f"{name} ({code}) is an AKTU subject in: {where}{more}. "
+                "Open Notes, choose your year and branch, and look for it in the subject list."
+            )
+    return None
 
 
 def extract_note_subject(question):
@@ -1195,7 +1310,10 @@ def admin_access():
 
 
 def canonical_subject(subject):
-    """Reuse an existing subject's spelling so "dbms" and "DBMS" stay one subject."""
+    """Use the official AKTU spelling, or reuse an existing subject's spelling,
+    so "dbms" and "DBMS" stay one subject."""
+    if subject.casefold() in OFFICIAL_SUBJECT_NAMES:
+        return OFFICIAL_SUBJECT_NAMES[subject.casefold()]
     row = get_db().execute(
         """SELECT subject FROM study_notes WHERE lower(subject) = lower(?)
            GROUP BY subject ORDER BY COUNT(*) DESC LIMIT 1""",
@@ -1257,6 +1375,7 @@ def edit_note(note_id):
         note=note,
         form=form,
         known_subjects=known_subjects(),
+        subject_choices=subject_choices(),
         note_branches=NOTE_BRANCHES,
         note_years=NOTE_YEARS,
         note_semesters=NOTE_SEMESTERS,
@@ -1513,6 +1632,9 @@ def note_semesters():
         year=year,
         semesters=YEAR_SEMESTERS[year],
         semester_stats=semester_stats,
+        official_counts={
+            sem: len(official_subjects(branch, year, sem)) for sem in YEAR_SEMESTERS[year]
+        },
     )
 
 
@@ -1531,10 +1653,15 @@ def note_subjects():
         return redirect(url_for("note_semesters", branch=branch, year=year))
 
     search = request.args.get("q", "").strip()[:100]
-    query = """SELECT id, title, subject, semester, original_filename, created_at,
+    # 1st-year branch pages also show the Common subjects every branch studies.
+    branches = [branch]
+    if year == "1st Year" and branch != COMMON_FIRST_YEAR_BRANCH:
+        branches.append(COMMON_FIRST_YEAR_BRANCH)
+    placeholders = ", ".join("?" for _ in branches)
+    query = f"""SELECT id, title, subject, semester, original_filename, created_at,
                       created_at >= datetime('now', '-7 days') AS is_new
-               FROM study_notes WHERE branch = ? AND year = ?"""
-    params = [branch, year]
+               FROM study_notes WHERE branch IN ({placeholders}) AND year = ?"""
+    params = [*branches, year]
     if semester:
         query += " AND semester = ?"
         params.append(semester)
@@ -1544,13 +1671,23 @@ def note_subjects():
     rows = get_db().execute(
         query + " ORDER BY lower(subject), semester, title", params
     ).fetchall()
-    subjects_by_name = {}
+    # Every official subject is listed (even without notes yet), in syllabus
+    # order; subjects only found in uploads (e.g. open electives) come after.
+    subjects_by_name = {
+        subject["name"].casefold(): {"subject": subject["name"], "code": subject["code"], "notes": []}
+        for subject in official_subjects(branch, year, semester)
+    }
     for row in rows:
         key = row["subject"].casefold()
         if key not in subjects_by_name:
-            subjects_by_name[key] = {"subject": row["subject"], "notes": []}
+            subjects_by_name[key] = {"subject": row["subject"], "code": "", "notes": []}
         subjects_by_name[key]["notes"].append(row)
-    subjects = list(subjects_by_name.values())
+    needle = search.casefold()
+    subjects = [
+        item for item in subjects_by_name.values()
+        if not needle or item["notes"]
+        or needle in item["subject"].casefold() or needle in item["code"].casefold()
+    ]
     return render_template(
         "note_subjects.html",
         branch=branch,
@@ -1625,6 +1762,7 @@ def upload_note():
     return render_template(
         "upload.html",
         known_subjects=known_subjects(),
+        subject_choices=subject_choices(),
         note_branches=NOTE_BRANCHES,
         note_years=NOTE_YEARS,
         note_semesters=NOTE_SEMESTERS,

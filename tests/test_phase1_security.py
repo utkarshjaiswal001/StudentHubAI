@@ -35,6 +35,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 import app as studenthub  # noqa: E402
 from werkzeug.security import generate_password_hash  # noqa: E402
+from markupsafe import escape  # noqa: E402
 
 app = studenthub.app
 
@@ -835,6 +836,63 @@ class PhaseOneSecurityTests(unittest.TestCase):
         self.assertNotIn('class="notes-new-badge"', body)
 
 
+    # --- Official AKTU subject list ---
+
+    def test_catalog_covers_every_branch(self):
+        branches = [b for b in studenthub.NOTE_BRANCHES if b != "Common (1st Year)"]
+        self.assertTrue(studenthub.official_subjects("Common (1st Year)", "1st Year"))
+        for branch in branches:
+            with self.subTest(branch=branch):
+                first_year = studenthub.official_subjects(branch, "1st Year")
+                self.assertGreater(len(first_year), len(studenthub.official_subjects("Common (1st Year)", "1st Year")))
+                for number in range(3, 8):
+                    self.assertTrue(studenthub.official_subjects(branch, "x", f"Semester {number}"))
+
+    def test_subjects_page_lists_official_subjects_for_every_branch(self):
+        client = app.test_client()
+        for branch in [b for b in studenthub.NOTE_BRANCHES if b != "Common (1st Year)"]:
+            with self.subTest(branch=branch):
+                query = {"branch": branch, "year": "2nd Year", "semester": "Semester 3"}
+                body = client.get("/notes/subjects", query_string=query).get_data(as_text=True)
+                self.assertIn("Technical Communication", body)
+                self.assertIn("BAS301", body)
+                self.assertIn("No notes yet", body)
+                semesters = client.get("/notes/semesters", query_string={"branch": branch, "year": "2nd Year"})
+                self.assertIn("AKTU subjects", semesters.get_data(as_text=True))
+
+    def test_first_year_branch_page_includes_common_subjects_and_notes(self):
+        self.seed_note(title="Shared IKS Note", subject="Introduction to Indian Knowledge System",
+                       branch="Common (1st Year)", year="1st Year", semester="Semester 1",
+                       stored_filename="iks.pdf")
+        client = app.test_client()
+        for branch in [b for b in studenthub.NOTE_BRANCHES if b != "Common (1st Year)"]:
+            with self.subTest(branch=branch):
+                body = client.get("/notes/subjects", query_string={"branch": branch, "year": "1st Year"}).get_data(as_text=True)
+                self.assertIn("Shared IKS Note", body)
+                self.assertIn("Programming Languages", body)
+                stream_subject = studenthub.AKTU_CATALOG["first_year"][branch][0]["name"]
+                self.assertIn(escape(stream_subject), body)
+
+    def test_subject_search_finds_official_subjects_by_code(self):
+        query = {"branch": "Civil Engineering", "year": "2nd Year", "semester": "Semester 3", "q": "bce301"}
+        body = app.test_client().get("/notes/subjects", query_string=query).get_data(as_text=True)
+        self.assertIn("Engineering Mechanics", body)
+        self.assertNotIn("Technical Communication", body)
+
+    def test_upload_offers_official_subjects_and_uses_official_spelling(self):
+        owner = app.test_client()
+        self.login(owner)
+        page = owner.get("/notes/upload").get_data(as_text=True)
+        self.assertIn('id="subject-choices"', page)
+        self.assertIn("Mechanical Engineering|3rd Year|Semester 5", page)
+        self.assertIn("subject_picker.js", page)
+        self.upload_note(owner, subject="technical communication")
+        self.assertEqual(self.count_rows("study_notes", "subject = 'Technical Communication'"), 1)
+        # Subjects outside the syllabus (e.g. open electives) can still be typed.
+        self.upload_note(owner, subject="My Open Elective")
+        self.assertEqual(self.count_rows("study_notes", "subject = 'My Open Elective'"), 1)
+
+
     # --- Core strengthening: error pages, backup/restore, Quick Help, spam limits ---
 
     def test_friendly_error_pages(self):
@@ -897,13 +955,23 @@ class PhaseOneSecurityTests(unittest.TestCase):
         self.assertNotEqual(result.exit_code, 0)
         self.assertEqual(self.count_rows("users"), 1)
 
-    def test_quick_help_knows_ece_and_first_year_subjects(self):
+    def test_quick_help_covers_every_branch(self):
         cases = {
             "explain digital communication": "Communication Systems",
             "what is a flip flop": "Digital Electronics",
             "help with engineering physics": "Engineering Physics",
             "8085 basics": "Microprocessors",
             "network analysis tips": "Network Analysis",
+            "explain induction motor": "Electrical Machines",
+            "power electronics basics": "Power Electronics",
+            "thermodynamics help": "Thermodynamics",
+            "how to draw bending moment diagram": "Strength of Materials",
+            "surveying tips": "Surveying",
+            "soil mechanics": "Geotechnical",
+            "software engineering": "Software Engineering",
+            "what is dbms": "DBMS",
+            # Any other AKTU subject is found from the syllabus list.
+            "tell me about cyber security": "BCC301",
             "how to make apps": "I can give quick pointers",
         }
         for question, expected in cases.items():

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ branch }} Notes | StudentHub AI</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=5) }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css', v=18) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css', v=19) }}">
 </head>
 <body>
     <nav class="navbar">
@@ -26,7 +26,7 @@
     <header class="notes-flow-hero">
         <span class="section-kicker">{{ year }} · {{ branch }}{% if semester %} · {{ semester }}{% endif %}</span>
         <h1>Choose a subject</h1>
-        <p>Open a subject card to see its study files. Preview each file on StudentHub AI.</p>
+        <p>All AKTU syllabus subjects are listed. Open a subject to see its study files.</p>
     </header>
 
     <main class="notes-flow-shell">
@@ -47,10 +47,16 @@
         {% if subjects %}
             <div class="notes-subject-list">
                 {% for item in subjects %}
+                    {% if not item.notes %}
+                    <div class="notes-subject-dropdown notes-subject-empty">
+                        <span class="notes-choice-icon" aria-hidden="true">📘</span>
+                        <span class="notes-choice-copy"><strong>{{ item.subject }}</strong><small>{% if item.code %}{{ item.code }} · {% endif %}No notes yet</small></span>
+                    </div>
+                    {% else %}
                     <details class="notes-subject-dropdown">
                         <summary>
                             <span class="notes-choice-icon" aria-hidden="true">📘</span>
-                            <span class="notes-choice-copy"><strong>{{ item.subject }}{% if item.notes|selectattr('is_new')|list %} <span class="notes-new-badge">New</span>{% endif %}</strong><small>{{ item.notes|length }} file{% if item.notes|length != 1 %}s{% endif %} available</small></span>
+                            <span class="notes-choice-copy"><strong>{{ item.subject }}{% if item.notes|selectattr('is_new')|list %} <span class="notes-new-badge">New</span>{% endif %}</strong><small>{% if item.code %}{{ item.code }} · {% endif %}{{ item.notes|length }} file{% if item.notes|length != 1 %}s{% endif %} available</small></span>
                             <span class="notes-dropdown-caret" aria-hidden="true">⌄</span>
                         </summary>
                         <div class="notes-pdf-list">
@@ -64,6 +70,7 @@
                             {% endfor %}
                         </div>
                     </details>
+                    {% endif %}
                 {% endfor %}
             </div>
         {% else %}

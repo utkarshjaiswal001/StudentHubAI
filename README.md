@@ -44,9 +44,11 @@ Mentor conversations are stored locally even when AI is not configured. The Open
 
 - Account registration, sign-in, sign-out, and protected student pages.
 - Student account settings: edit profile, change password, delete account, and a **My notes** shortcut to the student's own branch and year.
-- Public course notes: Year → Branch → Semester → Subject (1st Year skips the semester step because subjects are common). Subject search and "New" badges for recent uploads.
+- Public course notes: Year → Branch → Semester → Subject (1st Year skips the semester step; each branch page also shows the subjects common to every branch). Subject search and "New" badges for recent uploads.
+- Official AKTU subject list for all six branches (`data/aktu_subjects.json`, from the syllabus PDFs on aktu.ac.in): every syllabus subject appears with its code, even before notes are uploaded.
 - Owner Admin page: upload, edit, and delete notes; read and close student issue reports; reset a student's password (temporary password, must be changed at next sign-in).
-- Uploads are checked for a matching year/semester and reuse existing subject spellings.
+- Uploads are checked for a matching year/semester. The owner picks the subject from the AKTU list for that branch and semester, or types one under "Other" (e.g. open electives).
+- Quick Help gives study pointers for core subjects of every branch and can say where any AKTU subject sits in the syllabus.
 - Notes recommendations and recent activity in the Account Centre.
 - Quick Help and searchable saved Mentor conversation history, with up to 80 conversations shown per student.
 - Student issue reports and clearly marked Coming Soon roadmap features.
@@ -59,4 +61,4 @@ Mentor conversations are stored locally even when AI is not configured. The Open
 - Logins expire after 7 days; security headers (X-Frame-Options, nosniff, Referrer-Policy) on every page.
 - Owner-only upload/edit/delete, checked against the database on every request.
 - Uploaded files: PDF/PPTX only, 20 MB limit, file-content checks, random stored names outside the public folder.
-- Automated tests: `.\.venv\Scripts\python.exe -m unittest discover -s tests` (47 tests).
+- Automated tests: `.\.venv\Scripts\python.exe -m unittest discover -s tests` (59 tests).

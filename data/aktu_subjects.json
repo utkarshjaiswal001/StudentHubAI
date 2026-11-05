@@ -1,0 +1,1596 @@
+{
+ "about": "Official AKTU B.Tech theory subjects. 1st year: 2026-27 stream scheme; 2nd year: scheme effective 2023-24; 3rd year: 2024-25; 4th year: 2025-26. Source: aktu.ac.in syllabus pages. Open electives without listed options, labs and projects are not included.",
+ "first_year": {
+  "Common (1st Year)": [
+   {
+    "code": "AAC101 / AAC201",
+    "name": "Environment & Sustainability"
+   },
+   {
+    "code": "AAI101 / AAI201",
+    "name": "Introduction to AI & Prompt Engineering"
+   },
+   {
+    "code": "AAS104 / AAS204",
+    "name": "Introduction to Indian Knowledge System"
+   },
+   {
+    "code": "AAS105 / AAS205",
+    "name": "Professional Communication & Technical Writing"
+   },
+   {
+    "code": "ACS101",
+    "name": "Programming Languages"
+   },
+   {
+    "code": "ACS201",
+    "name": "Essentials of Data Structure"
+   }
+  ],
+  "Computer Science Engineering": [
+   {
+    "code": "AAS101E / AAS201E",
+    "name": "Quantum Physics and Applications"
+   },
+   {
+    "code": "AAS102D / AAS202D",
+    "name": "Applied Chemistry for Smart Systems"
+   },
+   {
+    "code": "AAS103D",
+    "name": "Calculus and Linear Algebra"
+   },
+   {
+    "code": "AEC101A / AEC201A",
+    "name": "Fundamentals of Electronics Engineering"
+   },
+   {
+    "code": "AEE101A / AEE201A",
+    "name": "Fundamentals of Electrical Engineering"
+   },
+   {
+    "code": "AME101A / AME201A",
+    "name": "Fundamentals of Mechanical Engineering"
+   },
+   {
+    "code": "AAS203D",
+    "name": "Numerical Methods"
+   }
+  ],
+  "Information Technology": [
+   {
+    "code": "AAS101E / AAS201E",
+    "name": "Quantum Physics and Applications"
+   },
+   {
+    "code": "AAS102D / AAS202D",
+    "name": "Applied Chemistry for Smart Systems"
+   },
+   {
+    "code": "AAS103D",
+    "name": "Calculus and Linear Algebra"
+   },
+   {
+    "code": "AEC101A / AEC201A",
+    "name": "Fundamentals of Electronics Engineering"
+   },
+   {
+    "code": "AEE101A / AEE201A",
+    "name": "Fundamentals of Electrical Engineering"
+   },
+   {
+    "code": "AME101A / AME201A",
+    "name": "Fundamentals of Mechanical Engineering"
+   },
+   {
+    "code": "AAS203D",
+    "name": "Numerical Methods"
+   }
+  ],
+  "Electronics & Communication": [
+   {
+    "code": "AAS101C / AAS201C",
+    "name": "Quantum Physics and Electronic Sensors"
+   },
+   {
+    "code": "AAS102C / AAS202C",
+    "name": "Applied Chemistry for Emerging Electronics and Futuristic Devices"
+   },
+   {
+    "code": "AAS103C",
+    "name": "Differential Calculus and Linear Algebra"
+   },
+   {
+    "code": "AEC101A / AEC201A",
+    "name": "Fundamentals of Electronics Engineering"
+   },
+   {
+    "code": "AEE101A / AEE201A",
+    "name": "Fundamentals of Electrical Engineering"
+   },
+   {
+    "code": "AME101A / AME201A",
+    "name": "Fundamentals of Mechanical Engineering"
+   },
+   {
+    "code": "AAS203C",
+    "name": "Calculus, Laplace Transform and Numerical Techniques"
+   }
+  ],
+  "Electrical Engineering": [
+   {
+    "code": "AAS101D / AAS201D",
+    "name": "Physics of Electrical Engineering Materials"
+   },
+   {
+    "code": "AAS102C / AAS202C",
+    "name": "Applied Chemistry for Emerging Electronics and Futuristic Devices"
+   },
+   {
+    "code": "AAS103C",
+    "name": "Differential Calculus and Linear Algebra"
+   },
+   {
+    "code": "AEC101A / AEC201A",
+    "name": "Fundamentals of Electronics Engineering"
+   },
+   {
+    "code": "AEE101A / AEE201A",
+    "name": "Fundamentals of Electrical Engineering"
+   },
+   {
+    "code": "AME101A / AME201A",
+    "name": "Fundamentals of Mechanical Engineering"
+   },
+   {
+    "code": "AAS203C",
+    "name": "Calculus, Laplace Transform and Numerical Techniques"
+   }
+  ],
+  "Mechanical Engineering": [
+   {
+    "code": "AAS101B / AAS201B",
+    "name": "Physics of Materials"
+   },
+   {
+    "code": "AAS102B / AAS202B",
+    "name": "Applied Chemistry for Advanced Metal Protection and Sustainable Energy Systems"
+   },
+   {
+    "code": "AAS103B",
+    "name": "Differential Calculus and Linear Algebra"
+   },
+   {
+    "code": "AEC101B / AEC201B",
+    "name": "Fundamentals of Electronics Engineering"
+   },
+   {
+    "code": "AEE101B / AEE201B",
+    "name": "Fundamentals of Electrical Engineering"
+   },
+   {
+    "code": "AME101B / AME201B",
+    "name": "Fundamentals of Mechanical Engineering"
+   },
+   {
+    "code": "AAS203B",
+    "name": "Multivariable Calculus and Numerical Methods"
+   }
+  ],
+  "Civil Engineering": [
+   {
+    "code": "AAS101A / AAS201A",
+    "name": "Physics for Sustainable Structural Systems"
+   },
+   {
+    "code": "AAS102A / AAS202A",
+    "name": "Applied Chemistry for Sustainable Structure & Material Design"
+   },
+   {
+    "code": "AAS103A",
+    "name": "Differential Calculus and Linear Algebra"
+   },
+   {
+    "code": "AEC101B / AEC201B",
+    "name": "Fundamentals of Electronics Engineering"
+   },
+   {
+    "code": "AEE101B / AEE201B",
+    "name": "Fundamentals of Electrical Engineering"
+   },
+   {
+    "code": "AME101B / AME201B",
+    "name": "Fundamentals of Mechanical Engineering"
+   },
+   {
+    "code": "AAS203A",
+    "name": "Differential Calculus and Numerical Methods"
+   }
+  ]
+ },
+ "semesters": {
+  "Computer Science Engineering": {
+   "Semester 3": [
+    {
+     "code": "BAS303",
+     "name": "Mathematics-IV (PDE, Probability and Statistics)",
+     "kind": "common"
+    },
+    {
+     "code": "BVE301",
+     "name": "Universal Human Value and Professional Ethics",
+     "kind": "common"
+    },
+    {
+     "code": "BAS301",
+     "name": "Technical Communication",
+     "kind": "common"
+    },
+    {
+     "code": "BCS301",
+     "name": "Data Structure",
+     "kind": "core"
+    },
+    {
+     "code": "BCS302",
+     "name": "Computer Organization and Architecture",
+     "kind": "core"
+    },
+    {
+     "code": "BCS303",
+     "name": "Discrete Structures & Theory of Logic",
+     "kind": "core"
+    },
+    {
+     "code": "BCC301",
+     "name": "Cyber Security",
+     "kind": "common"
+    },
+    {
+     "code": "BCC302",
+     "name": "Python Programming",
+     "kind": "common"
+    }
+   ],
+   "Semester 4": [
+    {
+     "code": "BAS403",
+     "name": "Mathematics-IV (PDE, Probability and Statistics)",
+     "kind": "common"
+    },
+    {
+     "code": "BAS401",
+     "name": "Technical Communication",
+     "kind": "common"
+    },
+    {
+     "code": "BVE401",
+     "name": "Universal Human Value and Professional Ethics",
+     "kind": "common"
+    },
+    {
+     "code": "BCS401",
+     "name": "Operating System",
+     "kind": "core"
+    },
+    {
+     "code": "BCS402",
+     "name": "Theory of Automata and Formal Languages",
+     "kind": "core"
+    },
+    {
+     "code": "BCS403",
+     "name": "Object Oriented Programming with Java",
+     "kind": "core"
+    },
+    {
+     "code": "BCC402",
+     "name": "Python Programming",
+     "kind": "common"
+    },
+    {
+     "code": "BCC401",
+     "name": "Cyber Security",
+     "kind": "common"
+    }
+   ],
+   "Semester 5": [
+    {
+     "code": "BCS501",
+     "name": "Database Management System",
+     "kind": "core"
+    },
+    {
+     "code": "BCS502",
+     "name": "Web Technology",
+     "kind": "core"
+    },
+    {
+     "code": "BCS503",
+     "name": "Design and Analysis of Algorithm",
+     "kind": "core"
+    },
+    {
+     "code": "BCS051",
+     "name": "Statistical Computing",
+     "kind": "elective"
+    },
+    {
+     "code": "BCS052",
+     "name": "Data Analytics",
+     "kind": "elective"
+    },
+    {
+     "code": "BCS053",
+     "name": "Computer Graphics",
+     "kind": "elective"
+    },
+    {
+     "code": "BCS054",
+     "name": "Object Oriented System Design with C++",
+     "kind": "elective"
+    },
+    {
+     "code": "BCS055",
+     "name": "Machine Learning Techniques",
+     "kind": "elective"
+    },
+    {
+     "code": "BCS056",
+     "name": "Application of Soft Computing",
+     "kind": "elective"
+    },
+    {
+     "code": "BCS057",
+     "name": "Image Processing",
+     "kind": "elective"
+    },
+    {
+     "code": "BCS058",
+     "name": "Data Warehousing & Data Mining",
+     "kind": "elective"
+    },
+    {
+     "code": "BNC501",
+     "name": "Constitution of India",
+     "kind": "common"
+    },
+    {
+     "code": "BNC502",
+     "name": "Essence of Indian Traditional Knowledge",
+     "kind": "common"
+    }
+   ],
+   "Semester 6": [
+    {
+     "code": "BCS601",
+     "name": "Software Engineering",
+     "kind": "core"
+    },
+    {
+     "code": "BCS602",
+     "name": "Compiler Design",
+     "kind": "core"
+    },
+    {
+     "code": "BCS603",
+     "name": "Computer Networks",
+     "kind": "core"
+    },
+    {
+     "code": "BCS061",
+     "name": "Big Data",
+     "kind": "elective"
+    },
+    {
+     "code": "BCS062",
+     "name": "Augmented & Virtual Reality",
+     "kind": "elective"
+    },
+    {
+     "code": "BCS063",
+     "name": "Blockchain Architecture Design",
+     "kind": "elective"
+    },
+    {
+     "code": "BCS064",
+     "name": "Data Compression",
+     "kind": "elective"
+    },
+    {
+     "code": "BNC601",
+     "name": "Constitution of India",
+     "kind": "common"
+    },
+    {
+     "code": "BNC602",
+     "name": "Essence of Indian Traditional Knowledge",
+     "kind": "common"
+    }
+   ],
+   "Semester 7": [
+    {
+     "code": "BCS701",
+     "name": "Artificial Intelligence",
+     "kind": "core"
+    },
+    {
+     "code": "BCS070",
+     "name": "Internet of Things",
+     "kind": "elective"
+    },
+    {
+     "code": "BCS071",
+     "name": "Cloud Computing",
+     "kind": "elective"
+    },
+    {
+     "code": "BCS072",
+     "name": "Cryptography and Network Security",
+     "kind": "elective"
+    },
+    {
+     "code": "BCS073",
+     "name": "Design & Development of Applications",
+     "kind": "elective"
+    }
+   ],
+   "Semester 8": []
+  },
+  "Information Technology": {
+   "Semester 3": [
+    {
+     "code": "BAS303",
+     "name": "Mathematics-IV (PDE, Probability and Statistics)",
+     "kind": "common"
+    },
+    {
+     "code": "BVE301",
+     "name": "Universal Human Value and Professional Ethics",
+     "kind": "common"
+    },
+    {
+     "code": "BAS301",
+     "name": "Technical Communication",
+     "kind": "common"
+    },
+    {
+     "code": "BCS301",
+     "name": "Data Structure",
+     "kind": "core"
+    },
+    {
+     "code": "BCS302",
+     "name": "Computer Organization and Architecture",
+     "kind": "core"
+    },
+    {
+     "code": "BCS303",
+     "name": "Discrete Structures & Theory of Logic",
+     "kind": "core"
+    },
+    {
+     "code": "BCC301",
+     "name": "Cyber Security",
+     "kind": "common"
+    },
+    {
+     "code": "BCC302",
+     "name": "Python Programming",
+     "kind": "common"
+    }
+   ],
+   "Semester 4": [
+    {
+     "code": "BAS403",
+     "name": "Mathematics-IV (PDE, Probability and Statistics)",
+     "kind": "common"
+    },
+    {
+     "code": "BAS401",
+     "name": "Technical Communication",
+     "kind": "common"
+    },
+    {
+     "code": "BVE401",
+     "name": "Universal Human Value and Professional Ethics",
+     "kind": "common"
+    },
+    {
+     "code": "BCS401",
+     "name": "Operating System",
+     "kind": "core"
+    },
+    {
+     "code": "BCS402",
+     "name": "Theory of Automata and Formal Languages",
+     "kind": "core"
+    },
+    {
+     "code": "BCS403",
+     "name": "Object Oriented Programming with Java",
+     "kind": "core"
+    },
+    {
+     "code": "BCC402",
+     "name": "Python Programming",
+     "kind": "common"
+    },
+    {
+     "code": "BCC401",
+     "name": "Cyber Security",
+     "kind": "common"
+    }
+   ],
+   "Semester 5": [
+    {
+     "code": "BCS501",
+     "name": "Database Management System",
+     "kind": "core"
+    },
+    {
+     "code": "BCS502",
+     "name": "Web Technology",
+     "kind": "core"
+    },
+    {
+     "code": "BCS503",
+     "name": "Design and Analysis of Algorithm",
+     "kind": "core"
+    },
+    {
+     "code": "BCS051",
+     "name": "Statistical Computing",
+     "kind": "elective"
+    },
+    {
+     "code": "BIT052",
+     "name": "Compiler Design",
+     "kind": "elective"
+    },
+    {
+     "code": "BCS053",
+     "name": "Computer Graphics",
+     "kind": "elective"
+    },
+    {
+     "code": "BCS054",
+     "name": "Object Oriented System Design with C++",
+     "kind": "elective"
+    },
+    {
+     "code": "BCS055",
+     "name": "Machine Learning Techniques",
+     "kind": "elective"
+    },
+    {
+     "code": "BCS056",
+     "name": "Application of Soft Computing",
+     "kind": "elective"
+    },
+    {
+     "code": "BCS057",
+     "name": "Image Processing",
+     "kind": "elective"
+    },
+    {
+     "code": "BCS058",
+     "name": "Data Warehousing & Data Mining",
+     "kind": "elective"
+    },
+    {
+     "code": "BNC501",
+     "name": "Constitution of India",
+     "kind": "common"
+    },
+    {
+     "code": "BNC502",
+     "name": "Essence of Indian Traditional Knowledge",
+     "kind": "common"
+    }
+   ],
+   "Semester 6": [
+    {
+     "code": "BCS601",
+     "name": "Software Engineering",
+     "kind": "core"
+    },
+    {
+     "code": "BIT601",
+     "name": "Data Analytics",
+     "kind": "core"
+    },
+    {
+     "code": "BCS603",
+     "name": "Computer Networks",
+     "kind": "core"
+    },
+    {
+     "code": "BCS061",
+     "name": "Big Data",
+     "kind": "elective"
+    },
+    {
+     "code": "BCS062",
+     "name": "Augmented & Virtual Reality",
+     "kind": "elective"
+    },
+    {
+     "code": "BCS063",
+     "name": "Blockchain Architecture Design",
+     "kind": "elective"
+    },
+    {
+     "code": "BCS064",
+     "name": "Data Compression",
+     "kind": "elective"
+    },
+    {
+     "code": "BNC601",
+     "name": "Constitution of India",
+     "kind": "common"
+    },
+    {
+     "code": "BNC602",
+     "name": "Essence of Indian Traditional Knowledge",
+     "kind": "common"
+    }
+   ],
+   "Semester 7": [
+    {
+     "code": "BCS701",
+     "name": "Artificial Intelligence",
+     "kind": "core"
+    },
+    {
+     "code": "BCS070",
+     "name": "Internet of Things",
+     "kind": "elective"
+    },
+    {
+     "code": "BCS071",
+     "name": "Cloud Computing",
+     "kind": "elective"
+    },
+    {
+     "code": "BCS072",
+     "name": "Cryptography and Network Security",
+     "kind": "elective"
+    },
+    {
+     "code": "BCS073",
+     "name": "Design & Development of Applications",
+     "kind": "elective"
+    }
+   ],
+   "Semester 8": []
+  },
+  "Electronics & Communication": {
+   "Semester 3": [
+    {
+     "code": "BAS303",
+     "name": "Mathematics-IV (PDE, Probability and Statistics)",
+     "kind": "common"
+    },
+    {
+     "code": "BVE301",
+     "name": "Universal Human Value and Professional Ethics",
+     "kind": "common"
+    },
+    {
+     "code": "BAS301",
+     "name": "Technical Communication",
+     "kind": "common"
+    },
+    {
+     "code": "BEC301",
+     "name": "Electronic Devices",
+     "kind": "core"
+    },
+    {
+     "code": "BEC302",
+     "name": "Digital System Design",
+     "kind": "core"
+    },
+    {
+     "code": "BEC303",
+     "name": "Network Analysis and Synthesis",
+     "kind": "core"
+    },
+    {
+     "code": "BCC301",
+     "name": "Cyber Security",
+     "kind": "common"
+    },
+    {
+     "code": "BCC302",
+     "name": "Python Programming",
+     "kind": "common"
+    }
+   ],
+   "Semester 4": [
+    {
+     "code": "BAS403",
+     "name": "Mathematics-IV (PDE, Probability and Statistics)",
+     "kind": "common"
+    },
+    {
+     "code": "BAS401",
+     "name": "Technical Communication",
+     "kind": "common"
+    },
+    {
+     "code": "BVE401",
+     "name": "Universal Human Value and Professional Ethics",
+     "kind": "common"
+    },
+    {
+     "code": "BEC401",
+     "name": "Communication Engineering",
+     "kind": "core"
+    },
+    {
+     "code": "BEC402",
+     "name": "Analog Circuits",
+     "kind": "core"
+    },
+    {
+     "code": "BEC403",
+     "name": "Signal System",
+     "kind": "core"
+    },
+    {
+     "code": "BCC402",
+     "name": "Python Programming",
+     "kind": "common"
+    },
+    {
+     "code": "BCC401",
+     "name": "Cyber Security",
+     "kind": "common"
+    }
+   ],
+   "Semester 5": [
+    {
+     "code": "BEC501",
+     "name": "Integrated Circuits",
+     "kind": "core"
+    },
+    {
+     "code": "BEC502",
+     "name": "Microprocessor & Microcontroller",
+     "kind": "core"
+    },
+    {
+     "code": "BEC503",
+     "name": "Digital Signal Processing",
+     "kind": "core"
+    },
+    {
+     "code": "BEC051",
+     "name": "IoT – Architecture, Communication, Technology & its applications",
+     "kind": "elective"
+    },
+    {
+     "code": "BEC052",
+     "name": "Bio-Medical Sensors & Instrumentation",
+     "kind": "elective"
+    },
+    {
+     "code": "BEC053",
+     "name": "Intelligent Systems and Robotics",
+     "kind": "elective"
+    },
+    {
+     "code": "BEC054",
+     "name": "VLSI Technology",
+     "kind": "elective"
+    },
+    {
+     "code": "BEC055",
+     "name": "Electronics Switching",
+     "kind": "elective"
+    },
+    {
+     "code": "BEC056",
+     "name": "Bio-Medical Signal Processing",
+     "kind": "elective"
+    },
+    {
+     "code": "BEC057",
+     "name": "Optical Communication",
+     "kind": "elective"
+    },
+    {
+     "code": "BEC058",
+     "name": "CMOS Analog VLSI Design",
+     "kind": "elective"
+    },
+    {
+     "code": "BNC501",
+     "name": "Constitution of India",
+     "kind": "common"
+    },
+    {
+     "code": "BNC502",
+     "name": "Essence of Indian Traditional Knowledge",
+     "kind": "common"
+    }
+   ],
+   "Semester 6": [
+    {
+     "code": "BEC601",
+     "name": "Digital Communication",
+     "kind": "core"
+    },
+    {
+     "code": "BEC602",
+     "name": "Control System",
+     "kind": "core"
+    },
+    {
+     "code": "BEC603",
+     "name": "Antenna and Wave Propagation",
+     "kind": "core"
+    },
+    {
+     "code": "BEC061",
+     "name": "Satellite Communication",
+     "kind": "elective"
+    },
+    {
+     "code": "BEC062",
+     "name": "Data Communication Networks",
+     "kind": "elective"
+    },
+    {
+     "code": "BEC063",
+     "name": "CMOS Digital Design Techniques",
+     "kind": "elective"
+    },
+    {
+     "code": "BEC064",
+     "name": "Microwave Engineering",
+     "kind": "elective"
+    },
+    {
+     "code": "BNC601",
+     "name": "Constitution of India",
+     "kind": "common"
+    },
+    {
+     "code": "BNC602",
+     "name": "Essence of Indian Traditional Knowledge",
+     "kind": "common"
+    }
+   ],
+   "Semester 7": [
+    {
+     "code": "BEC701",
+     "name": "VLSI Design",
+     "kind": "core"
+    },
+    {
+     "code": "BEC071",
+     "name": "Wireless & Mobile Communication",
+     "kind": "elective"
+    },
+    {
+     "code": "BEC072",
+     "name": "Information Theory & Coding",
+     "kind": "elective"
+    },
+    {
+     "code": "BEC073",
+     "name": "Microwave & Radar Engineering",
+     "kind": "elective"
+    },
+    {
+     "code": "BEC074",
+     "name": "Drone Systems: Design, Control & Navigation",
+     "kind": "elective"
+    }
+   ],
+   "Semester 8": []
+  },
+  "Electrical Engineering": {
+   "Semester 3": [
+    {
+     "code": "BAS303",
+     "name": "Mathematics-IV (PDE, Probability and Statistics)",
+     "kind": "common"
+    },
+    {
+     "code": "BVE301",
+     "name": "Universal Human Value and Professional Ethics",
+     "kind": "common"
+    },
+    {
+     "code": "BAS301",
+     "name": "Technical Communication",
+     "kind": "common"
+    },
+    {
+     "code": "BEE301",
+     "name": "Electromagnetic Field Theory",
+     "kind": "core"
+    },
+    {
+     "code": "BEE302",
+     "name": "Electrical Measurements & Instrumentation",
+     "kind": "core"
+    },
+    {
+     "code": "BEE303",
+     "name": "Basic Signals & Systems",
+     "kind": "core"
+    },
+    {
+     "code": "BCC301",
+     "name": "Cyber Security",
+     "kind": "common"
+    },
+    {
+     "code": "BCC302",
+     "name": "Python Programming",
+     "kind": "common"
+    }
+   ],
+   "Semester 4": [
+    {
+     "code": "BAS403",
+     "name": "Mathematics-IV (PDE, Probability and Statistics)",
+     "kind": "common"
+    },
+    {
+     "code": "BAS401",
+     "name": "Technical Communication",
+     "kind": "common"
+    },
+    {
+     "code": "BVE401",
+     "name": "Universal Human Value and Professional Ethics",
+     "kind": "common"
+    },
+    {
+     "code": "BEE401",
+     "name": "Digital Electronics",
+     "kind": "core"
+    },
+    {
+     "code": "BEE402",
+     "name": "Electrical Machines-I",
+     "kind": "core"
+    },
+    {
+     "code": "BEE403",
+     "name": "Network Analysis & Synthesis",
+     "kind": "core"
+    },
+    {
+     "code": "BCC402",
+     "name": "Python Programming",
+     "kind": "common"
+    },
+    {
+     "code": "BCC401",
+     "name": "Cyber Security",
+     "kind": "common"
+    }
+   ],
+   "Semester 5": [
+    {
+     "code": "BEE501",
+     "name": "Power System-I",
+     "kind": "core"
+    },
+    {
+     "code": "BEE502",
+     "name": "Control System",
+     "kind": "core"
+    },
+    {
+     "code": "BEE503",
+     "name": "Electrical Machines-II",
+     "kind": "core"
+    },
+    {
+     "code": "BEE051",
+     "name": "Robotics",
+     "kind": "elective"
+    },
+    {
+     "code": "BEE052",
+     "name": "Sensors and Transducers",
+     "kind": "elective"
+    },
+    {
+     "code": "BEE053",
+     "name": "Industrial Automation and Control",
+     "kind": "elective"
+    },
+    {
+     "code": "BEE054",
+     "name": "Electrical Standards and Engineering Practices",
+     "kind": "elective"
+    },
+    {
+     "code": "BEE055",
+     "name": "Optimization Techniques",
+     "kind": "elective"
+    },
+    {
+     "code": "BEE056",
+     "name": "Neural Networks & Fuzzy System",
+     "kind": "elective"
+    },
+    {
+     "code": "BEE057",
+     "name": "Digital Signal Processing",
+     "kind": "elective"
+    },
+    {
+     "code": "BEE058",
+     "name": "Analog & Digital Communication",
+     "kind": "elective"
+    },
+    {
+     "code": "BNC501",
+     "name": "Constitution of India",
+     "kind": "common"
+    },
+    {
+     "code": "BNC502",
+     "name": "Essence of Indian Traditional Knowledge",
+     "kind": "common"
+    }
+   ],
+   "Semester 6": [
+    {
+     "code": "BEE601",
+     "name": "Power System-II",
+     "kind": "core"
+    },
+    {
+     "code": "BEE602",
+     "name": "Microprocessor",
+     "kind": "core"
+    },
+    {
+     "code": "BEE603",
+     "name": "Power Electronics",
+     "kind": "core"
+    },
+    {
+     "code": "BEE061",
+     "name": "Special Electrical Machines",
+     "kind": "elective"
+    },
+    {
+     "code": "BEE062",
+     "name": "Electrical Machine Design",
+     "kind": "elective"
+    },
+    {
+     "code": "BEE063",
+     "name": "Digital Control System",
+     "kind": "elective"
+    },
+    {
+     "code": "BEE064",
+     "name": "Electrical and Hybrid Vehicles",
+     "kind": "elective"
+    },
+    {
+     "code": "BEE065",
+     "name": "Digital Design with VHDL",
+     "kind": "elective"
+    },
+    {
+     "code": "BNC601",
+     "name": "Constitution of India",
+     "kind": "common"
+    },
+    {
+     "code": "BNC602",
+     "name": "Essence of Indian Traditional Knowledge",
+     "kind": "common"
+    }
+   ],
+   "Semester 7": [
+    {
+     "code": "BEE701",
+     "name": "Power System Protection",
+     "kind": "core"
+    },
+    {
+     "code": "BEE071",
+     "name": "Energy Conservation & Auditing",
+     "kind": "elective"
+    },
+    {
+     "code": "BEE072",
+     "name": "HVDC & AC Transmission",
+     "kind": "elective"
+    },
+    {
+     "code": "BEE073",
+     "name": "Power Quality and FACTS",
+     "kind": "elective"
+    },
+    {
+     "code": "BEE074",
+     "name": "Electric Drives",
+     "kind": "elective"
+    },
+    {
+     "code": "BEE075",
+     "name": "Utilization of Electrical Energy & Electric Traction",
+     "kind": "elective"
+    },
+    {
+     "code": "BEE076",
+     "name": "Renewable Energy Resources",
+     "kind": "elective"
+    }
+   ],
+   "Semester 8": []
+  },
+  "Mechanical Engineering": {
+   "Semester 3": [
+    {
+     "code": "BAS303",
+     "name": "Mathematics-IV (PDE, Probability and Statistics)",
+     "kind": "common"
+    },
+    {
+     "code": "BVE301",
+     "name": "Universal Human Value and Professional Ethics",
+     "kind": "common"
+    },
+    {
+     "code": "BAS301",
+     "name": "Technical Communication",
+     "kind": "common"
+    },
+    {
+     "code": "BME301",
+     "name": "Thermodynamics",
+     "kind": "core"
+    },
+    {
+     "code": "BME302",
+     "name": "Fluid Mechanics & Fluid Machines",
+     "kind": "core"
+    },
+    {
+     "code": "BME303",
+     "name": "Materials Engineering",
+     "kind": "core"
+    },
+    {
+     "code": "BCC301",
+     "name": "Cyber Security",
+     "kind": "common"
+    },
+    {
+     "code": "BCC302",
+     "name": "Python Programming",
+     "kind": "common"
+    }
+   ],
+   "Semester 4": [
+    {
+     "code": "BAS403",
+     "name": "Mathematics-IV (PDE, Probability and Statistics)",
+     "kind": "common"
+    },
+    {
+     "code": "BAS401",
+     "name": "Technical Communication",
+     "kind": "common"
+    },
+    {
+     "code": "BVE401",
+     "name": "Universal Human Value and Professional Ethics",
+     "kind": "common"
+    },
+    {
+     "code": "BME401",
+     "name": "Applied Thermodynamics",
+     "kind": "core"
+    },
+    {
+     "code": "BME402",
+     "name": "Engineering Mechanics & Strength Material",
+     "kind": "core"
+    },
+    {
+     "code": "BME403",
+     "name": "Manufacturing Processes",
+     "kind": "core"
+    },
+    {
+     "code": "BCC402",
+     "name": "Python Programming",
+     "kind": "common"
+    },
+    {
+     "code": "BCC401",
+     "name": "Cyber Security",
+     "kind": "common"
+    }
+   ],
+   "Semester 5": [
+    {
+     "code": "BME501",
+     "name": "Heat & Mass Transfer",
+     "kind": "core"
+    },
+    {
+     "code": "BME502",
+     "name": "Machine Design",
+     "kind": "core"
+    },
+    {
+     "code": "BME503",
+     "name": "Industrial Engineering",
+     "kind": "core"
+    },
+    {
+     "code": "BME051",
+     "name": "Advance Manufacturing Processes",
+     "kind": "elective"
+    },
+    {
+     "code": "BME052",
+     "name": "I C Engine Fuel & Lubrication",
+     "kind": "elective"
+    },
+    {
+     "code": "BME053",
+     "name": "Finite Element Methods",
+     "kind": "elective"
+    },
+    {
+     "code": "BAU051",
+     "name": "Automobile Engines & Combustion",
+     "kind": "elective"
+    },
+    {
+     "code": "BME054",
+     "name": "Mechatronic Systems",
+     "kind": "elective"
+    },
+    {
+     "code": "BME055",
+     "name": "Turbo Machines",
+     "kind": "elective"
+    },
+    {
+     "code": "BME056",
+     "name": "Mechanical Vibrations",
+     "kind": "elective"
+    },
+    {
+     "code": "BAU052",
+     "name": "Automotive Chassis & Suspension",
+     "kind": "elective"
+    },
+    {
+     "code": "BNC501",
+     "name": "Constitution of India",
+     "kind": "common"
+    },
+    {
+     "code": "BNC502",
+     "name": "Essence of Indian Traditional Knowledge",
+     "kind": "common"
+    }
+   ],
+   "Semester 6": [
+    {
+     "code": "BME601",
+     "name": "Refrigeration & Air Conditioning",
+     "kind": "core"
+    },
+    {
+     "code": "BME602",
+     "name": "CAD/CAM",
+     "kind": "core"
+    },
+    {
+     "code": "BME603",
+     "name": "Theory of Machines",
+     "kind": "core"
+    },
+    {
+     "code": "BME061",
+     "name": "Industrial Robotics",
+     "kind": "elective"
+    },
+    {
+     "code": "BME062",
+     "name": "Computational Fluid Dynamics",
+     "kind": "elective"
+    },
+    {
+     "code": "BME063",
+     "name": "Tribology",
+     "kind": "elective"
+    },
+    {
+     "code": "BAU061",
+     "name": "Automotive Electrical & Electronics",
+     "kind": "elective"
+    },
+    {
+     "code": "BNC601",
+     "name": "Constitution of India",
+     "kind": "common"
+    },
+    {
+     "code": "BNC602",
+     "name": "Essence of Indian Traditional Knowledge",
+     "kind": "common"
+    }
+   ],
+   "Semester 7": [
+    {
+     "code": "BME701",
+     "name": "Measurement & Metrology",
+     "kind": "core"
+    },
+    {
+     "code": "BME071",
+     "name": "Additive Manufacturing",
+     "kind": "elective"
+    },
+    {
+     "code": "BME072",
+     "name": "Power Plant Engineering",
+     "kind": "elective"
+    },
+    {
+     "code": "BME073",
+     "name": "Computer Graphics and Product Modeling",
+     "kind": "elective"
+    },
+    {
+     "code": "BAU071",
+     "name": "Hybrid Vehicle Propulsion",
+     "kind": "elective"
+    }
+   ],
+   "Semester 8": []
+  },
+  "Civil Engineering": {
+   "Semester 3": [
+    {
+     "code": "BAS302",
+     "name": "Mathematics-III (Partial Differential Equations, Statistical and Numerical Techniques)",
+     "kind": "common"
+    },
+    {
+     "code": "BVE301",
+     "name": "Universal Human Value and Professional Ethics",
+     "kind": "common"
+    },
+    {
+     "code": "BAS301",
+     "name": "Technical Communication",
+     "kind": "common"
+    },
+    {
+     "code": "BCE301",
+     "name": "Engineering Mechanics",
+     "kind": "core"
+    },
+    {
+     "code": "BCE302",
+     "name": "Surveying and Geomatics",
+     "kind": "core"
+    },
+    {
+     "code": "BCE303",
+     "name": "Fluid Mechanics",
+     "kind": "core"
+    },
+    {
+     "code": "BCC301",
+     "name": "Cyber Security",
+     "kind": "common"
+    },
+    {
+     "code": "BCC302",
+     "name": "Python Programming",
+     "kind": "common"
+    }
+   ],
+   "Semester 4": [
+    {
+     "code": "BAS402",
+     "name": "Mathematics-III (Partial Differential Equations, Statistical and Numerical Techniques)",
+     "kind": "common"
+    },
+    {
+     "code": "BAS401",
+     "name": "Technical Communication",
+     "kind": "common"
+    },
+    {
+     "code": "BVE401",
+     "name": "Universal Human Value and Professional Ethics",
+     "kind": "common"
+    },
+    {
+     "code": "BCE401",
+     "name": "Materials, Testing & Construction Practices",
+     "kind": "core"
+    },
+    {
+     "code": "BCE402",
+     "name": "Introduction to Solid Mechanics",
+     "kind": "core"
+    },
+    {
+     "code": "BCE403",
+     "name": "Hydraulic Engineering and Machines",
+     "kind": "core"
+    },
+    {
+     "code": "BCC402",
+     "name": "Python Programming",
+     "kind": "common"
+    },
+    {
+     "code": "BCC401",
+     "name": "Cyber Security",
+     "kind": "common"
+    }
+   ],
+   "Semester 5": [
+    {
+     "code": "BCE501",
+     "name": "Geotechnical Engineering",
+     "kind": "core"
+    },
+    {
+     "code": "BCE502",
+     "name": "Structural Analysis",
+     "kind": "core"
+    },
+    {
+     "code": "BCE503",
+     "name": "Quantity Estimation and Construction Management",
+     "kind": "core"
+    },
+    {
+     "code": "BCE051",
+     "name": "Concrete Technology",
+     "kind": "elective"
+    },
+    {
+     "code": "BCE052",
+     "name": "Modern Construction Materials",
+     "kind": "elective"
+    },
+    {
+     "code": "BCE053",
+     "name": "Open Channel Flow",
+     "kind": "elective"
+    },
+    {
+     "code": "BCE054",
+     "name": "Engineering Geology",
+     "kind": "elective"
+    },
+    {
+     "code": "BCE055",
+     "name": "Engineering Hydrology",
+     "kind": "elective"
+    },
+    {
+     "code": "BCE056",
+     "name": "Sensor and Instrumentation Technologies for Civil Engineering Applications",
+     "kind": "elective"
+    },
+    {
+     "code": "BCE057",
+     "name": "Air and Noise Pollution Control",
+     "kind": "elective"
+    },
+    {
+     "code": "BCE058",
+     "name": "GIS and Advance Remote Sensing",
+     "kind": "elective"
+    },
+    {
+     "code": "BNC501",
+     "name": "Constitution of India",
+     "kind": "common"
+    },
+    {
+     "code": "BNC502",
+     "name": "Essence of Indian Traditional Knowledge",
+     "kind": "common"
+    }
+   ],
+   "Semester 6": [
+    {
+     "code": "BCE601",
+     "name": "Design of Concrete Structures",
+     "kind": "core"
+    },
+    {
+     "code": "BCE602",
+     "name": "Transportation Engineering",
+     "kind": "core"
+    },
+    {
+     "code": "BCE603",
+     "name": "Environmental Engineering",
+     "kind": "core"
+    },
+    {
+     "code": "BCE061",
+     "name": "Advanced Structural Analysis",
+     "kind": "elective"
+    },
+    {
+     "code": "BCE062",
+     "name": "River Engineering",
+     "kind": "elective"
+    },
+    {
+     "code": "BCE063",
+     "name": "Repair and Rehabilitation of Structures",
+     "kind": "elective"
+    },
+    {
+     "code": "BCE064",
+     "name": "Foundation Design",
+     "kind": "elective"
+    },
+    {
+     "code": "BNC601",
+     "name": "Constitution of India",
+     "kind": "common"
+    },
+    {
+     "code": "BNC602",
+     "name": "Essence of Indian Traditional Knowledge",
+     "kind": "common"
+    }
+   ],
+   "Semester 7": [
+    {
+     "code": "BCE701",
+     "name": "Advanced Structural Design",
+     "kind": "core"
+    },
+    {
+     "code": "BCE070",
+     "name": "Railway, Airway, and Waterway Infrastructure Systems",
+     "kind": "elective"
+    },
+    {
+     "code": "BCE071",
+     "name": "Artificial Intelligence and Machine Learning in Civil Engineering",
+     "kind": "elective"
+    },
+    {
+     "code": "BCE072",
+     "name": "Disaster Mitigation & Climate Resilient Infrastructure",
+     "kind": "elective"
+    },
+    {
+     "code": "BCE073",
+     "name": "Geosynthetics & Ground Improvement Techniques",
+     "kind": "elective"
+    }
+   ],
+   "Semester 8": []
+  }
+ }
+}
