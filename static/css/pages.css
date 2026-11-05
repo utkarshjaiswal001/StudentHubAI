@@ -1676,7 +1676,12 @@ footer {
 .admin-small-button { padding: 7px 12px; border: 1px solid var(--border); border-radius: 9px; background: #fff; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
 .admin-danger-link { color: #a34528; }
 .admin-danger-button { background: #b3261e; border-color: #b3261e; }
-@media (max-width: 640px) { .admin-row { flex-wrap: wrap; } .admin-inline-form input { min-width: 0; width: 100%; } }
+@media (max-width: 640px) {
+    .admin-row { flex-wrap: wrap; }
+    .admin-row-copy { flex-basis: calc(100% - 60px); }
+    .admin-row-actions { width: 100%; padding-left: 54px; }
+    .admin-inline-form input { min-width: 0; width: 100%; }
+}
 /* Account Centre actions */
 .account-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin-top: 18px; }
 /* Notes: subject search + New badge */
