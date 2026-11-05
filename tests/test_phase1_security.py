@@ -563,7 +563,7 @@ class PhaseOneSecurityTests(unittest.TestCase):
         self.assertEqual(self.count_rows("study_notes"), 0)
 
 
-    # --- Phase 2 security: lockout, quick-help history, headers, session expiry ---
+    # --- Phase 1 security: lockout, quick-help history, headers, session expiry ---
 
     def test_login_locks_after_five_wrong_passwords(self):
         client = app.test_client()
@@ -624,7 +624,7 @@ class PhaseOneSecurityTests(unittest.TestCase):
         self.assertEqual(app.permanent_session_lifetime.days, 7)
 
 
-    # --- Phase 3 admin tools: edit/delete notes, issue reports, password reset ---
+    # --- Phase 2 admin tools: edit/delete notes, issue reports, password reset ---
 
     def student_client(self):
         client = app.test_client()
@@ -719,7 +719,7 @@ class PhaseOneSecurityTests(unittest.TestCase):
         self.assertIn("semester=Semester", response.headers["Location"])
 
 
-    # --- Phase 4 student account: profile, password, delete, My notes ---
+    # --- Phase 3 student account: profile, password, delete, My notes ---
 
     def test_edit_profile(self):
         client = self.student_client()
@@ -803,6 +803,35 @@ class PhaseOneSecurityTests(unittest.TestCase):
             db.commit()
         studenthub.init_db()
         self.assertEqual(self.count_rows("users", "branch = 'Computer Science Engineering'"), 1)
+
+
+    # --- Phase 4 notes extras: subject spelling, search, New badge ---
+
+    def test_upload_reuses_existing_subject_spelling(self):
+        self.seed_note(subject="DBMS", year="2nd Year", semester="Semester 3", stored_filename="x.pdf")
+        owner = app.test_client()
+        self.login(owner)
+        self.assertIn('<option value="DBMS">', owner.get("/notes/upload").get_data(as_text=True))
+        self.upload_note(owner, subject="dbms")
+        self.assertEqual(self.count_rows("study_notes", "subject = 'DBMS'"), 2)
+        self.assertEqual(self.count_rows("study_notes", "subject = 'dbms'"), 0)
+
+    def test_subjects_page_search_and_new_badge(self):
+        self.seed_note(title="Normalization Notes", subject="DBMS", stored_filename="a.pdf")
+        self.seed_note(title="TCP Basics", subject="Computer Networks", stored_filename="b.pdf")
+        query = {"branch": "Computer Science Engineering", "year": "3rd Year", "semester": "Semester 5"}
+        client = app.test_client()
+        body = client.get("/notes/subjects", query_string={**query, "q": "network"}).get_data(as_text=True)
+        self.assertIn("TCP Basics", body)
+        self.assertNotIn("Normalization Notes", body)
+        body = client.get("/notes/subjects", query_string=query).get_data(as_text=True)
+        self.assertIn('class="notes-new-badge"', body)
+        with app.app_context():
+            db = studenthub.get_db()
+            db.execute("UPDATE study_notes SET created_at = '2020-01-01 00:00:00'")
+            db.commit()
+        body = client.get("/notes/subjects", query_string=query).get_data(as_text=True)
+        self.assertNotIn('class="notes-new-badge"', body)
 
 
 if __name__ == "__main__":

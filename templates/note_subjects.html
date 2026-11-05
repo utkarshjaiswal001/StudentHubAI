@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ branch }} Notes | StudentHub AI</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=5) }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css', v=15) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css', v=16) }}">
 </head>
 <body>
     <nav class="navbar">
@@ -34,20 +34,30 @@
             <div>{% if semester %}<a class="notes-back-link" href="{{ url_for('note_semesters', branch=branch, year=year) }}">← {{ branch }} semesters</a><span class="notes-step">STEP 4</span><h2>{{ semester }} subjects</h2>{% else %}<a class="notes-back-link" href="{{ url_for('note_branches', year=year) }}">← {{ year }} branches</a><span class="notes-step">STEP 3</span><h2>Subjects</h2>{% endif %}</div>
         </div>
 
+        <form class="admin-inline-form notes-subject-search" action="{{ url_for('note_subjects') }}" method="get">
+            <input type="hidden" name="branch" value="{{ branch }}">
+            <input type="hidden" name="year" value="{{ year }}">
+            {% if semester %}<input type="hidden" name="semester" value="{{ semester }}">{% endif %}
+            <label class="visually-hidden" for="subject-search">Search subjects and notes</label>
+            <input id="subject-search" name="q" value="{{ search }}" maxlength="100" placeholder="Search subjects or note titles">
+            <button class="notes-primary-button" type="submit">Search</button>
+            {% if search %}<a class="admin-text-link" href="{{ notes_browse_url(branch, year, semester) }}">Clear</a>{% endif %}
+        </form>
+
         {% if subjects %}
             <div class="notes-subject-list">
                 {% for item in subjects %}
                     <details class="notes-subject-dropdown">
                         <summary>
                             <span class="notes-choice-icon" aria-hidden="true">📘</span>
-                            <span class="notes-choice-copy"><strong>{{ item.subject }}</strong><small>{{ item.notes|length }} file{% if item.notes|length != 1 %}s{% endif %} available</small></span>
+                            <span class="notes-choice-copy"><strong>{{ item.subject }}{% if item.notes|selectattr('is_new')|list %} <span class="notes-new-badge">New</span>{% endif %}</strong><small>{{ item.notes|length }} file{% if item.notes|length != 1 %}s{% endif %} available</small></span>
                             <span class="notes-dropdown-caret" aria-hidden="true">⌄</span>
                         </summary>
                         <div class="notes-pdf-list">
                             {% for note in item.notes %}
                                 <article class="notes-pdf-row">
                                     <span class="notes-file-icon" aria-hidden="true">{{ note.original_filename.rsplit('.', 1)[-1]|upper }}</span>
-                                    <span class="notes-choice-copy"><strong>{{ note.title }}</strong><small>{{ note.semester }} · {{ note.original_filename }}</small></span>
+                                    <span class="notes-choice-copy"><strong>{{ note.title }}{% if note.is_new %} <span class="notes-new-badge">New</span>{% endif %}</strong><small>{{ note.semester }} · {{ note.original_filename }}</small></span>
                                     <a class="notes-preview-action" href="{{ url_for('preview_note', note_id=note.id, return_to=notes_browse_url(branch, year, semester)) }}">Preview</a>
                                     <a class="notes-download-link" href="{{ url_for('download_note', note_id=note.id) }}">Download</a>
                                 </article>
@@ -60,7 +70,7 @@
             <div class="notes-empty-state" role="status" aria-live="polite">
                 <span aria-hidden="true">📂</span>
                 <h3>No notes found</h3>
-                <p>There are no notes available for {{ branch }}, {{ year }}{% if semester %}, {{ semester }}{% endif %} yet. Please check back later.</p>
+                {% if search %}<p>Nothing matches “{{ search }}”. Try another word or clear the search.</p>{% else %}<p>There are no notes available for {{ branch }}, {{ year }}{% if semester %}, {{ semester }}{% endif %} yet. Please check back later.</p>{% endif %}
             </div>
         {% endif %}
     </main>

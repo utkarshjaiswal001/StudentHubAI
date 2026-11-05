@@ -1142,6 +1142,24 @@ def admin_access():
     )
 
 
+def canonical_subject(subject):
+    """Reuse an existing subject's spelling so "dbms" and "DBMS" stay one subject."""
+    row = get_db().execute(
+        """SELECT subject FROM study_notes WHERE lower(subject) = lower(?)
+           GROUP BY subject ORDER BY COUNT(*) DESC LIMIT 1""",
+        (subject,),
+    ).fetchone()
+    return row["subject"] if row else subject
+
+
+def known_subjects():
+    return [
+        row["subject"] for row in get_db().execute(
+            "SELECT subject FROM study_notes GROUP BY lower(subject) ORDER BY lower(subject)"
+        )
+    ]
+
+
 def get_note_or_404(note_id):
     note = get_db().execute(
         """SELECT id, title, subject, branch, year, semester, stored_filename,
@@ -1171,6 +1189,8 @@ def edit_note(note_id):
             flash(details_error, "error")
         else:
             db = get_db()
+            if form["subject"].casefold() != note["subject"].casefold():
+                form["subject"] = canonical_subject(form["subject"])
             db.execute(
                 """UPDATE study_notes SET title = ?, subject = ?, branch = ?, year = ?, semester = ?
                    WHERE id = ?""",
@@ -1184,6 +1204,7 @@ def edit_note(note_id):
         "note_edit.html",
         note=note,
         form=form,
+        known_subjects=known_subjects(),
         note_branches=NOTE_BRANCHES,
         note_years=NOTE_YEARS,
         note_semesters=NOTE_SEMESTERS,
@@ -1457,12 +1478,17 @@ def note_subjects():
         # Links without a semester go to the semester chooser.
         return redirect(url_for("note_semesters", branch=branch, year=year))
 
-    query = """SELECT id, title, subject, semester, original_filename, created_at
+    search = request.args.get("q", "").strip()[:100]
+    query = """SELECT id, title, subject, semester, original_filename, created_at,
+                      created_at >= datetime('now', '-7 days') AS is_new
                FROM study_notes WHERE branch = ? AND year = ?"""
     params = [branch, year]
     if semester:
         query += " AND semester = ?"
         params.append(semester)
+    if search:
+        query += " AND (subject LIKE ? OR title LIKE ?)"
+        params.extend([f"%{search}%", f"%{search}%"])
     rows = get_db().execute(
         query + " ORDER BY lower(subject), semester, title", params
     ).fetchall()
@@ -1478,6 +1504,7 @@ def note_subjects():
         branch=branch,
         year=year,
         semester=semester,
+        search=search,
         subjects=subjects,
     )
 
@@ -1525,6 +1552,7 @@ def upload_note():
                 uploaded_file.save(destination)
                 try:
                     db = get_db()
+                    subject = canonical_subject(subject)
                     db.execute(
                         """INSERT INTO study_notes
                            (title, branch, year, semester, subject, stored_filename,
@@ -1544,6 +1572,7 @@ def upload_note():
                     return redirect(notes_browse_url(branch, year, semester))
     return render_template(
         "upload.html",
+        known_subjects=known_subjects(),
         note_branches=NOTE_BRANCHES,
         note_years=NOTE_YEARS,
         note_semesters=NOTE_SEMESTERS,

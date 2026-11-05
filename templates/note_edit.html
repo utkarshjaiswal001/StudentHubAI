@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Note | StudentHub AI</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=6) }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css', v=15) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css', v=16) }}">
 </head>
 <body>
     <nav class="navbar">
@@ -43,7 +43,8 @@
                 </div>
                 <div class="notes-field">
                     <label for="note-subject">Subject</label>
-                    <input id="note-subject" name="subject" maxlength="100" required value="{{ form.subject }}">
+                    <input id="note-subject" name="subject" maxlength="100" required value="{{ form.subject }}" list="known-subjects" autocomplete="off">
+                    <datalist id="known-subjects">{% for subject in known_subjects %}<option value="{{ subject }}">{% endfor %}</datalist>
                 </div>
                 <div class="notes-field">
                     <label for="note-branch">Branch</label>
