@@ -12,7 +12,7 @@ Last updated: 2026-11-05 · Budget: free only · AI Mentor work: out of scope fo
 | 3 Student account | ✅ Done — waiting for your browser check |
 | 4 Notes extras | ✅ 4.1–4.3 done · 4.4 "Coming Soon" cards left for you to decide |
 | 5 Go online | ✅ Claude's part done (git cleaned, checklist in DEPLOYMENT.md) · ⏳ your part: push, PythonAnywhere |
-| 6 Submission | ✅ Report + slides updated, DEMO_AND_VIVA.md written · ⏳ your part: screenshots, recording, review |
+| 6 Submission | ✅ Report + slides updated, DEMO_AND_VIVA.md written · Rest handled by you separately |
 
 Tests: 47, all passing.
 
