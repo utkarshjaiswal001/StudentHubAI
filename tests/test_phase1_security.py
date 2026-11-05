@@ -88,7 +88,7 @@ class PhaseOneSecurityTests(unittest.TestCase):
             "name": "Test Student",
             "email": "student@example.com",
             "college": "Test College",
-            "branch": "Computer Science",
+            "branch": "Computer Science Engineering",
             "year": "1st Year",
             "password": "student-password",
             "confirm_password": "student-password",
@@ -313,8 +313,16 @@ class PhaseOneSecurityTests(unittest.TestCase):
                     0,
                 )
 
+    def test_registration_rejects_common_and_legacy_branch_names(self):
+        for index, branch in enumerate(["Common (1st Year)", "Computer Science"]):
+            with self.subTest(branch=branch):
+                email = f"bad-branch{index}@example.com"
+                response = self.register(app.test_client(), email=email, branch=branch)
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(self.count_rows("users", "email = ?", (email,)), 0)
+
     def test_registration_accepts_existing_and_notes_branch_names(self):
-        branches = ["Computer Science", "Other", "Computer Science Engineering"]
+        branches = ["Other", "Computer Science Engineering", "Electronics & Communication"]
         for index, branch in enumerate(branches):
             with self.subTest(branch=branch):
                 email = f"valid{index}@example.com"
@@ -709,6 +717,92 @@ class PhaseOneSecurityTests(unittest.TestCase):
         self.assertEqual(response.status_code, 302)
         self.assertIn("/notes/subjects?", response.headers["Location"])
         self.assertIn("semester=Semester", response.headers["Location"])
+
+
+    # --- Phase 4 student account: profile, password, delete, My notes ---
+
+    def test_edit_profile(self):
+        client = self.student_client()
+        token = self.csrf_token(client, "/account/profile")
+        bad = client.post("/account/profile", data={"csrf_token": token, "name": "New Name",
+                          "college": "GCET", "branch": "Common (1st Year)", "year": "2nd Year"})
+        self.assertEqual(bad.status_code, 200)
+        good = client.post("/account/profile", data={"csrf_token": token, "name": "New Name",
+                           "college": "GCET", "branch": "Civil Engineering", "year": "2nd Year"})
+        self.assertEqual(good.status_code, 302)
+        self.assertEqual(self.count_rows("users", "name = ? AND branch = ? AND year = ?",
+                                         ("New Name", "Civil Engineering", "2nd Year")), 1)
+        with client.session_transaction() as session:
+            self.assertEqual(session["user_name"], "New Name")
+
+    def test_change_password(self):
+        client = self.student_client()
+        token = self.csrf_token(client, "/account/password")
+        fields = {"csrf_token": token, "current_password": "wrong-one",
+                  "new_password": "brand-new-pass", "confirm_password": "brand-new-pass"}
+        self.assertEqual(client.post("/account/password", data=fields).status_code, 200)
+        fields["current_password"] = "student-password"
+        self.assertEqual(client.post("/account/password", data=fields).status_code, 302)
+        self.assertEqual(self.login(app.test_client(), email="student@example.com", password="student-password").status_code, 200)
+        self.assertEqual(self.login(app.test_client(), email="student@example.com", password="brand-new-pass").status_code, 302)
+
+    def test_reset_password_forces_new_password(self):
+        self.student_client()
+        with app.app_context():
+            db = studenthub.get_db()
+            db.execute("UPDATE users SET password_hash = ?, must_change_password = 1 WHERE email = ?",
+                       (generate_password_hash("temp-pass-123"), "student@example.com"))
+            db.commit()
+        client = app.test_client()
+        self.login(client, email="student@example.com", password="temp-pass-123")
+        for path in ("/notes", "/account", "/chatbot"):
+            with self.subTest(path=path):
+                response = client.get(path)
+                self.assertEqual(response.status_code, 302)
+                self.assertTrue(response.headers["Location"].endswith("/account/password"))
+        token = self.csrf_token(client, "/account/password")
+        client.post("/account/password", data={"csrf_token": token, "current_password": "temp-pass-123",
+                    "new_password": "my-own-pass-1", "confirm_password": "my-own-pass-1"})
+        self.assertEqual(client.get("/notes").status_code, 200)
+
+    def test_delete_account(self):
+        client = self.student_client()
+        token = self.csrf_token(client, "/chatbot")
+        client.post("/chatbot", data={"csrf_token": token, "question": "hello mentor"})
+        self.assertEqual(self.count_rows("mentor_messages"), 1)
+        client.post("/account/delete", data={"csrf_token": token, "password": "wrong"})
+        self.assertEqual(self.count_rows("users", "email = ?", ("student@example.com",)), 1)
+        response = client.post("/account/delete", data={"csrf_token": token, "password": "student-password"})
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(self.count_rows("users", "email = ?", ("student@example.com",)), 0)
+        self.assertEqual(self.count_rows("mentor_messages"), 0)
+        with client.session_transaction() as session:
+            self.assertNotIn("user_id", session)
+
+    def test_owner_cannot_delete_account(self):
+        owner = app.test_client()
+        self.login(owner)
+        token = self.csrf_token(owner, "/account")
+        owner.post("/account/delete", data={"csrf_token": token, "password": self.OWNER_PASSWORD})
+        self.assertEqual(self.count_rows("users", "email = ?", (self.OWNER_EMAIL,)), 1)
+
+    def test_my_notes_shortcut(self):
+        # Owner profile: Computer Science Engineering, 3rd Year -> semester chooser.
+        owner = app.test_client()
+        self.login(owner)
+        body = owner.get("/account").get_data(as_text=True)
+        self.assertIn("/notes/semesters?branch=Computer+Science+Engineering&amp;year=3rd+Year", body)
+        # 1st-year student -> branch list (Common first).
+        student = self.student_client()
+        self.assertIn("/notes/branches?year=1st+Year", student.get("/account").get_data(as_text=True))
+
+    def test_legacy_branch_name_is_migrated(self):
+        with app.app_context():
+            db = studenthub.get_db()
+            db.execute("UPDATE users SET branch = 'Computer Science' WHERE email = ?", (self.OWNER_EMAIL,))
+            db.commit()
+        studenthub.init_db()
+        self.assertEqual(self.count_rows("users", "branch = 'Computer Science Engineering'"), 1)
 
 
 if __name__ == "__main__":

@@ -110,17 +110,36 @@ def note_details_error(title, subject, branch, year, semester):
     return note_assignment_error(branch, year, semester)
 
 
-# Keep existing profile choices valid while also accepting the notes-library branch names.
+# Student profile branches match the notes library (Common is for notes only).
+# "Other" covers branches the library doesn't have yet.
 REGISTRATION_BRANCHES = [
-    "Computer Science",
-    "Computer Science Engineering",
-    "Information Technology",
-    "Electronics & Communication",
-    "Electrical Engineering",
-    "Mechanical Engineering",
-    "Civil Engineering",
-    "Other",
-]
+    branch for branch in NOTE_BRANCHES if branch != COMMON_FIRST_YEAR_BRANCH
+] + ["Other"]
+LEGACY_BRANCH_NAMES = {"Computer Science": "Computer Science Engineering"}
+
+
+def my_notes_url(branch, year):
+    """Shortcut to a student's own notes: their branch + year when possible."""
+    branch = LEGACY_BRANCH_NAMES.get(branch, branch)
+    if year not in NOTE_YEARS:
+        return url_for("notes")
+    if year == "1st Year" or branch not in NOTE_BRANCHES:
+        # 1st year picks Common or their branch; unknown branches pick from the list.
+        return url_for("note_branches", year=year)
+    return notes_browse_url(branch, year)
+
+
+def profile_error(name, college, branch, year):
+    """Validate editable profile fields; return an error message or None."""
+    if not 2 <= len(name) <= 80 or contains_control_characters(name):
+        return "Enter a name between 2 and 80 characters."
+    if not 2 <= len(college) <= 120 or contains_control_characters(college):
+        return "Enter a college name between 2 and 120 characters."
+    if branch not in REGISTRATION_BRANCHES:
+        return "Choose a valid branch."
+    if year not in NOTE_YEARS:
+        return "Choose a valid year."
+    return None
 EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 SUGGESTED_SUBJECTS = [
     "Python Programming",
@@ -375,6 +394,10 @@ def init_db():
             get_db().execute(
                 "ALTER TABLE users ADD COLUMN must_change_password INTEGER NOT NULL DEFAULT 0"
             )
+        for old_branch, new_branch in LEGACY_BRANCH_NAMES.items():
+            get_db().execute(
+                "UPDATE users SET branch = ? WHERE branch = ?", (new_branch, old_branch)
+            )
         get_db().execute(
             """CREATE TABLE IF NOT EXISTS login_attempts (
                 email TEXT PRIMARY KEY COLLATE NOCASE,
@@ -603,13 +626,41 @@ def inject_user_state():
             "SELECT is_owner FROM users WHERE id = ?", (session["user_id"],)
         ).fetchone()
         user_is_owner = bool(owner and owner["is_owner"])
+    my_notes = None
+    if session.get("user_id") is not None:
+        profile = get_db().execute(
+            "SELECT branch, year FROM users WHERE id = ?", (session["user_id"],)
+        ).fetchone()
+        if profile is not None:
+            my_notes = my_notes_url(profile["branch"], profile["year"])
     return {
+        "my_notes_url": my_notes,
         "is_logged_in": session.get("user_id") is not None,
         "is_owner": user_is_owner,
         "current_user_name": session.get("user_name"),
         "ai_configured": bool(os.environ.get("OPENAI_API_KEY", "").strip()),
         "csrf_token": get_csrf_token(),
     }
+
+
+@app.before_request
+def require_new_password_after_reset():
+    """After an admin reset, the student must pick a new password before anything else."""
+    if session.get("user_id") is None or request.endpoint in {
+        "change_password", "logout", "static", "health_check",
+    }:
+        return None
+    user = get_db().execute(
+        "SELECT must_change_password FROM users WHERE id = ?", (session["user_id"],)
+    ).fetchone()
+    if user is None:
+        # The account no longer exists (e.g. deleted); sign the browser out.
+        session.clear()
+        return redirect(url_for("login"))
+    if user["must_change_password"]:
+        flash("Your password was reset. Choose a new password to continue.", "info")
+        return redirect(url_for("change_password"))
+    return None
 
 
 @app.before_request
@@ -832,16 +883,10 @@ def register():
 
         if not all((name, email, college, branch, year, password, confirm_password)):
             flash("Please complete every field.", "error")
-        elif not 2 <= len(name) <= 80 or contains_control_characters(name):
-            flash("Enter a name between 2 and 80 characters.", "error")
         elif len(email) > 254 or not EMAIL_PATTERN.fullmatch(email):
             flash("Enter a valid email address.", "error")
-        elif not 2 <= len(college) <= 120 or contains_control_characters(college):
-            flash("Enter a college name between 2 and 120 characters.", "error")
-        elif branch not in REGISTRATION_BRANCHES:
-            flash("Choose a valid branch.", "error")
-        elif year not in NOTE_YEARS:
-            flash("Choose a valid year.", "error")
+        elif profile_error(name, college, branch, year):
+            flash(profile_error(name, college, branch, year), "error")
         elif password != confirm_password:
             flash("The passwords do not match.", "error")
         elif not 8 <= len(password) <= 128:
@@ -863,7 +908,9 @@ def register():
                 )
                 return redirect(url_for("home"))
 
-    return render_template("register.html")
+    return render_template(
+        "register.html", student_branches=REGISTRATION_BRANCHES, note_years=NOTE_YEARS
+    )
 
 
 @app.route("/logout", methods=["POST"])
@@ -927,6 +974,102 @@ def account_center():
         conversation_count=conversation_count,
         note_count=note_count,
     )
+
+
+@app.route("/account/profile", methods=["GET", "POST"])
+@login_required
+def edit_profile():
+    db = get_db()
+    user = db.execute(
+        "SELECT name, email, college, branch, year FROM users WHERE id = ?",
+        (session["user_id"],),
+    ).fetchone()
+    form = dict(user)
+    if request.method == "POST":
+        form.update({
+            field: request.form.get(field, "").strip()
+            for field in ("name", "college", "branch", "year")
+        })
+        error = profile_error(form["name"], form["college"], form["branch"], form["year"])
+        if error:
+            flash(error, "error")
+        else:
+            db.execute(
+                "UPDATE users SET name = ?, college = ?, branch = ?, year = ? WHERE id = ?",
+                (form["name"], form["college"], form["branch"], form["year"], session["user_id"]),
+            )
+            db.commit()
+            session["user_name"] = form["name"]
+            flash("Your profile was updated.", "success")
+            return redirect(url_for("account_center"))
+    return render_template(
+        "account_settings.html", section="profile", form=form,
+        student_branches=REGISTRATION_BRANCHES, note_years=NOTE_YEARS,
+    )
+
+
+@app.route("/account/password", methods=["GET", "POST"])
+@login_required
+def change_password():
+    db = get_db()
+    user = db.execute(
+        "SELECT email, password_hash, must_change_password FROM users WHERE id = ?",
+        (session["user_id"],),
+    ).fetchone()
+    if request.method == "POST":
+        current = request.form.get("current_password", "")
+        new = request.form.get("new_password", "")
+        confirm = request.form.get("confirm_password", "")
+        if not check_password_hash(user["password_hash"], current):
+            flash("Your current password is incorrect.", "error")
+        elif new != confirm:
+            flash("The new passwords do not match.", "error")
+        elif not 8 <= len(new) <= 128:
+            flash("Use a new password with 8 to 128 characters.", "error")
+        elif check_password_hash(user["password_hash"], new):
+            flash("Choose a password different from your current one.", "error")
+        else:
+            db.execute(
+                "UPDATE users SET password_hash = ?, must_change_password = 0 WHERE id = ?",
+                (generate_password_hash(new), session["user_id"]),
+            )
+            db.commit()
+            flash("Your password was changed.", "success")
+            return redirect(url_for("account_center"))
+    return render_template(
+        "account_settings.html", section="password",
+        forced=bool(user["must_change_password"]),
+    )
+
+
+@app.route("/account/delete", methods=["GET", "POST"])
+@login_required
+def delete_account():
+    db = get_db()
+    user = db.execute(
+        "SELECT email, password_hash, is_owner FROM users WHERE id = ?",
+        (session["user_id"],),
+    ).fetchone()
+    if user["is_owner"]:
+        flash("The owner account can't be deleted from the website.", "error")
+        return redirect(url_for("account_center"))
+    if request.method == "POST":
+        if not check_password_hash(user["password_hash"], request.form.get("password", "")):
+            flash("Your password is incorrect. Your account was not deleted.", "error")
+        else:
+            # Chats and activity are removed with the account; issue reports stay anonymous.
+            try:
+                db.execute("DELETE FROM users WHERE id = ?", (session["user_id"],))
+                db.commit()
+            except sqlite3.IntegrityError:
+                db.rollback()
+                flash("This account still owns library notes, so it can't be deleted. Contact the admin.", "error")
+                return redirect(url_for("account_center"))
+            clear_failed_logins(user["email"])
+            session.clear()
+            flash("Your account and its saved data were deleted.", "info")
+            return redirect(url_for("home"))
+    return render_template("account_settings.html", section="delete")
 
 
 @app.route("/admin")

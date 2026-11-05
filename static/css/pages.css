@@ -1677,3 +1677,5 @@ footer {
 .admin-danger-link { color: #a34528; }
 .admin-danger-button { background: #b3261e; border-color: #b3261e; }
 @media (max-width: 640px) { .admin-row { flex-wrap: wrap; } .admin-inline-form input { min-width: 0; width: 100%; } }
+/* Account Centre actions */
+.account-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin-top: 18px; }

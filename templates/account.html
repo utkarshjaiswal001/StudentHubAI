@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Account Centre | StudentHub AI</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=4) }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css', v=14) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css', v=15) }}">
 </head>
 <body>
     <nav class="navbar">
@@ -42,6 +42,12 @@
                 <div><dt>Study year</dt><dd>{{ user.year }}</dd></div>
                 <div><dt>Member since</dt><dd>{{ user.created_at[:10] }}</dd></div>
             </dl>
+            <div class="account-actions">
+                {% if my_notes_url %}<a class="notes-primary-button" href="{{ my_notes_url }}">📚 My notes</a>{% endif %}
+                <a class="admin-text-link" href="{{ url_for('edit_profile') }}">Edit profile</a>
+                <a class="admin-text-link" href="{{ url_for('change_password') }}">Change password</a>
+                {% if not is_owner %}<a class="admin-text-link admin-danger-link" href="{{ url_for('delete_account') }}">Delete account</a>{% endif %}
+            </div>
         </section>
 
         <section class="account-stats" aria-label="Your activity">

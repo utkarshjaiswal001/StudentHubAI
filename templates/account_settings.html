@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Settings | StudentHub AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=6) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css', v=15) }}">
+</head>
+<body>
+    <nav class="navbar">
+        <a class="logo" href="{{ url_for('home') }}">StudentHub AI</a>
+        <ul class="nav-links">
+            <li><a href="{{ url_for('home') }}">Home</a></li>
+            <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+            <li><a href="{{ url_for('notes') }}">Notes</a></li>
+            <li><a href="{{ url_for('chatbot') }}">AI Career Mentor</a></li>
+            {% include "_profile_menu.html" %}
+        </ul>
+    </nav>
+
+    <header class="notes-flow-hero">
+        <span class="section-kicker">ACCOUNT SETTINGS</span>
+        <h1>{% if section == 'profile' %}Edit profile{% elif section == 'password' %}Change password{% else %}Delete account{% endif %}</h1>
+        <p>{% if section == 'profile' %}Keep your branch and year up to date so "My notes" opens the right subjects.{% elif section == 'password' %}{% if forced %}Your password was reset by the admin. Enter the temporary password, then choose a new one.{% else %}Use at least 8 characters.{% endif %}{% else %}This permanently deletes your account, saved Mentor conversations, and notes history.{% endif %}</p>
+    </header>
+
+    <main class="owner-upload-wrap">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}<p class="auth-message {{ category }}" role="status">{{ message }}</p>{% endfor %}
+        {% endwith %}
+
+        {% if section == 'profile' %}
+        <form class="owner-upload-card" action="{{ url_for('edit_profile') }}" method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <div class="owner-upload-heading">
+                <span class="section-kicker">{{ form.email }}</span>
+                <h2>Your details</h2>
+                <p>Your email can't be changed.</p>
+            </div>
+            <div class="owner-upload-grid">
+                <div class="notes-field">
+                    <label for="profile-name">Name</label>
+                    <input id="profile-name" name="name" minlength="2" maxlength="80" required value="{{ form.name }}">
+                </div>
+                <div class="notes-field">
+                    <label for="profile-college">College</label>
+                    <input id="profile-college" name="college" minlength="2" maxlength="120" required value="{{ form.college }}">
+                </div>
+                <div class="notes-field">
+                    <label for="profile-branch">Branch</label>
+                    <select id="profile-branch" name="branch" required>
+                        <option value="" disabled {% if form.branch not in student_branches %}selected{% endif %}>Select branch</option>
+                        {% for branch in student_branches %}<option value="{{ branch }}" {% if form.branch == branch %}selected{% endif %}>{{ branch }}</option>{% endfor %}
+                    </select>
+                </div>
+                <div class="notes-field">
+                    <label for="profile-year">Study year</label>
+                    <select id="profile-year" name="year" required>
+                        {% for year in note_years %}<option value="{{ year }}" {% if form.year == year %}selected{% endif %}>{{ year }}</option>{% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="owner-upload-actions">
+                <a class="notes-reset-link" href="{{ url_for('account_center') }}">Cancel</a>
+                <button class="notes-primary-button" type="submit">Save profile</button>
+            </div>
+        </form>
+        {% elif section == 'password' %}
+        <form class="owner-upload-card" action="{{ url_for('change_password') }}" method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <div class="owner-upload-grid">
+                <div class="notes-field owner-upload-wide">
+                    <label for="current-password">{% if forced %}Temporary password{% else %}Current password{% endif %}</label>
+                    <input id="current-password" name="current_password" type="password" required autocomplete="current-password">
+                </div>
+                <div class="notes-field">
+                    <label for="new-password">New password</label>
+                    <input id="new-password" name="new_password" type="password" minlength="8" maxlength="128" required autocomplete="new-password">
+                </div>
+                <div class="notes-field">
+                    <label for="confirm-password">Confirm new password</label>
+                    <input id="confirm-password" name="confirm_password" type="password" minlength="8" maxlength="128" required autocomplete="new-password">
+                </div>
+            </div>
+            <div class="owner-upload-actions">
+                {% if not forced %}<a class="notes-reset-link" href="{{ url_for('account_center') }}">Cancel</a>{% endif %}
+                <button class="notes-primary-button" type="submit">Change password</button>
+            </div>
+        </form>
+        {% else %}
+        <form class="owner-upload-card" action="{{ url_for('delete_account') }}" method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <div class="owner-upload-heading">
+                <h2>Are you sure?</h2>
+                <p>This can't be undone. Issue reports you sent stay, but without your name.</p>
+            </div>
+            <div class="owner-upload-grid">
+                <div class="notes-field owner-upload-wide">
+                    <label for="delete-password">Enter your password to confirm</label>
+                    <input id="delete-password" name="password" type="password" required autocomplete="current-password">
+                </div>
+            </div>
+            <div class="owner-upload-actions">
+                <a class="notes-reset-link" href="{{ url_for('account_center') }}">Cancel</a>
+                <button class="notes-primary-button admin-danger-button" type="submit">Delete my account</button>
+            </div>
+        </form>
+        {% endif %}
+    </main>
+
+    <footer><p>© 2026 StudentHub AI | Developed by <strong>Utkarsh Jaiswal</strong></p></footer>
+</body>
+</html>

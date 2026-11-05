@@ -4,6 +4,7 @@
         <summary>{{ current_user_name }} <span aria-hidden="true">⌄</span></summary>
         <div class="profile-menu-panel">
             <a href="{{ url_for('account_center') }}">Account Centre</a>
+            {% if my_notes_url %}<a href="{{ my_notes_url }}">My notes</a>{% endif %}
             {% if is_owner %}<a href="{{ url_for('admin_access') }}">Admin Access</a>{% endif %}
             <a href="{{ url_for('home') }}#suggestions">Report an issue</a>
             <form class="profile-logout-form" action="{{ url_for('logout') }}" method="POST">

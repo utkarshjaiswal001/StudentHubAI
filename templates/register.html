@@ -76,15 +76,7 @@
                 <select name="branch" required>
 
                     <option value="">Select Branch</option>
-
-                    <option>Computer Science</option>
-                    <option>Information Technology</option>
-                    <option>Electronics & Communication</option>
-                    <option>Electrical Engineering</option>
-                    <option>Mechanical Engineering</option>
-                    <option>Civil Engineering</option>
-                    <option>Other</option>
-
+                    {% for branch in student_branches %}<option>{{ branch }}</option>{% endfor %}
                 </select>
 
                 <select name="year" required>
