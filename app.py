@@ -2,6 +2,8 @@ import os
 import re
 import secrets
 import sqlite3
+import shutil
+import tempfile
 import uuid
 import zipfile
 from datetime import datetime, timedelta, timezone
@@ -154,6 +156,10 @@ OPENAI_MODEL = os.environ.get("OPENAI_MODEL", "gpt-6.1-sol")
 MAX_CONVERSATION_HISTORY = 80
 MAX_FAILED_LOGINS = 5
 LOGIN_LOCK_MINUTES = 15
+# Anti-spam limits (per rolling hour).
+MAX_REPORTS_PER_USER_HOUR = 5
+MAX_ANONYMOUS_REPORTS_HOUR = 20
+MAX_REGISTRATIONS_HOUR = 30
 
 
 def validate_pptx_stream(stream):
@@ -518,6 +524,25 @@ def create_mentor_conversation(user_id, exchanges):
 def quick_subject_answer(question):
     text = question.casefold()
     quick_answers = [
+        # 1st-year common subjects
+        (("engineering physics", "physics"), "Engineering Physics (1st year) usually covers quantum mechanics basics, wave optics (interference, diffraction, polarization), lasers, fibre optics, and electromagnetism. Learn the key derivations and solve numericals unit by unit."),
+        (("engineering chemistry", "chemistry"), "Engineering Chemistry covers water treatment, fuels and combustion, polymers, corrosion, electrochemistry, and spectroscopy basics. Make short notes of reactions and practise numericals on hardness and calorific value."),
+        (("engineering mathematics", "mathematics", "maths", "math ", "calculus", "matrices", "differential equation"), "Engineering Mathematics builds on calculus, matrices, differential equations, and vector calculus, plus Laplace/Fourier transforms in later semesters. Practise standard problem types from each unit and previous-year papers."),
+        (("basic electrical", "beee", "electrical engineering basics"), "Basic Electrical Engineering covers DC circuits (KCL, KVL, network theorems), AC fundamentals and phasors, three-phase systems, transformers, and machines. Practise circuit numericals and phasor diagrams."),
+        (("programming for problem solving", "c programming", " pps "), "Programming for Problem Solving (C) covers data types, operators, conditions, loops, functions, arrays, strings, pointers, structures, and file handling. Write and dry-run small programs daily."),
+        (("engineering graphics", "engineering drawing", "autocad"), "Engineering Graphics covers projections of points, lines, planes and solids, sections, isometric views, and basic CAD. Practise neat drawings and visualise views step by step."),
+        # ECE core subjects
+        (("signals and systems", "signal and system", "signals"), "Signals and Systems covers signal classification, LTI systems, convolution, Fourier series and transform, Laplace and Z-transform, and sampling. Practise convolution and transform problems with their properties."),
+        (("analog communication", "digital communication", "communication system", "modulation"), "Communication Systems covers AM/FM modulation, noise, sampling and PCM, digital modulation (ASK, FSK, PSK, QAM), and basic information theory. Draw block diagrams and practise bandwidth and SNR numericals."),
+        (("digital electronics", "digital logic", "logic gate", "flip flop", "k-map", "kmap"), "Digital Electronics covers number systems, Boolean algebra and K-maps, combinational circuits (adders, multiplexers), flip-flops, counters, and registers. Practise K-map simplification and timing diagrams."),
+        (("analog circuit", "analog electronics", "electronic devices", "diode", "transistor", "bjt", "mosfet", "op-amp", "op amp"), "Analog electronics covers diodes, BJTs and MOSFETs (biasing and small-signal models), amplifiers, feedback, oscillators, and op-amp circuits. Practise biasing and gain calculations."),
+        (("network analysis", "network theory", "circuit theory", "network synthesis"), "Network Analysis covers mesh and nodal analysis, network theorems, transient response, two-port parameters, and resonance. Practise solving circuits by more than one method to check answers."),
+        (("electromagnetic", "emft", "emt ", "transmission line", "antenna"), "Electromagnetic Field Theory covers vector calculus, electrostatics, magnetostatics, Maxwell's equations, wave propagation, transmission lines, and antenna basics. Learn Maxwell's equations in both forms."),
+        (("microprocessor", "microcontroller", "8085", "8086", "8051"), "Microprocessors and Microcontrollers cover 8085/8086 architecture, addressing modes, instruction sets, assembly programming, interrupts, and 8051 interfacing. Practise small assembly programs and timing diagrams."),
+        (("control system",), "Control Systems covers transfer functions, block diagram reduction, time response, stability (Routh-Hurwitz, root locus), and frequency response (Bode, Nyquist). Practise one example of each method."),
+        (("vlsi", "cmos", "verilog", "fpga"), "VLSI Design covers MOS transistor theory, CMOS inverter and logic, fabrication basics, timing and power, and HDL design with Verilog. Write small Verilog modules and simulate them."),
+        (("embedded system", "arduino", " iot ", "internet of things"), "Embedded Systems combine a microcontroller, sensors, and firmware. Start with C on a board like Arduino or STM32: GPIO, timers, interrupts, UART/I2C/SPI, then build a small IoT project."),
+        # Computer science subjects
         (("data structure", "dsa"), "A data structure organizes information so a program can use it efficiently. Start with arrays, linked lists, stacks, queues, trees, hash maps, and graphs; compare their time and space costs."),
         (("dbms", "database", "sql"), "A DBMS stores and retrieves structured data. For coursework and interviews, focus on keys, joins, normalization, transactions, ACID properties, and indexes."),
         (("operating system", " os ", " os?"), "An operating system manages processes, memory, files, and devices. A useful study order is processes and threads, scheduling, synchronization, memory management, and deadlocks."),
@@ -530,7 +555,7 @@ def quick_subject_answer(question):
     for keywords, answer in quick_answers:
         if any(keyword in padded for keyword in keywords):
             return answer
-    return "I can give quick pointers on core CS subjects and placement basics. For a longer explanation or a multi-step plan, continue this thread in the full AI Mentor."
+    return "I can give quick pointers on 1st-year subjects, ECE and CS core subjects, and placement basics. For a longer explanation or a multi-step plan, continue this thread in the full AI Mentor."
 
 
 def extract_note_subject(question):
@@ -724,6 +749,29 @@ def health_check():
     return {"status": "ok"}, 200
 
 
+def reports_limit_reached(user_id):
+    if user_id is not None:
+        query, params, limit = (
+            "SELECT COUNT(*) FROM suggestions WHERE user_id = ? "
+            "AND created_at >= datetime('now', '-1 hour')",
+            (user_id,), MAX_REPORTS_PER_USER_HOUR,
+        )
+    else:
+        query, params, limit = (
+            "SELECT COUNT(*) FROM suggestions WHERE user_id IS NULL "
+            "AND created_at >= datetime('now', '-1 hour')",
+            (), MAX_ANONYMOUS_REPORTS_HOUR,
+        )
+    return get_db().execute(query, params).fetchone()[0] >= limit
+
+
+def registrations_limit_reached():
+    recent = get_db().execute(
+        "SELECT COUNT(*) FROM users WHERE created_at >= datetime('now', '-1 hour')"
+    ).fetchone()[0]
+    return recent >= MAX_REGISTRATIONS_HOUR
+
+
 @app.route("/suggestion", methods=["POST"])
 def submit_suggestion():
     suggestion = request.form.get("suggestion", "").strip()
@@ -735,6 +783,8 @@ def submit_suggestion():
         flash("Keep your report under 2,000 characters.", "error")
     elif category not in allowed_categories:
         flash("Choose a valid issue category.", "error")
+    elif reports_limit_reached(session.get("user_id")):
+        flash("Too many reports in the last hour. Please try again later.", "error")
     else:
         get_db().execute(
             "INSERT INTO suggestions (user_id, category, message) VALUES (?, ?, ?)",
@@ -891,6 +941,8 @@ def register():
             flash("The passwords do not match.", "error")
         elif not 8 <= len(password) <= 128:
             flash("Use a password with 8 to 128 characters.", "error")
+        elif registrations_limit_reached():
+            flash("Too many new accounts right now. Please try again in an hour.", "error")
         else:
             db = get_db()
             try:
@@ -1600,6 +1652,89 @@ def grant_library_owner(email):
     click.echo("Notes owner access granted to the existing account.")
 
 
+BACKUP_FOLDER = Path(os.environ.get("BACKUP_FOLDER", str(Path(app.root_path) / "backups")))
+
+
+def create_backup(label="backup"):
+    """Zip a consistent copy of the database plus every uploaded file; return the zip path."""
+    BACKUP_FOLDER.mkdir(parents=True, exist_ok=True)
+    stamp = utc_now().strftime("%Y%m%d-%H%M%S")
+    zip_path = BACKUP_FOLDER / f"studenthub-{label}-{stamp}.zip"
+    with tempfile.TemporaryDirectory() as work:
+        db_copy = Path(work) / "studenthub.sqlite3"
+        source = sqlite3.connect(app.config["DATABASE"])
+        target = sqlite3.connect(db_copy)
+        try:
+            source.backup(target)  # safe even while the site is running
+        finally:
+            target.close()
+            source.close()
+        with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as archive:
+            archive.write(db_copy, "studenthub.sqlite3")
+            upload_folder = Path(app.config["UPLOAD_FOLDER"])
+            if upload_folder.is_dir():
+                for file in sorted(upload_folder.iterdir()):
+                    if file.is_file():
+                        archive.write(file, f"uploads/{file.name}")
+    return zip_path
+
+
+@app.cli.command("backup")
+def backup_command():
+    """Save the database and all uploaded notes into one zip file."""
+    zip_path = create_backup()
+    with zipfile.ZipFile(zip_path) as archive:
+        files = len([name for name in archive.namelist() if name.startswith("uploads/")])
+    click.echo(f"Backup saved: {zip_path} (database + {files} uploaded file{'s' if files != 1 else ''})")
+
+
+@app.cli.command("restore")
+@click.argument("zip_file", type=click.Path(exists=True, dir_okay=False, path_type=Path))
+@click.option("--yes", is_flag=True, help="Skip the confirmation question.")
+def restore_command(zip_file, yes):
+    """Replace the database and uploads with a backup (current data is backed up first)."""
+    try:
+        with zipfile.ZipFile(zip_file) as archive:
+            names = archive.namelist()
+            if "studenthub.sqlite3" not in names:
+                raise click.ClickException("That zip is not a StudentHub backup (no database inside).")
+            for name in names:
+                if name != "studenthub.sqlite3" and not (
+                    name.startswith("uploads/") and "/" not in name[len("uploads/"):]
+                    and name[len("uploads/"):] not in {"", ".", ".."}
+                ):
+                    raise click.ClickException(f"Unexpected file in backup: {name}")
+    except zipfile.BadZipFile:
+        raise click.ClickException("That file is not a valid zip.")
+    if not yes:
+        click.confirm(
+            "This replaces ALL current accounts, notes and uploads with the backup. Continue?",
+            abort=True,
+        )
+    safety = create_backup("before-restore")
+    click.echo(f"Current data saved first: {safety}")
+    upload_folder = Path(app.config["UPLOAD_FOLDER"])
+    with tempfile.TemporaryDirectory() as work:
+        with zipfile.ZipFile(zip_file) as archive:
+            archive.extractall(work)
+        restored = sqlite3.connect(Path(work) / "studenthub.sqlite3")
+        live = sqlite3.connect(app.config["DATABASE"])
+        try:
+            restored.backup(live)
+        finally:
+            live.close()
+            restored.close()
+        if upload_folder.is_dir():
+            shutil.rmtree(upload_folder)
+        upload_folder.mkdir(parents=True, exist_ok=True)
+        restored_uploads = Path(work) / "uploads"
+        if restored_uploads.is_dir():
+            for file in restored_uploads.iterdir():
+                shutil.copy2(file, upload_folder / file.name)
+    init_db()  # apply any newer schema changes to the restored database
+    click.echo("Restore complete. Restart the website to be safe.")
+
+
 @app.cli.group("library")
 def library_cli():
     """Manage the shared notes library from a trusted owner shell."""
@@ -1768,6 +1903,55 @@ def serve_note_preview(note_id):
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["Content-Security-Policy"] = "frame-ancestors 'self'"
     return response
+
+
+ERROR_PAGES = {
+    400: ("Something went wrong with that request", "Please go back, reload the page, and try again."),
+    403: ("You don't have access to this page", "This page is only for the StudentHub admin account."),
+    404: ("Page not found", "The page or note you're looking for doesn't exist or was removed."),
+    405: ("That action isn't allowed here", "Please go back and use the buttons on the page."),
+    500: ("Something went wrong on our side", "Please try again in a minute. If it keeps happening, report a problem."),
+}
+
+
+def render_error_page(code, message=None):
+    heading, default_message = ERROR_PAGES[code]
+    try:
+        return render_template(
+            "error.html", code=code, heading=heading, message=message or default_message
+        ), code
+    except Exception:
+        # Never fail while showing an error (e.g. if the database is down).
+        app.logger.exception("Error page could not be rendered")
+        return f"{heading}. {default_message}", code
+
+
+@app.errorhandler(400)
+def bad_request(error):
+    # abort(400, "...") passes a friendly message (e.g. an expired form session).
+    description = getattr(error, "description", "")
+    custom = description if description and not description.startswith("The browser") else None
+    return render_error_page(400, custom)
+
+
+@app.errorhandler(403)
+def forbidden(_error):
+    return render_error_page(403)
+
+
+@app.errorhandler(404)
+def not_found(_error):
+    return render_error_page(404)
+
+
+@app.errorhandler(405)
+def method_not_allowed(_error):
+    return render_error_page(405)
+
+
+@app.errorhandler(500)
+def server_error(_error):
+    return render_error_page(500)
 
 
 @app.errorhandler(413)

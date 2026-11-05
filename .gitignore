@@ -12,3 +12,4 @@ tmp/
 *.log
 output/*Resume*
 output/resume_preview.png
+backups/

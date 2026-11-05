@@ -25,6 +25,7 @@ UPLOAD_ROOT.mkdir(parents=True, exist_ok=True)
 
 os.environ["DATABASE_PATH"] = str(TEMP_ROOT / "test.sqlite3")
 os.environ["UPLOAD_FOLDER"] = str(UPLOAD_ROOT)
+os.environ["BACKUP_FOLDER"] = str(TEMP_ROOT / "backups")
 os.environ["SECRET_KEY"] = "phase1-test-secret"
 os.environ["OWNER_EMAIL"] = "owner@example.com"
 os.environ["OPENAI_API_KEY"] = ""
@@ -832,6 +833,100 @@ class PhaseOneSecurityTests(unittest.TestCase):
             db.commit()
         body = client.get("/notes/subjects", query_string=query).get_data(as_text=True)
         self.assertNotIn('class="notes-new-badge"', body)
+
+
+    # --- Core strengthening: error pages, backup/restore, Quick Help, spam limits ---
+
+    def test_friendly_error_pages(self):
+        client = app.test_client()
+        response = client.get("/this-page-does-not-exist")
+        self.assertEqual(response.status_code, 404)
+        self.assertIn("Page not found", response.get_data(as_text=True))
+        self.assertIn("Go to Home", response.get_data(as_text=True))
+        student = self.student_client()
+        response = student.get("/admin")
+        self.assertEqual(response.status_code, 403)
+        self.assertIn("only for the StudentHub admin", response.get_data(as_text=True))
+        response = client.post("/login", data={"email": "x@example.com", "password": "x"})
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("form session expired", response.get_data(as_text=True))
+        self.assertEqual(client.get("/logout").status_code, 405)
+
+    def test_server_error_page_hides_details(self):
+        def boom():
+            raise RuntimeError("secret internal detail")
+        original_view = app.view_functions["dashboard"]
+        app.view_functions["dashboard"] = boom
+        app.testing = False
+        try:
+            client = self.student_client()
+            response = client.get("/dashboard")
+        finally:
+            app.testing = True
+            app.view_functions["dashboard"] = original_view
+        self.assertEqual(response.status_code, 500)
+        body = response.get_data(as_text=True)
+        self.assertIn("Something went wrong on our side", body)
+        self.assertNotIn("secret internal detail", body)
+
+    def test_backup_and_restore(self):
+        self.seed_note(title="Keep Me")
+        runner = app.test_cli_runner()
+        result = runner.invoke(args=["backup"])
+        self.assertEqual(result.exit_code, 0, result.output)
+        backup_zip = Path(re.search(r"Backup saved: (.+\.zip)", result.output).group(1))
+        self.assertIn("1 uploaded file", result.output)
+        # Lose the data, then restore it.
+        with app.app_context():
+            db = studenthub.get_db()
+            db.execute("DELETE FROM study_notes")
+            db.commit()
+        (UPLOAD_ROOT / "phase1.pdf").unlink()
+        result = runner.invoke(args=["restore", str(backup_zip), "--yes"])
+        self.assertEqual(result.exit_code, 0, result.output)
+        self.assertEqual(self.count_rows("study_notes", "title = 'Keep Me'"), 1)
+        self.assertTrue((UPLOAD_ROOT / "phase1.pdf").is_file())
+        self.assertTrue(any("before-restore" in p.name for p in (TEMP_ROOT / "backups").iterdir()))
+
+    def test_restore_rejects_non_backup_zip(self):
+        import zipfile
+        bad = TEMP_ROOT / "bad.zip"
+        with zipfile.ZipFile(bad, "w") as archive:
+            archive.writestr("../evil.txt", "x")
+        result = app.test_cli_runner().invoke(args=["restore", str(bad), "--yes"])
+        self.assertNotEqual(result.exit_code, 0)
+        self.assertEqual(self.count_rows("users"), 1)
+
+    def test_quick_help_knows_ece_and_first_year_subjects(self):
+        cases = {
+            "explain digital communication": "Communication Systems",
+            "what is a flip flop": "Digital Electronics",
+            "help with engineering physics": "Engineering Physics",
+            "8085 basics": "Microprocessors",
+            "network analysis tips": "Network Analysis",
+            "how to make apps": "I can give quick pointers",
+        }
+        for question, expected in cases.items():
+            with self.subTest(question=question):
+                self.assertIn(expected, studenthub.quick_subject_answer(question))
+
+    def test_issue_report_limit_per_student(self):
+        client = self.student_client()
+        token = self.csrf_token(client, "/")
+        for index in range(studenthub.MAX_REPORTS_PER_USER_HOUR + 2):
+            client.post("/suggestion", data={"csrf_token": token, "suggestion": f"report {index}", "category": "other"})
+        self.assertEqual(self.count_rows("suggestions"), studenthub.MAX_REPORTS_PER_USER_HOUR)
+
+    def test_registration_limit_per_hour(self):
+        original = studenthub.MAX_REGISTRATIONS_HOUR
+        studenthub.MAX_REGISTRATIONS_HOUR = 2  # owner (1) + one student
+        try:
+            self.assertEqual(self.register(app.test_client(), email="one@example.com").status_code, 302)
+            response = self.register(app.test_client(), email="two@example.com")
+            self.assertEqual(response.status_code, 200)
+            self.assertIn("Too many new accounts", response.get_data(as_text=True))
+        finally:
+            studenthub.MAX_REGISTRATIONS_HOUR = original
 
 
 if __name__ == "__main__":
