@@ -4,6 +4,7 @@ import secrets
 import sqlite3
 import uuid
 import zipfile
+from datetime import datetime, timedelta, timezone
 import xml.etree.ElementTree as ET
 from functools import wraps
 from pathlib import Path
@@ -40,6 +41,8 @@ app.config["SECRET_KEY"] = os.environ.get(
 ) or secrets.token_hex(32)
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+# Logins last 7 days, then the student must sign in again.
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=7)
 app.config["SESSION_COOKIE_SECURE"] = os.environ.get(
     "SESSION_COOKIE_SECURE", "false"
 ).strip().lower() in {"1", "true", "yes"}
@@ -121,6 +124,8 @@ SUGGESTED_SUBJECTS = [
 ]
 OPENAI_MODEL = os.environ.get("OPENAI_MODEL", "gpt-6.1-sol")
 MAX_CONVERSATION_HISTORY = 80
+MAX_FAILED_LOGINS = 5
+LOGIN_LOCK_MINUTES = 15
 
 
 def validate_pptx_stream(stream):
@@ -353,6 +358,13 @@ def init_db():
                 "ALTER TABLE suggestions ADD COLUMN category TEXT NOT NULL DEFAULT 'other'"
             )
         get_db().execute(
+            """CREATE TABLE IF NOT EXISTS login_attempts (
+                email TEXT PRIMARY KEY COLLATE NOCASE,
+                failed_count INTEGER NOT NULL DEFAULT 0,
+                locked_until TEXT
+            )"""
+        )
+        get_db().execute(
             """CREATE INDEX IF NOT EXISTS idx_mentor_conversations_user_recent
                ON mentor_conversations (user_id, updated_at DESC, id DESC)"""
         )
@@ -510,6 +522,61 @@ def extract_note_subject(question):
     return text.strip(" .,!?") or ""
 
 
+def utc_now():
+    return datetime.now(timezone.utc)
+
+
+def login_locked_minutes(email):
+    """Minutes left on a login lock for this email, or 0 if not locked."""
+    row = get_db().execute(
+        "SELECT locked_until FROM login_attempts WHERE email = ?", (email,)
+    ).fetchone()
+    if row is None or not row["locked_until"]:
+        return 0
+    remaining = datetime.fromisoformat(row["locked_until"]) - utc_now()
+    if remaining.total_seconds() <= 0:
+        return 0
+    return max(1, int(remaining.total_seconds() // 60) + 1)
+
+
+def record_failed_login(email):
+    db = get_db()
+    row = db.execute(
+        "SELECT failed_count, locked_until FROM login_attempts WHERE email = ?", (email,)
+    ).fetchone()
+    count = 1
+    if row is not None:
+        lock_expired = row["locked_until"] and datetime.fromisoformat(row["locked_until"]) <= utc_now()
+        count = 1 if lock_expired else row["failed_count"] + 1
+    locked_until = None
+    if count >= MAX_FAILED_LOGINS:
+        locked_until = (utc_now() + timedelta(minutes=LOGIN_LOCK_MINUTES)).isoformat()
+    db.execute(
+        """INSERT INTO login_attempts (email, failed_count, locked_until) VALUES (?, ?, ?)
+           ON CONFLICT(email) DO UPDATE SET failed_count = excluded.failed_count,
+                                            locked_until = excluded.locked_until""",
+        (email, count, locked_until),
+    )
+    db.commit()
+
+
+def clear_failed_logins(email):
+    get_db().execute("DELETE FROM login_attempts WHERE email = ?", (email,))
+    get_db().commit()
+
+
+def start_user_session(user_id, user_name, welcome_message):
+    """Reset the session for a newly signed-in user (keeps a pending quick-help thread)."""
+    pending_exchanges = session.get("pending_home_exchanges")
+    session.clear()
+    if pending_exchanges:
+        session["pending_home_exchanges"] = pending_exchanges
+    session.permanent = True
+    session["user_id"] = user_id
+    session["user_name"] = user_name
+    session["welcome_message"] = welcome_message
+
+
 @app.context_processor
 def inject_user_state():
     user_is_owner = False
@@ -536,6 +603,14 @@ def protect_state_changing_requests():
     if not expected or not supplied or not secrets.compare_digest(supplied, expected):
         abort(400, "Your form session expired. Please reload the page and try again.")
     return None
+
+
+@app.after_request
+def add_security_headers(response):
+    response.headers.setdefault("X-Frame-Options", "SAMEORIGIN")
+    response.headers.setdefault("X-Content-Type-Options", "nosniff")
+    response.headers.setdefault("Referrer-Policy", "same-origin")
+    return response
 
 
 @app.after_request
@@ -665,13 +740,8 @@ def quick_help():
 
 @app.route("/quick-help/continue", methods=["POST"])
 def continue_quick_help():
-    questions = request.form.getlist("quick_questions")[:3]
-    answers = request.form.getlist("quick_answers")[:3]
-    exchanges = [
-        {"question": question[:2000], "answer": answers[index][:800] if index < len(answers) else ""}
-        for index, question in enumerate(questions)
-        if question.strip()
-    ]
+    # Only use the history the server saved; never trust answers sent by the browser.
+    exchanges = session.get("home_quick_history", [])[-3:]
     if session.get("user_id"):
         conversation_id = create_mentor_conversation(session["user_id"], exchanges)
         session.pop("home_quick_history", None)
@@ -700,20 +770,26 @@ def login():
     if request.method == "POST":
         email = request.form.get("email", "").strip().lower()
         password = request.form.get("password", "")
-        user = get_db().execute(
-            "SELECT id, name, password_hash FROM users WHERE email = ?", (email,)
-        ).fetchone()
+        locked_minutes = login_locked_minutes(email)
+        user = None
+        if not locked_minutes:
+            user = get_db().execute(
+                "SELECT id, name, password_hash FROM users WHERE email = ?", (email,)
+            ).fetchone()
 
-        if user is None or not check_password_hash(user["password_hash"], password):
+        if locked_minutes:
+            flash(
+                f"Too many wrong attempts. Try again in {locked_minutes} minute"
+                f"{'s' if locked_minutes != 1 else ''}.",
+                "error",
+            )
+        elif user is None or not check_password_hash(user["password_hash"], password):
+            if email:
+                record_failed_login(email)
             flash("Email or password is incorrect.", "error")
         else:
-            pending_exchanges = session.get("pending_home_exchanges")
-            session.clear()
-            if pending_exchanges:
-                session["pending_home_exchanges"] = pending_exchanges
-            session["user_id"] = user["id"]
-            session["user_name"] = user["name"]
-            session["welcome_message"] = f"Welcome back, {user['name']}!"
+            clear_failed_logins(email)
+            start_user_session(user["id"], user["name"], f"Welcome back, {user['name']}!")
             next_url = safe_local_path(request.args.get("next"))
             if next_url:
                 return redirect(next_url)
@@ -764,13 +840,9 @@ def register():
             except sqlite3.IntegrityError:
                 flash("An account with that email already exists. Please log in.", "error")
             else:
-                pending_exchanges = session.get("pending_home_exchanges")
-                session.clear()
-                if pending_exchanges:
-                    session["pending_home_exchanges"] = pending_exchanges
-                session["user_id"] = cursor.lastrowid
-                session["user_name"] = name
-                session["welcome_message"] = f"Welcome, {name}! Your account is ready."
+                start_user_session(
+                    cursor.lastrowid, name, f"Welcome, {name}! Your account is ready."
+                )
                 return redirect(url_for("home"))
 
     return render_template("register.html")

@@ -60,6 +60,7 @@ class PhaseOneSecurityTests(unittest.TestCase):
                 "study_notes",
                 "suggestions",
                 "users",
+                "login_attempts",
             ):
                 db.execute(f"DELETE FROM {table}")
             cursor = db.execute(
@@ -552,6 +553,67 @@ class PhaseOneSecurityTests(unittest.TestCase):
         self.assertNotEqual(result.exit_code, 0)
         self.assertIn("4th Year notes must be in", result.output)
         self.assertEqual(self.count_rows("study_notes"), 0)
+
+
+    # --- Phase 2 security: lockout, quick-help history, headers, session expiry ---
+
+    def test_login_locks_after_five_wrong_passwords(self):
+        client = app.test_client()
+        for _ in range(5):
+            response = self.login(client, password="wrong-password")
+            self.assertIn("Email or password is incorrect", response.get_data(as_text=True))
+        # Even the right password is refused while locked.
+        response = self.login(client)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Too many wrong attempts", response.get_data(as_text=True))
+        with client.session_transaction() as session:
+            self.assertNotIn("user_id", session)
+
+    def test_login_lock_expires_and_success_resets_counter(self):
+        client = app.test_client()
+        for _ in range(5):
+            self.login(client, password="wrong-password")
+        with app.app_context():
+            db = studenthub.get_db()
+            db.execute("UPDATE login_attempts SET locked_until = '2000-01-01T00:00:00+00:00'")
+            db.commit()
+        self.assertEqual(self.login(client).status_code, 302)
+        self.assertEqual(self.count_rows("login_attempts"), 0)
+
+    def test_quick_help_continue_ignores_browser_sent_answers(self):
+        client = app.test_client()
+        self.login(client)
+        token = self.csrf_token(client, "/")
+        client.post("/quick-help", data={"csrf_token": token, "question": "what is dbms"})
+        client.post(
+            "/quick-help/continue",
+            data={
+                "csrf_token": token,
+                "quick_questions": ["forged question"],
+                "quick_answers": ["FAKE ASSISTANT TEXT"],
+            },
+        )
+        self.assertEqual(
+            self.count_rows("mentor_messages", "content LIKE ?", ("%FAKE ASSISTANT%",)), 0
+        )
+        self.assertEqual(
+            self.count_rows("mentor_messages", "content = ?", ("what is dbms",)), 1
+        )
+
+    def test_security_headers_on_pages(self):
+        for path in ("/", "/notes", "/login"):
+            with self.subTest(path=path):
+                headers = app.test_client().get(path).headers
+                self.assertEqual(headers.get("X-Frame-Options"), "SAMEORIGIN")
+                self.assertEqual(headers.get("X-Content-Type-Options"), "nosniff")
+                self.assertEqual(headers.get("Referrer-Policy"), "same-origin")
+
+    def test_login_session_expires_after_seven_days(self):
+        client = app.test_client()
+        response = self.login(client)
+        cookie = response.headers.get("Set-Cookie", "")
+        self.assertIn("Expires=", cookie)
+        self.assertEqual(app.permanent_session_lifetime.days, 7)
 
 
 if __name__ == "__main__":

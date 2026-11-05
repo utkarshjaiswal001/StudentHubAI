@@ -637,10 +637,6 @@
                     {% if quick_history %}
                         <form class="quick-continue-form" action="{{ url_for('continue_quick_help') }}" method="POST">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-                            {% for exchange in quick_history %}
-                                <input type="hidden" name="quick_questions" value="{{ exchange.question }}">
-                                <input type="hidden" name="quick_answers" value="{{ exchange.answer }}">
-                            {% endfor %}
                             <button type="submit">Continue this conversation in the full AI Mentor →</button>
                         </form>
                     {% endif %}
