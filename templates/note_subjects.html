@@ -24,14 +24,14 @@
     {% endwith %}
 
     <header class="notes-flow-hero">
-        <span class="section-kicker">{{ year }} · {{ branch }}</span>
+        <span class="section-kicker">{{ year }} · {{ branch }}{% if semester %} · {{ semester }}{% endif %}</span>
         <h1>Choose a subject</h1>
         <p>Open a subject card to see its study files. Preview each file on StudentHub AI.</p>
     </header>
 
     <main class="notes-flow-shell">
         <div class="notes-flow-heading">
-            <div><a class="notes-back-link" href="{{ url_for('note_branches', year=year) }}">← {{ year }} branches</a><span class="notes-step">STEP 3</span><h2>Subjects</h2></div>
+            <div>{% if semester %}<a class="notes-back-link" href="{{ url_for('note_semesters', branch=branch, year=year) }}">← {{ branch }} semesters</a><span class="notes-step">STEP 4</span><h2>{{ semester }} subjects</h2>{% else %}<a class="notes-back-link" href="{{ url_for('note_branches', year=year) }}">← {{ year }} branches</a><span class="notes-step">STEP 3</span><h2>Subjects</h2>{% endif %}</div>
         </div>
 
         {% if subjects %}
@@ -48,7 +48,7 @@
                                 <article class="notes-pdf-row">
                                     <span class="notes-file-icon" aria-hidden="true">{{ note.original_filename.rsplit('.', 1)[-1]|upper }}</span>
                                     <span class="notes-choice-copy"><strong>{{ note.title }}</strong><small>{{ note.semester }} · {{ note.original_filename }}</small></span>
-                                    <a class="notes-preview-action" href="{{ url_for('preview_note', note_id=note.id, return_to=url_for('note_subjects', branch=branch, year=year)) }}">Preview</a>
+                                    <a class="notes-preview-action" href="{{ url_for('preview_note', note_id=note.id, return_to=notes_browse_url(branch, year, semester)) }}">Preview</a>
                                     <a class="notes-download-link" href="{{ url_for('download_note', note_id=note.id) }}">Download</a>
                                 </article>
                             {% endfor %}
@@ -60,7 +60,7 @@
             <div class="notes-empty-state" role="status" aria-live="polite">
                 <span aria-hidden="true">📂</span>
                 <h3>No notes found</h3>
-                <p>There are no notes available for {{ branch }} in {{ year }} yet. Please check back later.</p>
+                <p>There are no notes available for {{ branch }}, {{ year }}{% if semester %}, {{ semester }}{% endif %} yet. Please check back later.</p>
             </div>
         {% endif %}
     </main>

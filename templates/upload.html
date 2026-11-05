@@ -62,6 +62,7 @@
                 </div>
                 <div class="notes-field">
                     <label for="note-semester">Semester</label>
+                    <small>1st Year: Sem 1–2 · 2nd: 3–4 · 3rd: 5–6 · 4th: 7–8. Common (1st Year) is for 1st Year only.</small>
                     <select id="note-semester" name="semester" required>
                         <option value="" disabled selected>Select semester</option>
                         {% for semester in note_semesters %}<option value="{{ semester }}">{{ semester }}</option>{% endfor %}

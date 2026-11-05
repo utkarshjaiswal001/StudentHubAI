@@ -460,5 +460,99 @@ class PhaseOneSecurityTests(unittest.TestCase):
         self.assertEqual(len(list(UPLOAD_ROOT.iterdir())), 1)
 
 
+    # --- Notes flow: year -> branch -> semester -> subject, and upload consistency ---
+
+    def upload_note(self, client, **fields):
+        data = {
+            "csrf_token": self.csrf_token(client, "/notes/upload"),
+            "title": "Flow Note",
+            "subject": "Maths",
+            "branch": "Computer Science Engineering",
+            "year": "2nd Year",
+            "semester": "Semester 3",
+            "file": (io.BytesIO(b"%PDF-1.4\n% test\n"), "flow.pdf"),
+        }
+        data.update(fields)
+        return client.post("/notes/upload", data=data, content_type="multipart/form-data")
+
+    def test_first_year_shows_common_first_plus_branches(self):
+        body = app.test_client().get("/notes/branches?year=1st+Year").get_data(as_text=True)
+        self.assertIn("Common (1st Year)", body)
+        self.assertIn("Electronics &amp; Communication", body)
+        self.assertLess(body.index("Common (1st Year)</strong>"), body.index("Computer Science Engineering</strong>"))
+        # 1st Year skips the semester step and links straight to subjects.
+        self.assertIn("/notes/subjects?", body)
+        self.assertNotIn("/notes/semesters?", body)
+
+    def test_first_year_subjects_show_both_semesters(self):
+        common = {"branch": "Common (1st Year)", "year": "1st Year"}
+        self.seed_note(title="Physics Sem One", semester="Semester 1", stored_filename="p1.pdf", **common)
+        self.seed_note(title="Maths Sem Two", semester="Semester 2", stored_filename="m2.pdf", **common)
+        client = app.test_client()
+        body = client.get("/notes/subjects", query_string=common).get_data(as_text=True)
+        self.assertIn("Physics Sem One", body)
+        self.assertIn("Maths Sem Two", body)
+        self.assertIn("1st Year branches", body)
+        response = client.get("/notes/semesters", query_string=common)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/notes/subjects?", response.headers["Location"])
+
+    def test_later_years_hide_common(self):
+        body = app.test_client().get("/notes/branches?year=2nd+Year").get_data(as_text=True)
+        self.assertNotIn("Common (1st Year)</strong>", body)
+        response = app.test_client().get("/notes/semesters?branch=Common+(1st+Year)&year=2nd+Year")
+        self.assertEqual(response.status_code, 302)
+
+    def test_semester_page_shows_only_that_years_semesters(self):
+        body = app.test_client().get(
+            "/notes/semesters", query_string={"branch": "Electronics & Communication", "year": "3rd Year"}
+        ).get_data(as_text=True)
+        self.assertIn("Semester 5", body)
+        self.assertIn("Semester 6", body)
+        self.assertNotIn("Semester 4<", body)
+        self.assertNotIn("Semester 7<", body)
+
+    def test_subjects_filtered_by_semester(self):
+        self.seed_note(title="Sem Five Note", semester="Semester 5", stored_filename="a.pdf")
+        self.seed_note(title="Sem Six Note", semester="Semester 6", stored_filename="b.pdf")
+        client = app.test_client()
+        query = {"branch": "Computer Science Engineering", "year": "3rd Year"}
+        body = client.get("/notes/subjects", query_string={**query, "semester": "Semester 5"}).get_data(as_text=True)
+        self.assertIn("Sem Five Note", body)
+        self.assertNotIn("Sem Six Note", body)
+        # Old links without a semester go to the semester chooser.
+        response = client.get("/notes/subjects", query_string=query)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/notes/semesters?", response.headers["Location"])
+
+    def test_upload_rejects_inconsistent_assignment(self):
+        owner = app.test_client()
+        self.login(owner)
+        bad = [
+            {"year": "2nd Year", "semester": "Semester 5"},
+            {"branch": "Common (1st Year)", "year": "2nd Year", "semester": "Semester 3"},
+        ]
+        for fields in bad:
+            with self.subTest(**fields):
+                self.assertEqual(self.upload_note(owner, **fields).status_code, 200)
+        self.assertEqual(self.count_rows("study_notes"), 0)
+        self.assertEqual(list(UPLOAD_ROOT.iterdir()), [])
+        ok = self.upload_note(owner, branch="Common (1st Year)", year="1st Year", semester="Semester 2")
+        self.assertEqual(ok.status_code, 302)
+        self.assertEqual(self.count_rows("study_notes"), 1)
+
+    def test_cli_add_rejects_inconsistent_assignment(self):
+        pdf = TEMP_ROOT / "cli-note.pdf"
+        pdf.write_bytes(b"%PDF-1.4\n% test\n")
+        result = app.test_cli_runner().invoke(args=[
+            "library", "add", "--owner-email", self.OWNER_EMAIL, "--title", "CLI",
+            "--subject", "Maths", "--branch", "Civil Engineering", "--year", "4th Year",
+            "--semester", "Semester 2", "--file", str(pdf),
+        ])
+        self.assertNotEqual(result.exit_code, 0)
+        self.assertIn("4th Year notes must be in", result.output)
+        self.assertEqual(self.count_rows("study_notes"), 0)
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -26,7 +26,7 @@
     <header class="notes-flow-hero">
         <span class="section-kicker">{{ year }} · COURSE LIBRARY</span>
         <h1>Choose your branch</h1>
-        <p>Pick the branch you want to explore. The subject list is one step away.</p>
+        <p>{% if year == '1st Year' %}Start with Common (1st Year) for subjects shared by every branch, or pick your branch for branch-specific notes.{% else %}Pick the branch you want to explore. Next, choose a semester.{% endif %}</p>
     </header>
 
     <main class="notes-flow-shell">
@@ -36,14 +36,14 @@
         <div class="notes-branch-grid">
             {% for branch in branches %}
                 {% set stats = branch_stats.get(branch, {}) %}
-                <a class="notes-choice-card notes-branch-card" href="{{ url_for('note_subjects', branch=branch, year=year) }}">
+                <a class="notes-choice-card notes-branch-card" href="{{ notes_browse_url(branch, year) }}">
                     <span class="notes-choice-icon" aria-hidden="true">{% if 'Computer' in branch %}💻{% elif 'Information' in branch %}🖥️{% elif 'Electronics' in branch %}🔌{% elif 'Electrical' in branch %}⚡{% elif 'Mechanical' in branch %}⚙️{% elif 'Civil' in branch %}🏗️{% else %}📚{% endif %}</span>
-                    <span class="notes-choice-copy"><strong>{{ branch }}</strong><small>{% if stats %}{{ stats.subject_count }} subjects · {{ stats.pdf_count }} files{% else %}No notes found yet{% endif %}</small></span>
+                    <span class="notes-choice-copy"><strong>{{ branch }}</strong><small>{% if branch == 'Common (1st Year)' %}Shared subjects for all branches · {% endif %}{% if stats %}{{ stats.subject_count }} subjects · {{ stats.pdf_count }} files{% else %}No notes found yet{% endif %}</small></span>
                     <span class="notes-choice-arrow" aria-hidden="true">→</span>
                 </a>
             {% endfor %}
         </div>
-        <aside class="notes-flow-tip"><span aria-hidden="true">✦</span><p>Choose the branch you want to explore; available course notes appear on the next page.</p></aside>
+        <aside class="notes-flow-tip"><span aria-hidden="true">✦</span><p>{% if year == '1st Year' %}Choose Common or your branch; its subjects appear on the next page.{% else %}Choose a branch, then a semester; available course notes appear after that.{% endif %}</p></aside>
     </main>
 
     <footer><p>© 2026 StudentHub AI | Developed by <strong>Utkarsh Jaiswal</strong></p></footer>

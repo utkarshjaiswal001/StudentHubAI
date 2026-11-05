@@ -65,6 +65,39 @@ NOTE_BRANCHES = [
 ]
 NOTE_YEARS = ["1st Year", "2nd Year", "3rd Year", "4th Year"]
 NOTE_SEMESTERS = [f"Semester {number}" for number in range(1, 9)]
+COMMON_FIRST_YEAR_BRANCH = "Common (1st Year)"
+# AKTU B.Tech: each year has two semesters (1st Year -> Semesters 1-2, and so on).
+YEAR_SEMESTERS = {
+    year: NOTE_SEMESTERS[index * 2:index * 2 + 2]
+    for index, year in enumerate(NOTE_YEARS)
+}
+# 1st-year subjects are common, so students skip the semester step and see
+# both semesters' subjects together.
+YEARS_WITHOUT_SEMESTER_STEP = {"1st Year"}
+
+
+def notes_browse_url(branch, year, semester=""):
+    """URL for the next browsing step after choosing a branch (and semester)."""
+    if year in YEARS_WITHOUT_SEMESTER_STEP:
+        return url_for("note_subjects", branch=branch, year=year)
+    if semester:
+        return url_for("note_subjects", branch=branch, year=year, semester=semester)
+    return url_for("note_semesters", branch=branch, year=year)
+
+
+app.jinja_env.globals["notes_browse_url"] = notes_browse_url
+
+
+def note_assignment_error(branch, year, semester):
+    """Return an error message if branch/year/semester don't fit together, else None."""
+    if branch not in NOTE_BRANCHES or year not in NOTE_YEARS or semester not in NOTE_SEMESTERS:
+        return "Choose a valid branch, year, and semester."
+    if branch == COMMON_FIRST_YEAR_BRANCH and year != "1st Year":
+        return "Common (1st Year) notes must be assigned to 1st Year."
+    if semester not in YEAR_SEMESTERS[year]:
+        allowed = " or ".join(YEAR_SEMESTERS[year])
+        return f"{year} notes must be in {allowed}."
+    return None
 # Keep existing profile choices valid while also accepting the notes-library branch names.
 REGISTRATION_BRANCHES = [
     "Computer Science",
@@ -873,9 +906,7 @@ def notes():
         or filters["semester"]
     )
     if filters["branch"] and filters["year"] and not search_requested:
-        return redirect(
-            url_for("note_subjects", branch=filters["branch"], year=filters["year"])
-        )
+        return redirect(notes_browse_url(filters["branch"], filters["year"]))
 
     if not search_requested and not filters["year"] and not filters["branch"]:
         suggested_notes = db.execute(
@@ -982,9 +1013,11 @@ def note_branches():
         flash("Choose a valid year to browse branches.", "error")
         return redirect(url_for("notes"))
 
+    # 1st Year lists Common first, then branch-specific first-year notes.
+    # Later years never show the Common first-year option.
     branches = [
         branch for branch in NOTE_BRANCHES
-        if year == "1st Year" or branch != "Common (1st Year)"
+        if year == "1st Year" or branch != COMMON_FIRST_YEAR_BRANCH
     ]
     rows = get_db().execute(
         """SELECT branch, COUNT(*) AS pdf_count,
@@ -1007,20 +1040,68 @@ def note_branches():
     )
 
 
+def valid_branch_for_year(branch, year):
+    return (
+        branch in NOTE_BRANCHES
+        and year in NOTE_YEARS
+        and (branch != COMMON_FIRST_YEAR_BRANCH or year == "1st Year")
+    )
+
+
+@app.route("/notes/semesters")
+def note_semesters():
+    branch = request.args.get("branch", "").strip()
+    year = request.args.get("year", "").strip()
+    if not valid_branch_for_year(branch, year):
+        flash("Choose a valid year and branch to browse semesters.", "error")
+        return redirect(url_for("notes"))
+    if year in YEARS_WITHOUT_SEMESTER_STEP:
+        return redirect(notes_browse_url(branch, year))
+
+    rows = get_db().execute(
+        """SELECT semester, COUNT(*) AS pdf_count,
+                  COUNT(DISTINCT lower(subject)) AS subject_count
+           FROM study_notes WHERE branch = ? AND year = ? GROUP BY semester""",
+        (branch, year),
+    ).fetchall()
+    semester_stats = {
+        row["semester"]: {
+            "pdf_count": row["pdf_count"],
+            "subject_count": row["subject_count"],
+        }
+        for row in rows
+    }
+    return render_template(
+        "note_semesters.html",
+        branch=branch,
+        year=year,
+        semesters=YEAR_SEMESTERS[year],
+        semester_stats=semester_stats,
+    )
+
+
 @app.route("/notes/subjects")
 def note_subjects():
     branch = request.args.get("branch", "").strip()
     year = request.args.get("year", "").strip()
-    if branch not in NOTE_BRANCHES or year not in NOTE_YEARS:
+    semester = request.args.get("semester", "").strip()
+    if not valid_branch_for_year(branch, year):
         flash("Choose a valid year and branch to browse subjects.", "error")
         return redirect(url_for("notes"))
+    if year in YEARS_WITHOUT_SEMESTER_STEP:
+        semester = ""
+    elif semester not in YEAR_SEMESTERS[year]:
+        # Links without a semester go to the semester chooser.
+        return redirect(url_for("note_semesters", branch=branch, year=year))
 
+    query = """SELECT id, title, subject, semester, original_filename, created_at
+               FROM study_notes WHERE branch = ? AND year = ?"""
+    params = [branch, year]
+    if semester:
+        query += " AND semester = ?"
+        params.append(semester)
     rows = get_db().execute(
-        """SELECT id, title, subject, semester, original_filename, created_at
-           FROM study_notes
-           WHERE branch = ? AND year = ?
-           ORDER BY lower(subject), semester, title""",
-        (branch, year),
+        query + " ORDER BY lower(subject), semester, title", params
     ).fetchall()
     subjects_by_name = {}
     for row in rows:
@@ -1033,6 +1114,7 @@ def note_subjects():
         "note_subjects.html",
         branch=branch,
         year=year,
+        semester=semester,
         subjects=subjects,
     )
 
@@ -1050,8 +1132,8 @@ def upload_note():
         uploaded_file = request.files.get("file")
         if not title or len(title) > 120 or not subject or len(subject) > 100:
             flash("Enter a title (up to 120 characters) and subject (up to 100 characters).", "error")
-        elif branch not in NOTE_BRANCHES or year not in NOTE_YEARS or semester not in NOTE_SEMESTERS:
-            flash("Choose a valid branch, year, and semester.", "error")
+        elif note_assignment_error(branch, year, semester):
+            flash(note_assignment_error(branch, year, semester), "error")
         elif uploaded_file is None or not uploaded_file.filename:
             flash("Choose a PDF or PowerPoint (.pptx) file to upload.", "error")
         else:
@@ -1103,6 +1185,7 @@ def upload_note():
         note_branches=NOTE_BRANCHES,
         note_years=NOTE_YEARS,
         note_semesters=NOTE_SEMESTERS,
+        year_semesters=YEAR_SEMESTERS,
     )
 
 
@@ -1145,6 +1228,9 @@ def add_library_note(owner_email, title, subject, branch, year, semester, notes_
     subject = subject.strip()
     if not title or len(title) > 120 or not subject or len(subject) > 100:
         raise click.ClickException("Title (1-120 characters) and subject (1-100 characters) are required.")
+    assignment_error = note_assignment_error(branch, year, semester)
+    if assignment_error:
+        raise click.ClickException(assignment_error)
     extension = notes_file.suffix.lower()
     if extension not in {".pdf", ".pptx"} or notes_file.stat().st_size > MAX_NOTE_FILE_SIZE:
         raise click.ClickException("Choose a PDF or PPTX file smaller than 20 MB.")
@@ -1250,8 +1336,10 @@ def preview_note(note_id):
     return_to = safe_local_path(request.args.get("return_to"))
     if return_to:
         back_url = return_to
-    elif note["branch"] in NOTE_BRANCHES and note["year"] in NOTE_YEARS:
-        back_url = url_for("note_subjects", branch=note["branch"], year=note["year"])
+    elif note_assignment_error(note["branch"], note["year"], note["semester"]) is None:
+        back_url = notes_browse_url(note["branch"], note["year"], note["semester"])
+    elif valid_branch_for_year(note["branch"], note["year"]):
+        back_url = notes_browse_url(note["branch"], note["year"])
     else:
         back_url = url_for("notes")
     is_pptx = Path(note["original_filename"]).suffix.lower() == ".pptx"
