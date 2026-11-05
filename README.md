@@ -43,7 +43,20 @@ Mentor conversations are stored locally even when AI is not configured. The Open
 ## Main features
 
 - Account registration, sign-in, sign-out, and protected student pages.
-- Public course notes by year, branch, semester, and subject, with owner-managed PDFs, previews, and downloads.
+- Student account settings: edit profile, change password, delete account, and a **My notes** shortcut to the student's own branch and year.
+- Public course notes: Year → Branch → Semester → Subject (1st Year skips the semester step because subjects are common). Subject search and "New" badges for recent uploads.
+- Owner Admin page: upload, edit, and delete notes; read and close student issue reports; reset a student's password (temporary password, must be changed at next sign-in).
+- Uploads are checked for a matching year/semester and reuse existing subject spellings.
 - Notes recommendations and recent activity in the Account Centre.
 - Quick Help and searchable saved Mentor conversation history, with up to 80 conversations shown per student.
 - Student issue reports and clearly marked Coming Soon roadmap features.
+
+## Security features
+
+- Passwords stored as salted hashes (Werkzeug); never stored in plain text.
+- CSRF token on every form; logout is POST-only; safe same-site redirects only.
+- Login locks for 15 minutes after 5 wrong passwords for the same email.
+- Logins expire after 7 days; security headers (X-Frame-Options, nosniff, Referrer-Policy) on every page.
+- Owner-only upload/edit/delete, checked against the database on every request.
+- Uploaded files: PDF/PPTX only, 20 MB limit, file-content checks, random stored names outside the public folder.
+- Automated tests: `.\.venv\Scripts\python.exe -m unittest discover -s tests` (47 tests).

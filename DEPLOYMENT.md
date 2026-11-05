@@ -1,5 +1,17 @@
 # Free Flask deployment for StudentHub AI
 
+## Quick checklist (free, no AI costs)
+
+1. Run the tests locally: `.\.venv\Scripts\python.exe -m unittest discover -s tests` — all must pass.
+2. Push to GitHub. Easiest: open **GitHub Desktop** → select this repository → **Push origin**. (Or in PowerShell in this folder: `git push origin main`.)
+3. Follow "Set it up" below on PythonAnywhere.
+4. **Leave `OPENAI_API_KEY` unset** on the live site. The Mentor still saves questions, and there are no API bills.
+5. Register your owner account on the live site, then run `grant-library-owner` in the PythonAnywhere Bash console.
+6. Test on phone and laptop: register, login, wrong password ×5 (should lock), browse notes, preview, download, upload/edit/delete as owner, change password, logout.
+7. Put a reminder in your calendar to renew the free web app before it expires (about monthly).
+
+Database changes (new columns/tables) are applied automatically when the app starts, so updates only need `git pull` + **Reload**.
+
 ## Recommended for a small demo: PythonAnywhere Beginner
 
 The app can run on PythonAnywhere's free Flask-capable web app. Its home filesystem persists, so the SQLite database and uploaded PDFs can remain under your account's home directory. The free tier is deliberately limited: it currently provides one web app, one worker, 512 MiB of storage, restricted outbound internet access, and a one-month expiry for the web app. Plan to renew/keep the free app active and keep backups. [Free account limits](https://help.pythonanywhere.com/pages/FreeAccountsFeatures/) · [Pricing](https://www.pythonanywhere.com/pricing/)
