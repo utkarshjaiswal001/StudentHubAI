@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Access | StudentHub AI</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=6) }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css', v=13) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css', v=14) }}">
 </head>
 <body>
     <nav class="navbar">
@@ -26,6 +26,9 @@
     </header>
 
     <main class="admin-access-page">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}<p class="auth-message {{ category }}" role="status">{{ message }}</p>{% endfor %}
+        {% endwith %}
         <section class="admin-perks-grid" aria-label="Admin tools and status">
             <article class="admin-perk-card">
                 <span class="admin-perk-icon" aria-hidden="true">📚</span>
@@ -49,6 +52,88 @@
                 <p>{{ stats.conversations }} saved conversation{% if stats.conversations != 1 %}s{% endif %} across {{ stats.students }} student account{% if stats.students != 1 %}s{% endif %}. Browse the latest 80 and open a thread to review its latest 200 messages.</p>
                 <a class="admin-text-link" href="#admin-conversations">Review conversations ↓</a>
             </article>
+        </section>
+
+        <section class="admin-manage-card" id="admin-notes" aria-labelledby="admin-notes-title">
+            <header class="admin-manage-heading">
+                <div>
+                    <span class="section-kicker">NOTES LIBRARY</span>
+                    <h2 id="admin-notes-title">Manage notes</h2>
+                </div>
+                <form class="admin-inline-form" action="{{ url_for('admin_access') }}#admin-notes" method="get">
+                    <label class="visually-hidden" for="admin-note-search">Search notes</label>
+                    <input id="admin-note-search" name="q" value="{{ note_search }}" maxlength="100" placeholder="Search title, subject, branch">
+                    <button class="notes-primary-button" type="submit">Search</button>
+                    {% if note_search %}<a class="admin-text-link" href="{{ url_for('admin_access') }}#admin-notes">Clear</a>{% endif %}
+                </form>
+            </header>
+            {% if library_notes %}
+                <div class="admin-row-list">
+                    {% for note in library_notes %}
+                    <article class="admin-row">
+                        <span class="notes-file-icon" aria-hidden="true">{{ note.original_filename.rsplit('.', 1)[-1]|upper }}</span>
+                        <span class="admin-row-copy"><strong>{{ note.title }}</strong><small>{{ note.subject }} · {{ note.branch }} · {{ note.year }} · {{ note.semester }}</small></span>
+                        <span class="admin-row-actions">
+                            <a class="admin-text-link" href="{{ url_for('preview_note', note_id=note.id, return_to=url_for('admin_access') ~ '#admin-notes') }}">Preview</a>
+                            <a class="admin-text-link" href="{{ url_for('edit_note', note_id=note.id) }}">Edit</a>
+                            <a class="admin-text-link admin-danger-link" href="{{ url_for('delete_note', note_id=note.id) }}">Delete</a>
+                        </span>
+                    </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="admin-empty-state">{% if note_search %}No notes match “{{ note_search }}”.{% else %}No notes uploaded yet.{% endif %}</p>
+            {% endif %}
+        </section>
+
+        <section class="admin-manage-card" id="admin-reports" aria-labelledby="admin-reports-title">
+            <header class="admin-manage-heading">
+                <div>
+                    <span class="section-kicker">STUDENT FEEDBACK</span>
+                    <h2 id="admin-reports-title">Issue reports <small>({{ open_report_count }} open)</small></h2>
+                </div>
+                {% if show_closed %}
+                    <a class="admin-text-link" href="{{ url_for('admin_access') }}#admin-reports">Show open only</a>
+                {% else %}
+                    <a class="admin-text-link" href="{{ url_for('admin_access', reports='all') }}#admin-reports">Show closed too</a>
+                {% endif %}
+            </header>
+            {% if reports %}
+                <div class="admin-row-list">
+                    {% for report in reports %}
+                    <article class="admin-row {% if report.status == 'closed' %}admin-row-closed{% endif %}">
+                        <span class="admin-row-copy">
+                            <strong>{{ report.category|replace('_', ' ')|capitalize }}{% if report.status == 'closed' %} · Closed{% endif %}</strong>
+                            <p>{{ report.message }}</p>
+                            <small>{{ report.student_name or 'Visitor' }}{% if report.student_email %} · {{ report.student_email }}{% endif %} · {{ report.created_at }}</small>
+                        </span>
+                        <form class="admin-row-actions" action="{{ url_for('update_report_status', report_id=report.id) }}" method="post">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                            <input type="hidden" name="status" value="{{ 'open' if report.status == 'closed' else 'closed' }}">
+                            <button class="admin-small-button" type="submit">{{ 'Reopen' if report.status == 'closed' else 'Mark closed' }}</button>
+                        </form>
+                    </article>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="admin-empty-state">No {% if not show_closed %}open {% endif %}issue reports.</p>
+            {% endif %}
+        </section>
+
+        <section class="admin-manage-card" id="admin-students" aria-labelledby="admin-students-title">
+            <header class="admin-manage-heading">
+                <div>
+                    <span class="section-kicker">STUDENT ACCOUNTS</span>
+                    <h2 id="admin-students-title">Reset a student's password</h2>
+                    <p class="admin-empty-state">Creates a one-time temporary password. Share it with the student privately; they must set a new password after signing in.</p>
+                </div>
+            </header>
+            <form class="admin-inline-form" action="{{ url_for('reset_student_password') }}" method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <label class="visually-hidden" for="reset-email">Student email</label>
+                <input id="reset-email" name="email" type="email" required maxlength="254" placeholder="student@example.com">
+                <button class="notes-primary-button" type="submit">Reset password</button>
+            </form>
         </section>
 
         <section class="admin-conversation-layout" id="admin-conversations" aria-labelledby="admin-conversations-title">

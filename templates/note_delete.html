@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delete Note | StudentHub AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=6) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css', v=14) }}">
+</head>
+<body>
+    <nav class="navbar">
+        <a class="logo" href="{{ url_for('home') }}">StudentHub AI</a>
+        <ul class="nav-links">
+            <li><a href="{{ url_for('home') }}">Home</a></li>
+            <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+            <li><a href="{{ url_for('notes') }}">Notes</a></li>
+            <li><a href="{{ url_for('chatbot') }}">AI Career Mentor</a></li>
+            {% include "_profile_menu.html" %}
+        </ul>
+    </nav>
+
+    <header class="notes-flow-hero">
+        <span class="section-kicker">OWNER LIBRARY TOOLS</span>
+        <h1>Delete note?</h1>
+        <p>This permanently removes the file from StudentHub. Students will no longer be able to preview or download it.</p>
+    </header>
+
+    <main class="owner-upload-wrap">
+        <form class="owner-upload-card" action="{{ url_for('delete_note', note_id=note.id) }}" method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <div class="owner-upload-heading">
+                <span class="section-kicker">{{ note.subject }} · {{ note.branch }} · {{ note.year }} · {{ note.semester }}</span>
+                <h2>{{ note.title }}</h2>
+                <p>File: {{ note.original_filename }} · uploaded {{ note.created_at }}</p>
+            </div>
+            <div class="owner-upload-actions">
+                <a class="notes-reset-link" href="{{ url_for('admin_access') }}#admin-notes">Cancel</a>
+                <button class="notes-primary-button admin-danger-button" type="submit">Yes, delete this note</button>
+            </div>
+        </form>
+    </main>
+
+    <footer><p>© 2026 StudentHub AI | Developed by <strong>Utkarsh Jaiswal</strong></p></footer>
+</body>
+</html>

@@ -616,5 +616,100 @@ class PhaseOneSecurityTests(unittest.TestCase):
         self.assertEqual(app.permanent_session_lifetime.days, 7)
 
 
+    # --- Phase 3 admin tools: edit/delete notes, issue reports, password reset ---
+
+    def student_client(self):
+        client = app.test_client()
+        self.assertEqual(self.register(client).status_code, 302)
+        return client
+
+    def test_admin_tools_blocked_for_students(self):
+        note_id = self.seed_note()
+        client = self.student_client()
+        token = self.csrf_token(client, "/")
+        self.assertEqual(client.get(f"/admin/notes/{note_id}/edit").status_code, 403)
+        self.assertEqual(client.get(f"/admin/notes/{note_id}/delete").status_code, 403)
+        self.assertEqual(client.post(f"/admin/notes/{note_id}/delete", data={"csrf_token": token}).status_code, 403)
+        self.assertEqual(client.post("/admin/reports/1/status", data={"csrf_token": token, "status": "closed"}).status_code, 403)
+        self.assertEqual(client.post("/admin/students/reset-password", data={"csrf_token": token, "email": self.OWNER_EMAIL}).status_code, 403)
+        self.assertEqual(self.count_rows("study_notes"), 1)
+
+    def test_owner_edits_note_and_bad_values_are_rejected(self):
+        note_id = self.seed_note()
+        owner = app.test_client()
+        self.login(owner)
+        token = self.csrf_token(owner, f"/admin/notes/{note_id}/edit")
+        fields = {"csrf_token": token, "title": "Renamed", "subject": "DBMS",
+                  "branch": "Information Technology", "year": "2nd Year", "semester": "Semester 4"}
+        bad = owner.post(f"/admin/notes/{note_id}/edit", data={**fields, "semester": "Semester 7"})
+        self.assertEqual(bad.status_code, 200)
+        self.assertEqual(self.count_rows("study_notes", "title = ?", ("Phase One Note",)), 1)
+        good = owner.post(f"/admin/notes/{note_id}/edit", data=fields)
+        self.assertEqual(good.status_code, 302)
+        self.assertEqual(
+            self.count_rows("study_notes", "title = ? AND branch = ? AND semester = ?",
+                            ("Renamed", "Information Technology", "Semester 4")), 1)
+
+    def test_owner_deletes_note_and_file_after_confirm(self):
+        note_id = self.seed_note()
+        owner = app.test_client()
+        self.login(owner)
+        confirm = owner.get(f"/admin/notes/{note_id}/delete")
+        self.assertIn("Yes, delete this note", confirm.get_data(as_text=True))
+        self.assertEqual(self.count_rows("study_notes"), 1)  # GET never deletes
+        token = self.csrf_token(owner, "/admin")
+        self.assertEqual(owner.post(f"/admin/notes/{note_id}/delete", data={"csrf_token": token}).status_code, 302)
+        self.assertEqual(self.count_rows("study_notes"), 0)
+        self.assertFalse((UPLOAD_ROOT / "phase1.pdf").exists())
+
+    def test_admin_lists_notes_with_search(self):
+        self.seed_note(title="Signals Unit 1", subject="Signals", stored_filename="s.pdf")
+        self.seed_note(title="DBMS Unit 2", stored_filename="d.pdf")
+        owner = app.test_client()
+        self.login(owner)
+        body = owner.get("/admin?q=Signals").get_data(as_text=True)
+        self.assertIn("Signals Unit 1", body)
+        self.assertNotIn("DBMS Unit 2", body)
+
+    def test_owner_closes_issue_report(self):
+        visitor = app.test_client()
+        token = self.csrf_token(visitor, "/")
+        visitor.post("/suggestion", data={"csrf_token": token, "suggestion": "Download button broken", "category": "notes"})
+        owner = app.test_client()
+        self.login(owner)
+        self.assertIn("Download button broken", owner.get("/admin").get_data(as_text=True))
+        with app.app_context():
+            report_id = studenthub.get_db().execute("SELECT id FROM suggestions").fetchone()[0]
+        token = self.csrf_token(owner, "/admin")
+        owner.post(f"/admin/reports/{report_id}/status", data={"csrf_token": token, "status": "closed"})
+        self.assertEqual(self.count_rows("suggestions", "status = 'closed'"), 1)
+        self.assertNotIn("Download button broken", owner.get("/admin").get_data(as_text=True))
+        self.assertIn("Download button broken", owner.get("/admin?reports=all").get_data(as_text=True))
+
+    def test_owner_resets_student_password(self):
+        self.student_client()
+        owner = app.test_client()
+        self.login(owner)
+        token = self.csrf_token(owner, "/admin")
+        response = owner.post("/admin/students/reset-password",
+                              data={"csrf_token": token, "email": "student@example.com"},
+                              follow_redirects=True)
+        temporary = re.search(r"Temporary password for Test Student: (\S+) ", response.get_data(as_text=True)).group(1)
+        self.assertEqual(self.count_rows("users", "email = ? AND must_change_password = 1", ("student@example.com",)), 1)
+        self.assertEqual(self.login(app.test_client(), email="student@example.com", password="student-password").status_code, 200)
+        self.assertEqual(self.login(app.test_client(), email="student@example.com", password=temporary).status_code, 302)
+        # The owner account can't be reset from here.
+        owner.post("/admin/students/reset-password", data={"csrf_token": token, "email": self.OWNER_EMAIL})
+        self.assertEqual(self.login(app.test_client()).status_code, 302)
+
+    def test_upload_redirects_to_where_note_appears(self):
+        owner = app.test_client()
+        self.login(owner)
+        response = self.upload_note(owner)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("/notes/subjects?", response.headers["Location"])
+        self.assertIn("semester=Semester", response.headers["Location"])
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

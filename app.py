@@ -101,6 +101,15 @@ def note_assignment_error(branch, year, semester):
         allowed = " or ".join(YEAR_SEMESTERS[year])
         return f"{year} notes must be in {allowed}."
     return None
+
+
+def note_details_error(title, subject, branch, year, semester):
+    """Validate note text fields and course assignment; return an error message or None."""
+    if not title or len(title) > 120 or not subject or len(subject) > 100:
+        return "Enter a title (up to 120 characters) and subject (up to 100 characters)."
+    return note_assignment_error(branch, year, semester)
+
+
 # Keep existing profile choices valid while also accepting the notes-library branch names.
 REGISTRATION_BRANCHES = [
     "Computer Science",
@@ -356,6 +365,15 @@ def init_db():
         if "category" not in suggestion_columns:
             get_db().execute(
                 "ALTER TABLE suggestions ADD COLUMN category TEXT NOT NULL DEFAULT 'other'"
+            )
+        if "status" not in suggestion_columns:
+            get_db().execute(
+                "ALTER TABLE suggestions ADD COLUMN status TEXT NOT NULL DEFAULT 'open'"
+            )
+        user_columns = {row["name"] for row in get_db().execute("PRAGMA table_info(users)")}
+        if "must_change_password" not in user_columns:
+            get_db().execute(
+                "ALTER TABLE users ADD COLUMN must_change_password INTEGER NOT NULL DEFAULT 0"
             )
         get_db().execute(
             """CREATE TABLE IF NOT EXISTS login_attempts (
@@ -949,13 +967,143 @@ def admin_access():
                WHERE conversation_id = ? ORDER BY id DESC LIMIT 200""",
             (selected_id,),
         ).fetchall()[::-1]
+    note_search = request.args.get("q", "").strip()[:100]
+    note_pattern = f"%{note_search}%"
+    library_notes = db.execute(
+        """SELECT id, title, subject, branch, year, semester, original_filename, created_at
+           FROM study_notes
+           WHERE ? = '' OR title LIKE ? OR subject LIKE ? OR branch LIKE ?
+           ORDER BY created_at DESC, id DESC LIMIT 200""",
+        (note_search, note_pattern, note_pattern, note_pattern),
+    ).fetchall()
+    show_closed = request.args.get("reports") == "all"
+    reports = db.execute(
+        f"""SELECT s.id, s.category, s.message, s.status, s.created_at,
+                   u.name AS student_name, u.email AS student_email
+            FROM suggestions AS s LEFT JOIN users AS u ON u.id = s.user_id
+            {'' if show_closed else "WHERE s.status = 'open'"}
+            ORDER BY s.created_at DESC, s.id DESC LIMIT 100"""
+    ).fetchall()
+    open_report_count = db.execute(
+        "SELECT COUNT(*) FROM suggestions WHERE status = 'open'"
+    ).fetchone()[0]
     return render_template(
         "admin.html", stats=stats, conversations=conversations,
         selected_conversation=selected_conversation,
         selected_messages=selected_messages,
+        library_notes=library_notes, note_search=note_search,
+        reports=reports, show_closed=show_closed,
+        open_report_count=open_report_count,
         ai_model=OPENAI_MODEL,
         ai_configured=bool(os.environ.get("OPENAI_API_KEY", "").strip()),
     )
+
+
+def get_note_or_404(note_id):
+    note = get_db().execute(
+        """SELECT id, title, subject, branch, year, semester, stored_filename,
+                  original_filename, created_at
+           FROM study_notes WHERE id = ?""",
+        (note_id,),
+    ).fetchone()
+    if note is None:
+        abort(404)
+    return note
+
+
+@app.route("/admin/notes/<int:note_id>/edit", methods=["GET", "POST"])
+@owner_required
+def edit_note(note_id):
+    note = get_note_or_404(note_id)
+    form = dict(note)
+    if request.method == "POST":
+        form.update({
+            field: request.form.get(field, "").strip()
+            for field in ("title", "subject", "branch", "year", "semester")
+        })
+        details_error = note_details_error(
+            form["title"], form["subject"], form["branch"], form["year"], form["semester"]
+        )
+        if details_error:
+            flash(details_error, "error")
+        else:
+            db = get_db()
+            db.execute(
+                """UPDATE study_notes SET title = ?, subject = ?, branch = ?, year = ?, semester = ?
+                   WHERE id = ?""",
+                (form["title"], form["subject"], form["branch"], form["year"],
+                 form["semester"], note_id),
+            )
+            db.commit()
+            flash(f"Saved changes to “{form['title']}”.", "success")
+            return redirect(url_for("admin_access", _anchor="admin-notes"))
+    return render_template(
+        "note_edit.html",
+        note=note,
+        form=form,
+        note_branches=NOTE_BRANCHES,
+        note_years=NOTE_YEARS,
+        note_semesters=NOTE_SEMESTERS,
+    )
+
+
+@app.route("/admin/notes/<int:note_id>/delete", methods=["GET", "POST"])
+@owner_required
+def delete_note(note_id):
+    note = get_note_or_404(note_id)
+    if request.method == "POST":
+        db = get_db()
+        db.execute("DELETE FROM study_notes WHERE id = ?", (note_id,))
+        db.commit()
+        (Path(app.config["UPLOAD_FOLDER"]) / note["stored_filename"]).unlink(missing_ok=True)
+        flash(f"Deleted “{note['title']}” from the notes library.", "success")
+        return redirect(url_for("admin_access", _anchor="admin-notes"))
+    return render_template("note_delete.html", note=note)
+
+
+@app.route("/admin/reports/<int:report_id>/status", methods=["POST"])
+@owner_required
+def update_report_status(report_id):
+    status = request.form.get("status", "")
+    if status not in {"open", "closed"}:
+        abort(400)
+    db = get_db()
+    cursor = db.execute(
+        "UPDATE suggestions SET status = ? WHERE id = ?", (status, report_id)
+    )
+    db.commit()
+    if cursor.rowcount == 0:
+        abort(404)
+    flash("Issue report closed." if status == "closed" else "Issue report reopened.", "success")
+    return redirect(url_for("admin_access", _anchor="admin-reports"))
+
+
+@app.route("/admin/students/reset-password", methods=["POST"])
+@owner_required
+def reset_student_password():
+    email = request.form.get("email", "").strip().lower()
+    db = get_db()
+    student = db.execute(
+        "SELECT id, name, is_owner FROM users WHERE email = ?", (email,)
+    ).fetchone()
+    if student is None:
+        flash("No student account uses that email.", "error")
+    elif student["is_owner"]:
+        flash("The owner account can't be reset here. Use Change password on your Account page.", "error")
+    else:
+        temporary_password = secrets.token_urlsafe(9)
+        db.execute(
+            "UPDATE users SET password_hash = ?, must_change_password = 1 WHERE id = ?",
+            (generate_password_hash(temporary_password), student["id"]),
+        )
+        db.commit()
+        clear_failed_logins(email)
+        flash(
+            f"Temporary password for {student['name']}: {temporary_password} — "
+            "share it privately. They must choose a new password after signing in.",
+            "success",
+        )
+    return redirect(url_for("admin_access", _anchor="admin-students"))
 
 
 @app.route("/notes")
@@ -1202,10 +1350,9 @@ def upload_note():
         year = request.form.get("year", "").strip()
         semester = request.form.get("semester", "").strip()
         uploaded_file = request.files.get("file")
-        if not title or len(title) > 120 or not subject or len(subject) > 100:
-            flash("Enter a title (up to 120 characters) and subject (up to 100 characters).", "error")
-        elif note_assignment_error(branch, year, semester):
-            flash(note_assignment_error(branch, year, semester), "error")
+        details_error = note_details_error(title, subject, branch, year, semester)
+        if details_error:
+            flash(details_error, "error")
         elif uploaded_file is None or not uploaded_file.filename:
             flash("Choose a PDF or PowerPoint (.pptx) file to upload.", "error")
         else:
@@ -1251,7 +1398,7 @@ def upload_note():
                     flash("The note could not be saved. Please try again.", "error")
                 else:
                     flash("Your file is now available in the public notes library.", "success")
-                    return redirect(url_for("notes"))
+                    return redirect(notes_browse_url(branch, year, semester))
     return render_template(
         "upload.html",
         note_branches=NOTE_BRANCHES,
@@ -1454,6 +1601,8 @@ def serve_note_preview(note_id):
 @app.errorhandler(413)
 def upload_too_large(_error):
     flash("Files must be smaller than 20 MB.", "error")
+    if request.endpoint == "upload_note":
+        return redirect(url_for("upload_note"))
     return redirect(url_for("notes"))
 
 
