@@ -2,6 +2,20 @@
 
 Last updated: 2026-11-05 · Budget: free only · AI Mentor work: out of scope for now
 
+## Status (2026-11-05)
+
+| Phase | Status |
+|---|---|
+| 0 Save work | ✅ Done |
+| 1 Security | ✅ Done — waiting for your browser check |
+| 2 Admin tools | ✅ Done — waiting for your browser check |
+| 3 Student account | ✅ Done — waiting for your browser check |
+| 4 Notes extras | ✅ 4.1–4.3 done · 4.4 "Coming Soon" cards left for you to decide |
+| 5 Go online | ✅ Claude's part done (git cleaned, checklist in DEPLOYMENT.md) · ⏳ your part: push, PythonAnywhere |
+| 6 Submission | ✅ Report + slides updated, DEMO_AND_VIVA.md written · ⏳ your part: screenshots, recording, review |
+
+Tests: 47, all passing.
+
 **Who does what**
 - **Claude** makes every change to the project files, writes tests, runs them, and commits.
 - **You** only do what needs your own accounts or eyes: checking pages in the browser, logging into GitHub/PythonAnywhere, and giving the go-ahead at each checkpoint.
