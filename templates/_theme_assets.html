@@ -1,4 +1,7 @@
-<script>(function(){var t;try{t=localStorage.getItem("sh-theme");}catch(e){}document.documentElement.setAttribute("data-theme",t==="light"?"light":"dark");})();</script>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/dark-auto.css', v=1) }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/dark.css', v=1) }}">
-    <script src="{{ url_for('static', filename='js/theme_toggle.js', v=1) }}" defer></script>
+<script>(function(){var t,p,ok={{ theme_palettes|map(attribute='id')|list|tojson }};try{t=localStorage.getItem("sh-theme");p=localStorage.getItem("sh-palette");}catch(e){}var d=document.documentElement;d.setAttribute("data-theme",t==="light"?"light":"dark");d.setAttribute("data-palette",ok.indexOf(p)>-1?p:"aurora");})();</script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/palettes.css', v=1) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dark-auto.css', v=2) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dark.css', v=2) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme-ui.css', v=1) }}">
+    <script type="application/json" id="theme-palettes">{{ theme_palettes|tojson }}</script>
+    <script src="{{ url_for('static', filename='js/theme_toggle.js', v=2) }}" defer></script>

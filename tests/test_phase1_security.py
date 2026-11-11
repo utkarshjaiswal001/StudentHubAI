@@ -902,6 +902,24 @@ class PhaseOneSecurityTests(unittest.TestCase):
                 self.assertIn("js/theme_toggle.js", body)
                 # Theme files load after the old stylesheets so they can override them.
                 self.assertLess(body.index("css/style.css"), body.index("css/dark.css"))
+                self.assertIn("css/palettes.css", body)
+                self.assertIn("css/theme-ui.css", body)
+
+    def test_theme_gallery_shows_every_palette_in_both_modes(self):
+        body = app.test_client().get("/themes").get_data(as_text=True)
+        palettes = studenthub.THEME_PALETTES
+        self.assertGreaterEqual(len(palettes), 6)
+        for palette in palettes:
+            with self.subTest(palette=palette["id"]):
+                self.assertIn(palette["name"], body)
+                self.assertIn(f'data-theme="dark" data-palette="{palette["id"]}"', body)
+                self.assertIn(f'data-theme="light" data-palette="{palette["id"]}"', body)
+                # Each palette has its own colours in palettes.css (Aurora is the default).
+                if palette["id"] != "aurora":
+                    css = (Path(studenthub.app.root_path) / "static" / "css" / "palettes.css").read_text(encoding="utf-8")
+                    self.assertIn(f'[data-palette="{palette["id"]}"]', css)
+        # The head script only accepts known palette names.
+        self.assertIn('"aurora", "ocean"', body)
 
 
     # --- Core strengthening: error pages, backup/restore, Quick Help, spam limits ---

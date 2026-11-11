@@ -50,7 +50,7 @@ def fmt(r, g, b, a=1.0):
 
 
 def dark_background(token):
-    """Light surfaces become navy; tinted pastels keep their hue, darkened."""
+    """Light surfaces become the palette's dark surfaces; pastel tints get a hint of the palette colour."""
     c = parse_color(token)
     if c is None:
         return token
@@ -58,23 +58,20 @@ def dark_background(token):
     h, l, s = colorsys.rgb_to_hls(r, g, b)
     if l < 0.62:
         return token  # already dark or a strong colour (buttons, badges): keep
-    if s < 0.12 or l > 0.985:
-        h, s = 225 / 360, 0.36
-    else:
-        s = min(s, 0.42)
-    new_l = 0.15 + (1 - l) * 0.55
     if a < 0.999 and s > 0.15 and l < 0.985:
         return token  # faint colour tints work on dark too
     if a < 0.999:
         # Light glass overlays: dark glass for strong ones, faint light for subtle ones.
         if a >= 0.5:
-            return fmt(*colorsys.hls_to_rgb(225 / 360, 0.12, 0.38), a)
+            return f"color-mix(in srgb, var(--surface) {round(a * 100)}%, transparent)"
         return fmt(1, 1, 1, round(a * 0.18, 2))
-    return fmt(*colorsys.hls_to_rgb(h, new_l, s))
+    if s < 0.12 or l > 0.985:
+        return "var(--surface)" if l > 0.97 else "var(--surface-2)"
+    return "color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface))"
 
 
 def dark_text(token):
-    """Dark text becomes light; strong coloured text becomes a lighter tint."""
+    """Dark text becomes light; brand-coloured text uses the palette's link colour."""
     c = parse_color(token)
     if c is None:
         return token
@@ -83,10 +80,12 @@ def dark_text(token):
     if l > 0.7:
         return token  # already light (e.g. white text on buttons)
     if s > 0.35:
+        if 200 <= h * 360 <= 290:
+            return "var(--primary-dark)"
         return fmt(*colorsys.hls_to_rgb(h, 0.76, min(s, 0.85)), a)
     if l < 0.35:
-        return fmt(*colorsys.hls_to_rgb(h, 0.92, min(s, 0.3)), a)
-    return fmt(*colorsys.hls_to_rgb(h, 0.74, min(s, 0.25)), a)
+        return "var(--dark)"
+    return "var(--muted)"
 
 
 def dark_border(token):

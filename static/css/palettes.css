@@ -1,0 +1,187 @@
+/* =========================================================
+   StudentHub AI: colour sets ("palettes")
+   Each palette has a dark and a light version. The page picks one with
+   <html data-theme="dark|light" data-palette="aurora|ocean|...">.
+   The theme gallery (/themes) uses the same attributes on its sample
+   boxes, so every sample shows exactly what the site will look like.
+
+   --c1 / --c2 / --c3 are "r, g, b" numbers for the main, second and
+   warm colours, so other rules can use rgba(var(--c1), .2) for glows.
+   ========================================================= */
+
+/* ---------- Dark base (Aurora) ---------- */
+[data-theme="dark"] {
+    --c1: 139, 140, 246;
+    --c2: 60, 200, 192;
+    --c3: 255, 191, 105;
+    --primary: rgb(var(--c1));
+    --primary-dark: #a9aafc;   /* links and highlighted text */
+    --secondary: rgb(var(--c2));
+    --accent: rgb(var(--c3));
+    --orange: rgb(var(--c3));
+    --green: #4fd1a0;
+    --dark: #eef0fb;           /* headings */
+    --text: #d3d7ea;
+    --muted: #9aa1c0;
+    --background: #0f1424;
+    --surface: #1a2238;
+    --surface-2: #212a44;
+    --input-bg: #131a2e;
+    --footer-bg: #0a0e1a;
+    --border: rgba(255, 255, 255, .08);
+    --hero-gradient: linear-gradient(135deg, #141a33 0%, #1b2150 50%, #11303f 100%);
+    --button-gradient: linear-gradient(120deg, rgb(var(--c1)) 0%, rgb(var(--c2)) 100%);
+    --shadow: 0 16px 40px rgba(0, 0, 0, .38);
+    --soft-shadow: 0 6px 22px rgba(0, 0, 0, .28);
+    --glow: 0 0 0 1px rgba(var(--c1), .38), 0 14px 36px rgba(var(--c1), .22);
+    --focus-ring: 0 0 0 3px rgba(var(--c1), .5);
+}
+
+/* ---------- Light base (Aurora) ---------- */
+[data-theme="light"] {
+    --c1: 90, 95, 208;
+    --c2: 42, 157, 176;
+    --c3: 230, 150, 60;
+    --primary: rgb(var(--c1));
+    --primary-dark: #4549b0;
+    --secondary: rgb(var(--c2));
+    --accent: #3fa7c4;
+    --orange: #ff9f43;
+    --green: #2fa57a;
+    --dark: #1f2440;
+    --text: #3d4260;
+    --muted: #6b7090;
+    --background: #f5f6fb;
+    --surface: #ffffff;
+    --surface-2: #f3f4fa;
+    --input-bg: #fbfbff;
+    --footer-bg: #1f2340;
+    --white: #ffffff;
+    --border: #e3e5f0;
+    --hero-gradient: linear-gradient(135deg, #353b86 0%, #4a52b4 48%, #2f7f9c 100%);
+    --button-gradient: linear-gradient(135deg, rgb(var(--c1)), #3f8fc0);
+    --shadow: 0 10px 30px rgba(40, 44, 90, .08);
+    --soft-shadow: 0 4px 16px rgba(40, 44, 90, .06);
+    --glow: 0 0 0 1px rgba(var(--c1), .25), 0 10px 28px rgba(var(--c1), .14);
+    --focus-ring: 0 0 0 3px rgba(var(--c1), .32);
+}
+
+/* ---------- Ocean: blue + mint ---------- */
+[data-theme="dark"][data-palette="ocean"] {
+    --c1: 77, 163, 255;
+    --c2: 79, 209, 165;
+    --c3: 126, 224, 255;
+    --primary-dark: #9cc9ff;
+    --dark: #eef5fc;
+    --text: #d2e1f0;
+    --muted: #8fa6bf;
+    --background: #0b1622;
+    --surface: #13233a;
+    --surface-2: #1a2d47;
+    --input-bg: #0f1d30;
+    --footer-bg: #070f19;
+    --hero-gradient: linear-gradient(135deg, #0d1b2e 0%, #11294a 50%, #0f3a3a 100%);
+}
+[data-theme="light"][data-palette="ocean"] {
+    --c1: 47, 127, 216;
+    --c2: 31, 158, 133;
+    --primary-dark: #1f63b3;
+    --hero-gradient: linear-gradient(135deg, #17406e 0%, #1f5c94 50%, #1a7a72 100%);
+    --button-gradient: linear-gradient(135deg, #2f7fd8, #1fa38a);
+}
+
+/* ---------- Sunset: coral + lavender + gold ---------- */
+[data-theme="dark"][data-palette="sunset"] {
+    --c1: 255, 122, 144;
+    --c2: 181, 140, 255;
+    --c3: 255, 209, 102;
+    --primary-dark: #ffb0bd;
+    --dark: #fbf1f6;
+    --text: #ecdfe9;
+    --muted: #b39fb3;
+    --background: #17121f;
+    --surface: #221a2e;
+    --surface-2: #2b2139;
+    --input-bg: #1b1426;
+    --footer-bg: #0f0b15;
+    --hero-gradient: linear-gradient(135deg, #1f1430 0%, #3a1a3a 50%, #3a2416 100%);
+}
+[data-theme="light"][data-palette="sunset"] {
+    --c1: 217, 84, 111;
+    --c2: 138, 92, 214;
+    --primary-dark: #b23e57;
+    --hero-gradient: linear-gradient(135deg, #5a2347 0%, #8a3456 50%, #a0582c 100%);
+    --button-gradient: linear-gradient(135deg, #e0607a, #9a6ae0);
+}
+
+/* ---------- Forest: green + teal + sand ---------- */
+[data-theme="dark"][data-palette="forest"] {
+    --c1: 95, 211, 141;
+    --c2: 63, 183, 166;
+    --c3: 242, 198, 109;
+    --primary-dark: #9fe8bd;
+    --dark: #effaf3;
+    --text: #d6e7de;
+    --muted: #93ad9f;
+    --background: #0e1915;
+    --surface: #16251f;
+    --surface-2: #1d3029;
+    --input-bg: #12201b;
+    --footer-bg: #08110d;
+    --hero-gradient: linear-gradient(135deg, #0f2119 0%, #123326 50%, #1d2f1a 100%);
+}
+[data-theme="light"][data-palette="forest"] {
+    --c1: 47, 156, 98;
+    --c2: 42, 143, 132;
+    --primary-dark: #237a4c;
+    --hero-gradient: linear-gradient(135deg, #1d4a36 0%, #256347 50%, #3d5a2a 100%);
+    --button-gradient: linear-gradient(135deg, #2f9c62, #2a8f84);
+}
+
+/* ---------- Galaxy: purple + pink + yellow ---------- */
+[data-theme="dark"][data-palette="galaxy"] {
+    --c1: 192, 132, 252;
+    --c2: 244, 114, 182;
+    --c3: 252, 211, 77;
+    --primary-dark: #dab5ff;
+    --dark: #f6f0ff;
+    --text: #e2daf2;
+    --muted: #a99cc4;
+    --background: #120d22;
+    --surface: #1d1633;
+    --surface-2: #261d42;
+    --input-bg: #181130;
+    --footer-bg: #0b0816;
+    --hero-gradient: linear-gradient(135deg, #1a1033 0%, #2d1450 50%, #3a1238 100%);
+}
+[data-theme="light"][data-palette="galaxy"] {
+    --c1: 139, 79, 216;
+    --c2: 208, 80, 143;
+    --primary-dark: #6d36b5;
+    --hero-gradient: linear-gradient(135deg, #3a1f6e 0%, #5a2a8a 50%, #7a2560 100%);
+    --button-gradient: linear-gradient(135deg, #8b4fd8, #d0508f);
+}
+
+/* ---------- Slate: quiet grey-blue, green and orange touches ---------- */
+[data-theme="dark"][data-palette="slate"] {
+    --c1: 122, 162, 247;
+    --c2: 158, 206, 106;
+    --c3: 224, 175, 104;
+    --primary-dark: #a9c1fb;
+    --dark: #eceffa;
+    --text: #c9cfe3;
+    --muted: #8a90a8;
+    --background: #1a1b26;
+    --surface: #222433;
+    --surface-2: #2a2d3e;
+    --input-bg: #1c1e2b;
+    --footer-bg: #13141c;
+    --hero-gradient: linear-gradient(135deg, #1e2030 0%, #24283b 50%, #1f2a33 100%);
+}
+[data-theme="light"][data-palette="slate"] {
+    --c1: 74, 111, 196;
+    --c2: 74, 143, 168;
+    --primary-dark: #3a589f;
+    --hero-gradient: linear-gradient(135deg, #2b3247 0%, #38425e 50%, #2f4550 100%);
+    --button-gradient: linear-gradient(135deg, #4a6fc4, #4a8fa8);
+}

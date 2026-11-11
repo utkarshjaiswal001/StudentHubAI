@@ -780,6 +780,7 @@ def inject_user_state():
         "current_user_name": session.get("user_name"),
         "ai_configured": bool(os.environ.get("OPENAI_API_KEY", "").strip()),
         "csrf_token": get_csrf_token(),
+        "theme_palettes": THEME_PALETTES,
     }
 
 
@@ -1439,6 +1440,29 @@ def reset_student_password():
             "success",
         )
     return redirect(url_for("admin_access", _anchor="admin-students"))
+
+
+# Colour sets students can pick from (see static/css/palettes.css).
+# "swatches" are the three main colours shown as dots in the theme menu.
+THEME_PALETTES = [
+    {"id": "aurora", "name": "Aurora", "mood": "Violet and teal with warm amber. Calm and modern.",
+     "swatches": ["#8b8cf6", "#3cc8c0", "#ffbf69"]},
+    {"id": "ocean", "name": "Ocean", "mood": "Sky blue and mint. Cool, fresh and clean.",
+     "swatches": ["#4da3ff", "#4fd1a5", "#7ee0ff"]},
+    {"id": "sunset", "name": "Sunset", "mood": "Coral, lavender and gold. Warm and lively.",
+     "swatches": ["#ff7a90", "#b58cff", "#ffd166"]},
+    {"id": "forest", "name": "Forest", "mood": "Leaf green and teal with sand. Relaxing and natural.",
+     "swatches": ["#5fd38d", "#3fb7a6", "#f2c66d"]},
+    {"id": "galaxy", "name": "Galaxy", "mood": "Purple and pink with a yellow spark. Bold and fun.",
+     "swatches": ["#c084fc", "#f472b6", "#fcd34d"]},
+    {"id": "slate", "name": "Slate", "mood": "Quiet grey-blue with soft green. Minimal and easy on the eyes.",
+     "swatches": ["#7aa2f7", "#9ece6a", "#e0af68"]},
+]
+
+
+@app.route("/themes")
+def theme_gallery():
+    return render_template("themes.html")
 
 
 @app.route("/notes")

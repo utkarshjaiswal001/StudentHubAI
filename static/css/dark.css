@@ -1,48 +1,28 @@
 /* =========================================================
-   StudentHub AI: "Aurora" dark theme (hand-tuned part)
-   Applies only when <html data-theme="dark">. dark-auto.css
-   (generated) handles the old fixed colours; this file sets
-   the palette, page headers, glows, buttons and the theme switch.
+   StudentHub AI: dark theme (hand-tuned part)
+   Applies only when <html data-theme="dark">. Colours come from the
+   palette variables in palettes.css (--c1, --c2, --c3, --surface ...),
+   so every palette reuses these rules. dark-auto.css (generated)
+   handles the old fixed colours from the original stylesheets.
    ========================================================= */
 
 html[data-theme="dark"] {
     color-scheme: dark;
-
-    --primary: #8b8cf6;
-    --primary-dark: #a9aafc;
-    --secondary: #3cc8c0;
-    --accent: #ffbf69;
-    --green: #4fd1a0;
-    --orange: #ffbf69;
-    --dark: #eef0fb;
-    --text: #d3d7ea;
-    --muted: #9aa1c0;
-    --background: #0f1424;
-    --surface: #1a2238;
-    --surface-2: #212a44;
-    --border: rgba(255, 255, 255, .08);
-
-    --shadow: 0 16px 40px rgba(0, 0, 0, .38);
-    --soft-shadow: 0 6px 22px rgba(0, 0, 0, .28);
-    --glow: 0 0 0 1px rgba(139, 140, 246, .38), 0 14px 36px rgba(110, 112, 240, .22);
-    --button-gradient: linear-gradient(120deg, #7b7cf0 0%, #5f8ff0 50%, #2fb4b0 100%);
-    --hero-gradient: linear-gradient(135deg, #141a33 0%, #1b2150 50%, #11303f 100%);
-    --focus-ring: 0 0 0 3px rgba(139, 140, 246, .5);
 }
 
-/* ---------- Page background: soft aurora glow at the top ---------- */
+/* ---------- Page background: soft glow at the top ---------- */
 
 html[data-theme="dark"] body {
     background:
-        radial-gradient(900px 500px at 10% -5%, rgba(139, 140, 246, .14), transparent 60%),
-        radial-gradient(800px 480px at 95% 5%, rgba(60, 200, 192, .10), transparent 60%),
+        radial-gradient(900px 500px at 10% -5%, rgba(var(--c1), .14), transparent 60%),
+        radial-gradient(800px 480px at 95% 5%, rgba(var(--c2), .10), transparent 60%),
         var(--background);
     background-attachment: fixed;
     color: var(--text);
 }
 
 html[data-theme="dark"] ::selection {
-    background: rgba(139, 140, 246, .45);
+    background: rgba(var(--c1), .45);
     color: #fff;
 }
 
@@ -54,20 +34,16 @@ html[data-theme="dark"] strong {
     color: var(--dark);
 }
 
-html[data-theme="dark"] a {
-    color: inherit;
-}
-
 /* ---------- Top bar ---------- */
 
 html[data-theme="dark"] .navbar {
-    background: rgba(15, 20, 36, .82);
+    background: color-mix(in srgb, var(--background) 85%, transparent);
     border-bottom: 1px solid var(--border);
     box-shadow: 0 1px 0 rgba(255, 255, 255, .02);
 }
 
 html[data-theme="dark"] .logo {
-    background: linear-gradient(90deg, #a9aafc, #6fe0d6);
+    background: linear-gradient(90deg, var(--primary-dark), rgb(var(--c2)));
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
@@ -75,7 +51,7 @@ html[data-theme="dark"] .logo {
 
 html[data-theme="dark"] .nav-links a,
 html[data-theme="dark"] .nav-link {
-    color: #c4c8de;
+    color: var(--text);
 }
 
 html[data-theme="dark"] .nav-links a:hover,
@@ -83,10 +59,10 @@ html[data-theme="dark"] .nav-links a.active,
 html[data-theme="dark"] .nav-link:hover,
 html[data-theme="dark"] .nav-link.active {
     color: #fff;
-    background: rgba(139, 140, 246, .16);
+    background: rgba(var(--c1), .16);
 }
 
-/* ---------- Page headers: navy with a slowly drifting aurora ---------- */
+/* ---------- Page headers: dark gradient with a slowly drifting glow ---------- */
 
 html[data-theme="dark"] .hero,
 html[data-theme="dark"] .hero-section,
@@ -106,18 +82,18 @@ html[data-theme="dark"] .notes-flow-hero::before {
     inset: -40%;
     z-index: -1;
     background:
-        radial-gradient(closest-side at 30% 40%, rgba(139, 140, 246, .35), transparent),
-        radial-gradient(closest-side at 70% 60%, rgba(60, 200, 192, .25), transparent),
-        radial-gradient(closest-side at 55% 20%, rgba(255, 191, 105, .12), transparent);
+        radial-gradient(closest-side at 30% 40%, rgba(var(--c1), .35), transparent),
+        radial-gradient(closest-side at 70% 60%, rgba(var(--c2), .25), transparent),
+        radial-gradient(closest-side at 55% 20%, rgba(var(--c3), .12), transparent);
     filter: blur(20px);
     animation: aurora-drift 26s ease-in-out infinite alternate;
 }
 
 html[data-theme="dark"] .hero-section {
     background:
-        radial-gradient(ellipse at 20% 10%, rgba(139, 140, 246, .30), transparent 45%),
-        radial-gradient(ellipse at 85% 80%, rgba(60, 200, 192, .22), transparent 45%),
-        radial-gradient(ellipse at 60% 35%, rgba(255, 191, 105, .08), transparent 40%),
+        radial-gradient(ellipse at 20% 10%, rgba(var(--c1), .30), transparent 45%),
+        radial-gradient(ellipse at 85% 80%, rgba(var(--c2), .22), transparent 45%),
+        radial-gradient(ellipse at 60% 35%, rgba(var(--c3), .08), transparent 40%),
         var(--hero-gradient);
 }
 
@@ -134,12 +110,12 @@ html[data-theme="dark"] .hero-section h1 {
 
 html[data-theme="dark"] .notes-flow-hero p,
 html[data-theme="dark"] .hero p {
-    color: #c9cde4;
+    color: color-mix(in srgb, var(--text) 85%, #fff);
 }
 
 html[data-theme="dark"] .section-kicker,
 html[data-theme="dark"] .notes-step {
-    color: #6fe0d6;
+    color: color-mix(in srgb, rgb(var(--c2)) 75%, #fff);
 }
 
 /* ---------- Cards: lift and glow on hover ---------- */
@@ -155,7 +131,7 @@ html[data-theme="dark"] .account-profile-panel,
 html[data-theme="dark"] .account-section-panel,
 html[data-theme="dark"] .account-stats > *,
 html[data-theme="dark"] .form-card {
-    background: linear-gradient(160deg, #1d2540, #182036 70%);
+    background: linear-gradient(160deg, color-mix(in srgb, var(--surface-2) 70%, var(--surface)), var(--surface) 70%);
     border: 1px solid var(--border);
     box-shadow: var(--soft-shadow);
 }
@@ -171,42 +147,42 @@ html[data-theme="dark"] .service-card:hover,
 html[data-theme="dark"] .notes-choice-card:hover,
 html[data-theme="dark"] .notes-subject-dropdown:hover {
     transform: translateY(-3px);
-    border-color: rgba(139, 140, 246, .45);
+    border-color: rgba(var(--c1), .45);
     box-shadow: var(--glow);
 }
 
 html[data-theme="dark"] .notes-subject-dropdown summary:hover,
 html[data-theme="dark"] .notes-subject-dropdown[open] summary {
-    background: rgba(139, 140, 246, .08);
+    background: rgba(var(--c1), .08);
 }
 
 html[data-theme="dark"] .notes-subject-empty {
-    background: rgba(26, 34, 56, .55);
+    background: color-mix(in srgb, var(--surface) 55%, transparent);
     box-shadow: none;
 }
 
 html[data-theme="dark"] .notes-subject-empty strong {
-    color: #aab0cc;
+    color: var(--muted);
 }
 
 /* Icon tiles inside cards. */
 html[data-theme="dark"] .notes-choice-icon,
 html[data-theme="dark"] .service-icon,
 html[data-theme="dark"] .notes-file-icon {
-    background: rgba(139, 140, 246, .14);
+    background: rgba(var(--c1), .14);
     border-color: transparent;
 }
 
-/* Home page service cards: dark with a hint of their colour. */
-html[data-theme="dark"] .service-notes      { background: linear-gradient(150deg, rgba(95, 143, 240, .16), #182036 70%); }
-html[data-theme="dark"] .service-ai         { background: linear-gradient(150deg, rgba(139, 140, 246, .18), #182036 70%); }
-html[data-theme="dark"] .service-placement  { background: linear-gradient(150deg, rgba(255, 191, 105, .14), #182036 70%); }
-html[data-theme="dark"] .service-resume     { background: linear-gradient(150deg, rgba(79, 209, 160, .14), #182036 70%); }
-html[data-theme="dark"] .service-interview  { background: linear-gradient(150deg, rgba(255, 130, 160, .13), #182036 70%); }
-html[data-theme="dark"] .service-internship { background: linear-gradient(150deg, rgba(60, 200, 192, .14), #182036 70%); }
+/* Home page service cards: dark with a hint of colour. */
+html[data-theme="dark"] .service-notes,
+html[data-theme="dark"] .service-resume      { background: linear-gradient(150deg, rgba(var(--c2), .15), var(--surface) 70%); }
+html[data-theme="dark"] .service-ai,
+html[data-theme="dark"] .service-interview   { background: linear-gradient(150deg, rgba(var(--c1), .17), var(--surface) 70%); }
+html[data-theme="dark"] .service-placement,
+html[data-theme="dark"] .service-internship  { background: linear-gradient(150deg, rgba(var(--c3), .13), var(--surface) 70%); }
 
 html[data-theme="dark"] .service-showcase {
-    background: rgba(15, 20, 36, .78);
+    background: color-mix(in srgb, var(--background) 80%, transparent);
     border: 1px solid var(--border);
     backdrop-filter: blur(14px);
 }
@@ -222,7 +198,7 @@ html[data-theme="dark"] .form-card button[type="submit"] {
     background-position: 0% 50%;
     color: #fff;
     border: none;
-    box-shadow: 0 8px 24px rgba(95, 110, 240, .28);
+    box-shadow: 0 8px 24px rgba(var(--c1), .28);
     transition: background-position .5s ease, transform .2s ease, box-shadow .2s ease;
 }
 
@@ -231,7 +207,7 @@ html[data-theme="dark"] .notes-primary-button:hover,
 html[data-theme="dark"] .card-btn:hover,
 html[data-theme="dark"] .form-card button[type="submit"]:hover {
     background-position: 100% 50%;
-    box-shadow: 0 10px 30px rgba(60, 200, 192, .30);
+    box-shadow: 0 10px 30px rgba(var(--c2), .30);
     transform: translateY(-2px);
 }
 
@@ -239,7 +215,7 @@ html[data-theme="dark"] .secondary-button,
 html[data-theme="dark"] .notes-preview-action,
 html[data-theme="dark"] .notes-download-link {
     background: rgba(255, 255, 255, .05);
-    color: #e6e8f7;
+    color: var(--dark);
     border: 1px solid rgba(255, 255, 255, .14);
     box-shadow: none;
 }
@@ -247,16 +223,16 @@ html[data-theme="dark"] .notes-download-link {
 html[data-theme="dark"] .secondary-button:hover,
 html[data-theme="dark"] .notes-preview-action:hover,
 html[data-theme="dark"] .notes-download-link:hover {
-    background: rgba(139, 140, 246, .16);
-    border-color: rgba(139, 140, 246, .5);
+    background: rgba(var(--c1), .16);
+    border-color: rgba(var(--c1), .5);
 }
 
 /* ---------- Badges: warm and cheerful ---------- */
 
 html[data-theme="dark"] .notes-new-badge {
-    background: rgba(255, 191, 105, .16);
-    color: #ffcf8a;
-    border: 1px solid rgba(255, 191, 105, .35);
+    background: rgba(var(--c3), .16);
+    color: color-mix(in srgb, rgb(var(--c3)) 70%, #fff);
+    border: 1px solid rgba(var(--c3), .35);
 }
 
 html[data-theme="dark"] .service-status.available {
@@ -266,7 +242,7 @@ html[data-theme="dark"] .service-status.available {
 
 html[data-theme="dark"] .service-status:not(.available) {
     background: rgba(255, 255, 255, .06);
-    color: #aab0cc;
+    color: var(--muted);
 }
 
 /* ---------- Messages ---------- */
@@ -293,8 +269,8 @@ html[data-theme="dark"] .auth-message.error {
 html[data-theme="dark"] input,
 html[data-theme="dark"] select,
 html[data-theme="dark"] textarea {
-    background: #131a2e;
-    color: #e6e8f7;
+    background: var(--input-bg);
+    color: var(--dark);
     border-color: rgba(255, 255, 255, .12);
 }
 
@@ -304,75 +280,34 @@ html[data-theme="dark"] .notes-field textarea,
 html[data-theme="dark"] .form-card input,
 html[data-theme="dark"] .form-card select,
 html[data-theme="dark"] .notes-subject-search input {
-    background: #131a2e;
+    background: var(--input-bg);
     border: 1px solid rgba(255, 255, 255, .14);
 }
 
 html[data-theme="dark"] input::placeholder,
 html[data-theme="dark"] textarea::placeholder {
-    color: #7d84a3;
+    color: color-mix(in srgb, var(--muted) 80%, transparent);
 }
 
 html[data-theme="dark"] input:focus,
 html[data-theme="dark"] select:focus,
 html[data-theme="dark"] textarea:focus {
     border-color: var(--primary);
-    background: #151d33;
 }
 
 html[data-theme="dark"] input[type="file"]::file-selector-button {
-    background: rgba(139, 140, 246, .16);
-    color: #e6e8f7;
-    border-color: rgba(139, 140, 246, .35);
+    background: rgba(var(--c1), .16);
+    color: var(--dark);
+    border-color: rgba(var(--c1), .35);
 }
 
 /* ---------- Footer ---------- */
 
 html[data-theme="dark"] footer,
 html[data-theme="dark"] .footer {
-    background: #0a0e1a;
-    color: #9aa1c0;
+    background: var(--footer-bg);
+    color: var(--muted);
     border-top: 1px solid var(--border);
-}
-
-/* ---------- Light / dark switch (both themes) ---------- */
-
-.theme-toggle {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 38px;
-    height: 38px;
-    padding: 0;
-    border: 1px solid var(--border);
-    border-radius: 50%;
-    background: rgba(90, 95, 208, .08);
-    color: inherit;
-    font-size: 17px;
-    line-height: 1;
-    cursor: pointer;
-    transition: transform .25s ease, background .2s ease, box-shadow .2s ease;
-}
-
-.theme-toggle:hover {
-    transform: rotate(-18deg) scale(1.06);
-    background: rgba(90, 95, 208, .16);
-}
-
-html[data-theme="dark"] .theme-toggle {
-    background: rgba(255, 191, 105, .10);
-    border-color: rgba(255, 191, 105, .30);
-}
-
-html[data-theme="dark"] .theme-toggle:hover {
-    background: rgba(255, 191, 105, .18);
-    box-shadow: 0 0 18px rgba(255, 191, 105, .25);
-}
-
-.theme-toggle-item {
-    display: flex;
-    align-items: center;
-    list-style: none;
 }
 
 /* ---------- Dashboard greeting ---------- */
@@ -389,9 +324,9 @@ html[data-theme="dark"] .theme-toggle:hover {
 }
 
 html[data-theme="dark"] .hero-greeting {
-    background: rgba(255, 191, 105, .14);
-    color: #ffd59c;
-    border: 1px solid rgba(255, 191, 105, .3);
+    background: rgba(var(--c3), .14);
+    color: color-mix(in srgb, rgb(var(--c3)) 65%, #fff);
+    border: 1px solid rgba(var(--c3), .3);
 }
 
 /* Smooth colour change when switching themes (not on first load). */

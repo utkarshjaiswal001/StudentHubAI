@@ -23,7 +23,7 @@
     --soft-shadow: 0 4px 16px rgba(40, 44, 90, .06);
     --hero-gradient: linear-gradient(135deg, #353b86 0%, #4a52b4 48%, #2f7f9c 100%);
     --button-gradient: linear-gradient(135deg, #5a5fd0, #3f8fc0);
-    --focus-ring: 0 0 0 3px rgba(90, 95, 208, .32);
+    --focus-ring: 0 0 0 3px rgba(var(--c1), .32);
 }
 
 /* ---------- Text: the system font is clearer than Arial ---------- */
@@ -31,7 +31,7 @@
 body {
     font-family: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
     background:
-        radial-gradient(circle at 8% 0%, rgba(90, 95, 208, .06), transparent 30%),
+        radial-gradient(circle at 8% 0%, rgba(var(--c1), .06), transparent 30%),
         radial-gradient(circle at 92% 10%, rgba(42, 157, 176, .06), transparent 30%),
         var(--background);
     color: var(--text);
@@ -86,7 +86,7 @@ footer,
 }
 
 .nav-links a:hover {
-    background: rgba(90, 95, 208, .08);
+    background: rgba(var(--c1), .08);
 }
 
 /* ---------- Page headers: deep, muted colours ---------- */

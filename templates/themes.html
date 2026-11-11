@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Themes | StudentHub AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=5) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css', v=19) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css', v=2) }}">
+    {% include "_theme_assets.html" %}
+</head>
+<body>
+    <nav class="navbar">
+        <a class="logo" href="{{ url_for('home') }}">StudentHub AI</a>
+        <ul class="nav-links">
+            <li><a href="{{ url_for('home') }}">Home</a></li>
+            <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+            <li><a href="{{ url_for('notes') }}">Notes</a></li>
+            <li><a href="{{ url_for('chatbot') }}">AI Career Mentor</a></li>
+            {% include "_profile_menu.html" %}
+        </ul>
+    </nav>
+
+    <header class="notes-flow-hero">
+        <span class="section-kicker">MAKE IT YOURS</span>
+        <h1>Pick a theme</h1>
+        <p>Each colour set comes in dark and light. Tap “Use” and the whole site changes. You can switch again any time from the 🎨 button.</p>
+    </header>
+
+    <main class="theme-gallery">
+        {% for palette in theme_palettes %}
+        <section class="theme-option" data-option="{{ palette.id }}" aria-labelledby="theme-{{ palette.id }}">
+            <div class="theme-option-head">
+                <div>
+                    <h2 id="theme-{{ palette.id }}">{{ palette.name }}</h2>
+                    <p>{{ palette.mood }}</p>
+                </div>
+                <span class="theme-dots" aria-hidden="true">{% for color in palette.swatches %}<span class="theme-dot" style="background: {{ color }}"></span>{% endfor %}</span>
+            </div>
+            <div class="theme-sample-pair">
+                {% for mode, label in [("dark", "🌙 Dark"), ("light", "☀️ Light")] %}
+                <div class="theme-sample-wrap">
+                    <div class="theme-sample" data-theme="{{ mode }}" data-palette="{{ palette.id }}" aria-hidden="true">
+                        <div class="ts-hero">
+                            <span class="ts-kicker">AKTU STUDY LIBRARY</span>
+                            <strong>Find notes</strong>
+                        </div>
+                        <div class="ts-body">
+                            <div class="ts-card">
+                                <span class="ts-icon">📘</span>
+                                <span class="ts-copy"><b>Data Structure</b><small>BCS301 · 3 files</small></span>
+                                <span class="ts-badge">New</span>
+                            </div>
+                            <div class="ts-card ts-card-quiet">
+                                <span class="ts-icon">📗</span>
+                                <span class="ts-copy"><b>Engineering Mechanics</b><small>BCE301 · No notes yet</small></span>
+                            </div>
+                            <div class="ts-actions">
+                                <span class="ts-button">Open notes</span>
+                                <span class="ts-link">Preview</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="theme-use-button" type="button" data-mode="{{ mode }}" data-palette="{{ palette.id }}">Use {{ palette.name }} · {{ label }}</button>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endfor %}
+    </main>
+
+    <footer><p>© 2026 StudentHub AI | Developed by <strong>Utkarsh Jaiswal</strong></p></footer>
+    <script src="{{ url_for('static', filename='js/theme_gallery.js', v=1) }}" defer></script>
+</body>
+</html>
