@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=4) }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css', v=19) }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css', v=1) }}">
+    {% include "_theme_assets.html" %}
 </head>
 
 <body>
@@ -45,6 +46,8 @@
     <section class="hero">
 
         <div class="hero-content">
+
+            <span class="hero-greeting" data-greeting="{{ (current_user_name or '').split(' ')[0] }}" hidden></span>
 
             <h1>Your StudentHub Dashboard</h1>
 

@@ -48,6 +48,7 @@ Mentor conversations are stored locally even when AI is not configured. The Open
 - Official AKTU subject list for all six branches (`data/aktu_subjects.json`, from the syllabus PDFs on aktu.ac.in): every syllabus subject appears with its code, even before notes are uploaded.
 - Owner Admin page: upload, edit, and delete notes; read and close student issue reports; reset a student's password (temporary password, must be changed at next sign-in).
 - Uploads are checked for a matching year/semester. The owner picks the subject from the AKTU list for that branch and semester, or types one under "Other" (e.g. open electives).
+- Dark "Aurora" theme by default with a 🌙/☀️ switch in the top bar (the choice is remembered per browser); the light theme stays available.
 - Quick Help gives study pointers for core subjects of every branch and can say where any AKTU subject sits in the syllabus.
 - Notes recommendations and recent activity in the Account Centre.
 - Quick Help and searchable saved Mentor conversation history, with up to 80 conversations shown per student.
@@ -61,4 +62,4 @@ Mentor conversations are stored locally even when AI is not configured. The Open
 - Logins expire after 7 days; security headers (X-Frame-Options, nosniff, Referrer-Policy) on every page.
 - Owner-only upload/edit/delete, checked against the database on every request.
 - Uploaded files: PDF/PPTX only, 20 MB limit, file-content checks, random stored names outside the public folder.
-- Automated tests: `.\.venv\Scripts\python.exe -m unittest discover -s tests` (59 tests).
+- Automated tests: `.\.venv\Scripts\python.exe -m unittest discover -s tests` (60 tests).

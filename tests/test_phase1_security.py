@@ -892,6 +892,17 @@ class PhaseOneSecurityTests(unittest.TestCase):
         self.upload_note(owner, subject="My Open Elective")
         self.assertEqual(self.count_rows("study_notes", "subject = 'My Open Elective'"), 1)
 
+    def test_every_page_loads_dark_theme_and_switch(self):
+        client = app.test_client()
+        for path in ["/", "/notes", "/login", "/register", "/nope"]:
+            with self.subTest(path=path):
+                body = client.get(path).get_data(as_text=True)
+                self.assertIn('setAttribute("data-theme"', body)
+                self.assertIn("css/dark.css", body)
+                self.assertIn("js/theme_toggle.js", body)
+                # Theme files load after the old stylesheets so they can override them.
+                self.assertLess(body.index("css/style.css"), body.index("css/dark.css"))
+
 
     # --- Core strengthening: error pages, backup/restore, Quick Help, spam limits ---
 

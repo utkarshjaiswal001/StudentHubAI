@@ -10,6 +10,7 @@
     <link rel="stylesheet"
           href="{{ url_for('static', filename='css/style.css', v=18) }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css', v=1) }}">
+    {% include "_theme_assets.html" %}
 </head>
 
 <body data-authenticated="{{ 'true' if is_logged_in else 'false' }}">
