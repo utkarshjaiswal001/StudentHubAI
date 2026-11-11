@@ -279,7 +279,7 @@ html[data-fx] :is(.primary-button, .notes-primary-button, .card-btn,
     background: var(--fx-button, var(--button-gradient));
 }
 
-html[data-fx]:is([data-palette="racing"], [data-palette="mocha"], [data-palette="silk"], [data-palette="powder"])
+html[data-fx]:is([data-palette="racing"], [data-palette="mocha"])
     :is(.primary-button, .notes-primary-button, .card-btn, .register-button, .hg-open, .form-card button[type="submit"]) {
     color: #fff;
     text-shadow: 0 1px 1px rgba(0, 0, 0, .25);
@@ -289,7 +289,7 @@ html[data-fx]:is([data-palette="racing"], [data-palette="mocha"], [data-palette=
         0 10px 26px rgba(var(--c1), .35);
 }
 
-html[data-fx]:is([data-palette="racing"], [data-palette="mocha"], [data-palette="silk"], [data-palette="powder"])
+html[data-fx]:is([data-palette="racing"], [data-palette="mocha"])
     :is(.primary-button, .notes-primary-button, .card-btn, .register-button, .hg-open, .form-card button[type="submit"])::before {
     content: "";
     position: absolute;
