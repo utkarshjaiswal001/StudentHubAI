@@ -376,3 +376,115 @@ html[data-theme="light"] .service-icon,
 html[data-theme="light"] .notes-file-icon {
     background: rgba(var(--c1), .12);
 }
+
+/* =========================================================
+   Gentle light mode: no strong colour blocks with white text.
+   Page banners become a soft tint with dark text, buttons are a little
+   muted, and the last white boxes become off-white.
+   ========================================================= */
+
+html[data-theme="light"] {
+    --button-gradient: linear-gradient(135deg,
+        color-mix(in srgb, rgb(var(--c1)) 74%, #8a8d9c),
+        color-mix(in srgb, rgb(var(--c2)) 74%, #8a8d9c));
+    --dark: #2a2f45;
+}
+
+/* Page banners */
+html[data-theme="light"] .hero,
+html[data-theme="light"] .hero-section {
+    background:
+        radial-gradient(ellipse at 15% 0%, rgba(var(--c1), .16), transparent 55%),
+        radial-gradient(ellipse at 90% 100%, rgba(var(--c2), .14), transparent 55%),
+        linear-gradient(135deg,
+            color-mix(in srgb, rgb(var(--c1)) 10%, var(--background)),
+            color-mix(in srgb, rgb(var(--c2)) 8%, var(--background)));
+    color: var(--dark);
+}
+
+html[data-theme="light"] .hero-section::before,
+html[data-theme="light"] .hero-section::after {
+    background: rgba(var(--c1), .06);
+    box-shadow: none;
+}
+
+html[data-theme="light"] .hero h1,
+html[data-theme="light"] .hero-content h1,
+html[data-theme="light"] .hero-content h2 {
+    color: var(--dark);
+    text-shadow: none;
+}
+
+html[data-theme="light"] .hero p,
+html[data-theme="light"] .hero-content p,
+html[data-theme="light"] .hero-description {
+    color: var(--muted);
+}
+
+html[data-theme="light"] .hero-badge {
+    background: rgba(var(--c1), .10);
+    color: var(--primary-dark);
+    border-color: rgba(var(--c1), .25);
+    backdrop-filter: none;
+}
+
+html[data-theme="light"] .hero-greeting {
+    background: rgba(var(--c3), .16);
+    color: color-mix(in srgb, rgb(var(--c3)) 55%, #3a2a10);
+    border: 1px solid rgba(var(--c3), .35);
+}
+
+/* The big home page panel that sits on the banner */
+html[data-theme="light"] .service-showcase {
+    background: color-mix(in srgb, var(--surface) 92%, transparent);
+    border: 1px solid var(--border);
+    box-shadow: var(--soft-shadow);
+}
+
+/* Buttons: muted colour, off-white text, softer shadow */
+html[data-theme="light"] .primary-button,
+html[data-theme="light"] .notes-primary-button,
+html[data-theme="light"] .card-btn,
+html[data-theme="light"] .register-button,
+html[data-theme="light"] .form-card button[type="submit"] {
+    background: var(--button-gradient);
+    color: #fbfaff;
+    box-shadow: 0 4px 14px rgba(var(--c1), .18);
+}
+
+html[data-theme="light"] .secondary-button,
+html[data-theme="light"] .login-button {
+    background: var(--surface);
+    color: var(--primary-dark);
+    border: 1px solid rgba(var(--c1), .25);
+    box-shadow: none;
+}
+
+/* Last white boxes: inputs and search fields */
+html[data-theme="light"] input,
+html[data-theme="light"] select,
+html[data-theme="light"] textarea {
+    background: var(--input-bg);
+    color: var(--dark);
+}
+
+/* Gallery previews follow the gentle light style too. */
+.theme-sample[data-theme="light"] .ts-hero {
+    background:
+        radial-gradient(closest-side at 25% 30%, rgba(var(--c1), .18), transparent),
+        radial-gradient(closest-side at 80% 70%, rgba(var(--c2), .14), transparent),
+        color-mix(in srgb, rgb(var(--c1)) 10%, var(--background));
+}
+
+.theme-sample[data-theme="light"] .ts-hero strong {
+    color: var(--dark);
+}
+
+.theme-sample[data-theme="light"] .ts-kicker {
+    color: var(--primary-dark);
+}
+
+.theme-sample[data-theme="light"] .ts-button {
+    color: #fbfaff;
+    box-shadow: 0 3px 10px rgba(var(--c1), .18);
+}
