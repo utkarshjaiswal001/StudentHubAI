@@ -10,6 +10,5 @@ instance/
 # Local-only files (personal docs, scratch output, server logs)
 tmp/
 *.log
-output/*Resume*
-output/resume_preview.png
+output/
 backups/

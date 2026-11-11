@@ -2,6 +2,24 @@
 
 StudentHub AI is a Flask application for student accounts, course notes, PDF sharing, saved career-mentor conversations, and issue reports.
 
+## Project layout
+
+```
+app.py                 Flask app: routes, database setup, security checks
+Run StudentHub.bat     Double-click to start the site on Windows
+requirements.txt       Python packages
+data/                  AKTU subject list and syllabus (JSON)
+templates/             HTML pages (Jinja)
+static/css/            Stylesheets (themes, layouts, pages)
+static/js/             Page scripts (theme menu, subject page, upload picker)
+tests/                 Automated tests
+tools/                 Build scripts: theme CSS generator, report and slide makers
+docs/                  Guides: deployment, AI setup, demo and viva, project plan
+docs/submission/       Project report (.docx) and presentation (.pptx)
+docs/samples/          A sample notes PDF for trying uploads
+instance/              Local database and uploaded files (not in git)
+```
+
 ## Run locally
 
 From this project directory in PowerShell:
