@@ -13,7 +13,7 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-spec = importlib.util.spec_from_file_location("make_dark_css", ROOT / ".studenthub-build" / "make_dark_css.py")
+spec = importlib.util.spec_from_file_location("make_dark_css", ROOT / "tools" / "make_dark_css.py")
 gen = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(gen)
 
@@ -63,7 +63,7 @@ class ThemeColourCoverageTests(unittest.TestCase):
                             new = gen.convert(prop, value, mode)
                             if new != value:
                                 self.assertIn(new, text, f"{name} is out of date for {source} {selector} {prop}. "
-                                                         "Run: python .studenthub-build/make_dark_css.py")
+                                                         "Run: python tools/make_dark_css.py")
 
     def test_no_fixed_brand_colour_survives_in_either_mode(self):
         css_dir = ROOT / "static" / "css"

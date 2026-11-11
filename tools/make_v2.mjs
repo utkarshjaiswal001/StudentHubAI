@@ -1,7 +1,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { Presentation, PresentationFile } from 'file:///C:/Users/Utkarsh%20Jaiswal/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/@oai/artifact-tool/dist/artifact_tool.mjs';
-const workspace='D:/Student Hub ( PROJECT )'; const build=path.join(workspace,'.studenthub-build'); const final=path.join(workspace,'output','StudentHub_Project_Presentation_GCET_Final_v16.pptx');
+const workspace='D:/Student Hub ( PROJECT )'; const build=path.join(workspace,'tools'); const final=path.join(workspace,'docs','submission','StudentHub_Project_Presentation_GCET_Final_v16.pptx');
 const W=1280,H=720,C={navy:'#102A43',teal:'#007BA7',sky:'#58C2E8',red:'#6BC6E8',gold:'#2F8DBB',mint:'#D9F3EE',paper:'#102A43',white:'#F7FBFF',ink:'#F7FBFF',muted:'#D8EAF3',line:'#355C72',goldText:'#58C2E8',skyText:'#86D8F2',coverWhite:'#FFFFFF',coverMint:'#D9F3EE',coverBlue:'#58C2E8'};
 const p=Presentation.create({slideSize:{width:W,height:H}}); const logoBytes=await fs.readFile(path.join(build,'gcet-logo-transparent.png'));
 function box(s,x,y,w,h,fill,geometry='rect',stroke='none'){return s.shapes.add({geometry,position:{left:x,top:y,width:w,height:h},fill,line:{style:'solid',fill:stroke,width:stroke==='none'?0:1}})}

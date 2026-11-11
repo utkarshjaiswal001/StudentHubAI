@@ -9,8 +9,8 @@ from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 
 ROOT=Path(r'D:\Student Hub ( PROJECT )')
-OUT=ROOT/'StudentHubAI_Mini_Project_Report.docx'
-QA=ROOT/'.studenthub-build'
+OUT=ROOT/'docs'/'submission'/'StudentHubAI_Mini_Project_Report.docx'
+QA=ROOT/'tools'
 QA.mkdir(exist_ok=True)
 
 # Draw a clean architecture figure for insertion into the report.
