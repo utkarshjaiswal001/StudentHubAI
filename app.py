@@ -1466,6 +1466,12 @@ THEME_PALETTES = [
      "swatches": ["#16161c", "#0b7fbf", "#ff2d95"]},
     {"id": "silk", "name": "Silk", "mood": "Mocha, platinum silver and pale lavender. Soft and elegant.",
      "swatches": ["#8a5a44", "#e5e4e2", "#d9cfee"]},
+    {"id": "powder", "name": "Powder Sky", "mood": "Powder blue, lavender white and sunset peach. Soft, airy and calm.",
+     "swatches": ["#8db9f0", "#e9e8f8", "#f5b69e"]},
+    {"id": "obsidian", "name": "Obsidian", "mood": "Obsidian black, chrome silver and laser crimson. Sleek and bold.",
+     "swatches": ["#080808", "#cdcbca", "#d41514"]},
+    {"id": "emerald", "name": "Emerald", "mood": "Jet black, muted moss and neon emerald. Techy and fresh.",
+     "swatches": ["#000000", "#6d8f63", "#39ff88"]},
 ]
 
 # Light mode page/card colour choices. "auto" uses the palette's own tint.

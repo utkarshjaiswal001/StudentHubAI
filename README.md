@@ -48,7 +48,7 @@ Mentor conversations are stored locally even when AI is not configured. The Open
 - Official AKTU subject list for all six branches (`data/aktu_subjects.json`, from the syllabus PDFs on aktu.ac.in): every syllabus subject appears with its code, even before notes are uploaded.
 - Owner Admin page: upload, edit, and delete notes; read and close student issue reports; reset a student's password (temporary password, must be changed at next sign-in).
 - Uploads are checked for a matching year/semester. The owner picks the subject from the AKTU list for that branch and semester, or types one under "Other" (e.g. open electives).
-- Themes: 10 colour sets (Aurora, Ocean, Sunset, Forest, Galaxy, Slate, Racing, Mocha Gold, Neon, Silk), each in dark and light, plus soft light-mode backgrounds (Cream, Sand, Sage, Mist, Lavender, Dim). Pick from the 🎨 button in the top bar or the `/themes` gallery with live previews; the choice is remembered per browser. Default: Aurora dark.
+- Themes: 13 colour sets (Aurora, Ocean, Sunset, Forest, Galaxy, Slate, Racing, Mocha Gold, Neon, Silk, Powder Sky, Obsidian, Emerald), each in dark and light, plus soft light-mode backgrounds (Cream, Sand, Sage, Mist, Lavender, Dim). Pick from the 🎨 button in the top bar or the `/themes` gallery with live previews; the choice is remembered per browser. Default: Aurora dark.
 - Quick Help gives study pointers for core subjects of every branch and can say where any AKTU subject sits in the syllabus.
 - Notes recommendations and recent activity in the Account Centre.
 - Quick Help and searchable saved Mentor conversation history, with up to 80 conversations shown per student.

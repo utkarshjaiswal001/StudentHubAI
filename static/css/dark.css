@@ -192,6 +192,7 @@ html[data-theme="dark"] .service-showcase {
 html[data-theme="dark"] .primary-button,
 html[data-theme="dark"] .notes-primary-button,
 html[data-theme="dark"] .card-btn,
+html[data-theme="dark"] .register-button,
 html[data-theme="dark"] .form-card button[type="submit"] {
     background: var(--button-gradient);
     background-size: 180% 100%;

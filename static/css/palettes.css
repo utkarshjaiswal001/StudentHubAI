@@ -321,6 +321,94 @@
     --button-gradient: linear-gradient(135deg, #7c62c4, #8b4e37);
 }
 
+/* Powder Sky: powder blue + soft lavender white + warm sunset peach */
+[data-theme="dark"][data-palette="powder"] {
+    --c1: 141, 185, 240;
+    --c2: 245, 182, 158;
+    --c3: 233, 232, 248;
+    --primary-dark: #a9cbf5;
+    --dark: #f2f3fb;
+    --text: #d8dbec;
+    --muted: #9aa0bb;
+    --background: #10131f;
+    --surface: #181d2e;
+    --surface-2: #1f2539;
+    --input-bg: #131828;
+    --footer-bg: #0a0c15;
+    --hero-gradient: linear-gradient(135deg, #141a30 0%, #1d2a4d 50%, #3a2a33 100%);
+    --button-gradient: linear-gradient(120deg, #4f86d6 0%, #e08a68 100%);
+}
+[data-theme="light"][data-palette="powder"] {
+    --background: #e2e4f3;
+    --surface: #eeeffa;
+    --surface-2: #e6e7f5;
+    --input-bg: #f4f4fc;
+    --c1: 74, 128, 206;
+    --c2: 224, 128, 90;
+    --c3: 245, 182, 158;
+    --primary-dark: #3a68b0;
+    --hero-gradient: linear-gradient(135deg, #5b7fc4 0%, #8db9f0 50%, #f5b69e 100%);
+    --button-gradient: linear-gradient(135deg, #5a8fd8, #e8906a);
+}
+
+/* Obsidian: obsidian black + chrome silver + laser crimson */
+[data-theme="dark"][data-palette="obsidian"] {
+    --c1: 222, 48, 46;
+    --c2: 205, 203, 202;
+    --c3: 255, 120, 110;
+    --primary-dark: #ff7a76;
+    --dark: #f2f2f2;
+    --text: #d6d5d4;
+    --muted: #9a9897;
+    --background: #0b0b0b;
+    --surface: #151515;
+    --surface-2: #1c1c1c;
+    --input-bg: #101010;
+    --footer-bg: #050505;
+    --hero-gradient: linear-gradient(135deg, #0b0b0b 0%, #1a1a1a 50%, #3a0808 100%);
+    --button-gradient: linear-gradient(120deg, #d41514 0%, #a01818 100%);
+}
+[data-theme="light"][data-palette="obsidian"] {
+    --background: #e6e5e4;
+    --surface: #f1f0ef;
+    --surface-2: #e9e8e7;
+    --input-bg: #f7f6f5;
+    --c1: 196, 22, 20;
+    --c2: 90, 88, 87;
+    --primary-dark: #a31210;
+    --hero-gradient: linear-gradient(135deg, #080808 0%, #2a2a2a 55%, #7a0e0d 100%);
+    --button-gradient: linear-gradient(135deg, #d41514, #8e1a18);
+}
+
+/* Emerald: jet black + muted moss green + neon emerald (toned down a little) */
+[data-theme="dark"][data-palette="emerald"] {
+    --c1: 57, 220, 128;
+    --c2: 109, 143, 99;
+    --c3: 180, 240, 200;
+    --primary-dark: #7debaa;
+    --dark: #eff8f1;
+    --text: #d3e2d6;
+    --muted: #91a596;
+    --background: #0a0d0b;
+    --surface: #131915;
+    --surface-2: #1a221c;
+    --input-bg: #0e130f;
+    --footer-bg: #050706;
+    --hero-gradient: linear-gradient(135deg, #050806 0%, #10241a 50%, #1c2a18 100%);
+    --button-gradient: linear-gradient(120deg, #2fbf70 0%, #5f8a55 100%);
+}
+[data-theme="light"][data-palette="emerald"] {
+    --background: #e4ebe5;
+    --surface: #f0f5f1;
+    --surface-2: #e7eee8;
+    --input-bg: #f6faf7;
+    --c1: 30, 150, 85;
+    --c2: 85, 115, 77;
+    --primary-dark: #1a7a45;
+    --hero-gradient: linear-gradient(135deg, #0a0f0b 0%, #1f4a30 55%, #4c6b44 100%);
+    --button-gradient: linear-gradient(135deg, #21a35e, #5f8a55);
+}
+
 /* ---------- Light background tones (light mode only) ----------
    <html data-bg="..."> swaps the page and card colours behind any palette.
    "auto" (no override) keeps the palette's own soft tint. */
