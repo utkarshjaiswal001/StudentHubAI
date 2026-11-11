@@ -921,6 +921,18 @@ class PhaseOneSecurityTests(unittest.TestCase):
         # The head script only accepts known palette names.
         self.assertIn('"aurora", "ocean"', body)
 
+    def test_glass_layout_is_offered_and_loaded(self):
+        client = app.test_client()
+        home = client.get("/").get_data(as_text=True)
+        self.assertIn("css/layout-glass.css", home)
+        self.assertIn('l==="glass"?"glass":"classic"', home)
+        self.assertIn('class="hero-glass-card"', home)
+        gallery = client.get("/themes").get_data(as_text=True)
+        self.assertIn('data-layout="classic"', gallery)
+        self.assertIn('data-layout="glass"', gallery)
+        css = (Path(studenthub.app.root_path) / "static" / "css" / "layout-glass.css").read_text(encoding="utf-8")
+        self.assertIn('html[data-layout="glass"] .navbar', css)
+
     def test_theme_gallery_offers_light_background_tones(self):
         body = app.test_client().get("/themes").get_data(as_text=True)
         css = (Path(studenthub.app.root_path) / "static" / "css" / "palettes.css").read_text(encoding="utf-8")

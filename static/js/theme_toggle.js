@@ -20,6 +20,16 @@
         return root.getAttribute("data-bg") || "auto";
     }
 
+    function layout() {
+        return root.getAttribute("data-layout") === "glass" ? "glass" : "classic";
+    }
+
+    function setLayout(value) {
+        root.setAttribute("data-layout", value === "glass" ? "glass" : "classic");
+        try { localStorage.setItem("sh-layout", layout()); } catch (e) { /* ignore */ }
+        document.dispatchEvent(new CustomEvent("studenthub:theme"));
+    }
+
     function apply(newMode, newPalette, newBackground) {
         root.classList.add("theme-switching");
         if (newMode) root.setAttribute("data-theme", newMode);
@@ -36,6 +46,7 @@
 
     window.StudentHubTheme = {
         apply: apply, mode: mode, palette: palette, background: background,
+        layout: layout, setLayout: setLayout,
         palettes: palettes, backgrounds: backgrounds
     };
 
@@ -70,6 +81,17 @@
             modes.appendChild(b);
         });
         panel.appendChild(modes);
+
+        panel.appendChild(el("p", "theme-panel-label", "Layout"));
+        var layouts = el("div", "theme-mode-row");
+        [["classic", "▭ Classic"], ["glass", "✨ Glass"]].forEach(function (item) {
+            var b = el("button", "theme-mode-btn theme-layout-btn", item[1]);
+            b.type = "button";
+            b.dataset.layout = item[0];
+            b.addEventListener("click", function () { setLayout(item[0]); });
+            layouts.appendChild(b);
+        });
+        panel.appendChild(layouts);
 
         panel.appendChild(el("p", "theme-panel-label", "Colours"));
         var list = el("div", "theme-palette-list");
@@ -113,8 +135,11 @@
         panel.appendChild(more);
 
         function refresh() {
-            panel.querySelectorAll(".theme-mode-btn").forEach(function (b) {
+            panel.querySelectorAll(".theme-mode-btn[data-mode]").forEach(function (b) {
                 b.setAttribute("aria-pressed", String(b.dataset.mode === mode()));
+            });
+            panel.querySelectorAll(".theme-layout-btn").forEach(function (b) {
+                b.setAttribute("aria-pressed", String(b.dataset.layout === layout()));
             });
             panel.querySelectorAll(".theme-palette-btn").forEach(function (b) {
                 b.setAttribute("aria-pressed", String(b.dataset.palette === palette()));
@@ -182,8 +207,27 @@
         node.hidden = false;
     }
 
+    // Glass layout: small icon rail on the left (CSS shows it only in Glass on big screens).
+    function placeRail() {
+        var rail = el("nav", "glass-rail");
+        rail.setAttribute("aria-label", "Quick links");
+        var path = window.location.pathname;
+        [["/", "🏠", "Home"], ["/notes", "📚", "Notes"], ["/dashboard", "📊", "Dashboard"],
+         ["/chatbot", "🤖", "AI Career Mentor"], ["/themes", "🎨", "Themes"]].forEach(function (item) {
+            var a = el("a", "", item[1]);
+            a.href = item[0];
+            a.title = item[2];
+            a.setAttribute("aria-label", item[2]);
+            var here = item[0] === "/" ? path === "/" : path.indexOf(item[0]) === 0;
+            if (here) a.setAttribute("aria-current", "page");
+            rail.appendChild(a);
+        });
+        document.body.appendChild(rail);
+    }
+
     function start() {
         placeMenu();
+        placeRail();
         greet();
     }
 

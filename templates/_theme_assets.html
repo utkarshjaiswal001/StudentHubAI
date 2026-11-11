@@ -1,9 +1,10 @@
-<script>(function(){var t,p,ok={{ theme_palettes|map(attribute='id')|list|tojson }};try{t=localStorage.getItem("sh-theme");p=localStorage.getItem("sh-palette");}catch(e){}var d=document.documentElement;d.setAttribute("data-theme",t==="light"?"light":"dark");d.setAttribute("data-palette",ok.indexOf(p)>-1?p:"aurora");var b,bgs={{ theme_light_backgrounds|map(attribute='id')|list|tojson }};try{b=localStorage.getItem("sh-bg");}catch(e){}d.setAttribute("data-bg",bgs.indexOf(b)>-1?b:"auto");})();</script>
+<script>(function(){var t,p,ok={{ theme_palettes|map(attribute='id')|list|tojson }};try{t=localStorage.getItem("sh-theme");p=localStorage.getItem("sh-palette");}catch(e){}var d=document.documentElement;d.setAttribute("data-theme",t==="light"?"light":"dark");d.setAttribute("data-palette",ok.indexOf(p)>-1?p:"aurora");var b,bgs={{ theme_light_backgrounds|map(attribute='id')|list|tojson }};try{b=localStorage.getItem("sh-bg");}catch(e){}d.setAttribute("data-bg",bgs.indexOf(b)>-1?b:"auto");var l;try{l=localStorage.getItem("sh-layout");}catch(e){}d.setAttribute("data-layout",l==="glass"?"glass":"classic");})();</script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/palettes.css', v=5) }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/dark-auto.css', v=3) }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/light-auto.css', v=1) }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/dark.css', v=3) }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme-ui.css', v=5) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme-ui.css', v=6) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/layout-glass.css', v=1) }}">
     <script type="application/json" id="theme-palettes">{{ theme_palettes|tojson }}</script>
     <script type="application/json" id="theme-backgrounds">{{ theme_light_backgrounds|tojson }}</script>
-    <script src="{{ url_for('static', filename='js/theme_toggle.js', v=3) }}" defer></script>
+    <script src="{{ url_for('static', filename='js/theme_toggle.js', v=4) }}" defer></script>

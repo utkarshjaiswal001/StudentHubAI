@@ -17,6 +17,9 @@
             var active = theme.mode() === "light" && button.dataset.bg === theme.background();
             setLabel(button, active, button.textContent.replace(/^✓ In use · |^Use /, ""));
         });
+        document.querySelectorAll(".theme-layout-use").forEach(function (button) {
+            setLabel(button, button.dataset.layout === theme.layout(), button.textContent.replace(/^✓ In use · |^Use /, ""));
+        });
         // Background previews show the colour set currently in use.
         document.querySelectorAll("[data-follow-palette]").forEach(function (sample) {
             sample.setAttribute("data-palette", theme.palette());
@@ -26,7 +29,9 @@
     document.addEventListener("click", function (event) {
         var button = event.target.closest(".theme-use-button");
         if (!button || !window.StudentHubTheme) return;
-        if (button.dataset.bg) {
+        if (button.dataset.layout) {
+            window.StudentHubTheme.setLayout(button.dataset.layout);
+        } else if (button.dataset.bg) {
             window.StudentHubTheme.apply("light", null, button.dataset.bg);
         } else {
             window.StudentHubTheme.apply(button.dataset.mode, button.dataset.palette);

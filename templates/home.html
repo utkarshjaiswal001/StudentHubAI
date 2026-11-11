@@ -132,6 +132,18 @@
             </div>
 
 
+            <!-- Floating quick finder (shown only in the Glass layout) -->
+            <aside class="hero-glass-card" aria-label="Find your notes">
+                <p class="hg-kicker">AKTU study library</p>
+                <h3>Find your notes</h3>
+                <div class="hg-years">
+                    {% for year in ["1st Year", "2nd Year", "3rd Year", "4th Year"] %}
+                        <a href="{{ url_for('note_branches', year=year) }}">{{ year }}</a>
+                    {% endfor %}
+                </div>
+                <a class="hg-open" href="{{ url_for('notes') }}">Browse all notes <span aria-hidden="true">→</span></a>
+            </aside>
+
             <!-- Large service showcase -->
 
             <div id="services" class="service-showcase page-section">
