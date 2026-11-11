@@ -1458,6 +1458,14 @@ THEME_PALETTES = [
      "swatches": ["#c084fc", "#f472b6", "#fcd34d"]},
     {"id": "slate", "name": "Slate", "mood": "Quiet grey-blue with soft green. Minimal and easy on the eyes.",
      "swatches": ["#7aa2f7", "#9ece6a", "#e0af68"]},
+    {"id": "racing", "name": "Racing", "mood": "Charcoal, forest green and crimson. Sharp and premium.",
+     "swatches": ["#2b2b2b", "#1f6f58", "#c8262e"]},
+    {"id": "mocha", "name": "Mocha Gold", "mood": "Mocha brown, champagne gold and burnt amber. Warm and cosy.",
+     "swatches": ["#5a4034", "#f2d39c", "#c96a28"]},
+    {"id": "neon", "name": "Neon", "mood": "Jet black, cerulean blue and neon rose. Futuristic and bold.",
+     "swatches": ["#16161c", "#0b7fbf", "#ff2d95"]},
+    {"id": "silk", "name": "Silk", "mood": "Mocha, platinum silver and pale lavender. Soft and elegant.",
+     "swatches": ["#8a5a44", "#e5e4e2", "#d9cfee"]},
 ]
 
 # Light mode page/card colour choices. "auto" uses the palette's own tint.

@@ -207,6 +207,120 @@
     --button-gradient: linear-gradient(135deg, #4a6fc4, #4a8fa8);
 }
 
+/* ---------- Reel-inspired sets (added Nov 2026) ---------- */
+
+/* Racing: charcoal + forest green + crimson */
+[data-theme="dark"][data-palette="racing"] {
+    --c1: 224, 64, 72;
+    --c2: 46, 160, 120;
+    --c3: 255, 150, 140;
+    --primary-dark: #ff8f94;
+    --dark: #f3f1f0;
+    --text: #dcd8d6;
+    --muted: #9e9a98;
+    --background: #111614;
+    --surface: #19201d;
+    --surface-2: #202925;
+    --input-bg: #141a18;
+    --footer-bg: #0b0f0d;
+    --hero-gradient: linear-gradient(135deg, #141414 0%, #0f2420 55%, #3a0f14 100%);
+}
+[data-theme="light"][data-palette="racing"] {
+    --background: #ece9e6;
+    --surface: #f6f4f2;
+    --surface-2: #eeebe8;
+    --input-bg: #faf9f7;
+    --c1: 178, 34, 42;
+    --c2: 22, 110, 88;
+    --primary-dark: #9a1c24;
+    --hero-gradient: linear-gradient(135deg, #1c1c1c 0%, #173a32 55%, #6e1820 100%);
+    --button-gradient: linear-gradient(135deg, #b2222a, #1f6f58);
+}
+
+/* Mocha Gold: mocha brown + champagne gold + burnt amber */
+[data-theme="dark"][data-palette="mocha"] {
+    --c1: 212, 120, 48;
+    --c2: 214, 170, 96;
+    --c3: 246, 216, 160;
+    --primary-dark: #f0c890;
+    --dark: #f8efe4;
+    --text: #e6d9cc;
+    --muted: #ab9a8a;
+    --background: #1a1310;
+    --surface: #251b16;
+    --surface-2: #2e221c;
+    --input-bg: #1e1612;
+    --footer-bg: #110c0a;
+    --hero-gradient: linear-gradient(135deg, #21160f 0%, #3a2617 50%, #4a2e14 100%);
+}
+[data-theme="light"][data-palette="mocha"] {
+    --background: #efe6da;
+    --surface: #f8f2ea;
+    --surface-2: #f0e8dc;
+    --input-bg: #fbf7f1;
+    --c1: 176, 92, 30;
+    --c2: 150, 110, 50;
+    --primary-dark: #8e4a16;
+    --hero-gradient: linear-gradient(135deg, #3d2a20 0%, #6b4426 50%, #a0601f 100%);
+    --button-gradient: linear-gradient(135deg, #c06a24, #a87a3a);
+}
+
+/* Neon: jet black + cerulean blue + neon rose (toned down a little for comfort) */
+[data-theme="dark"][data-palette="neon"] {
+    --c1: 52, 160, 224;
+    --c2: 255, 72, 160;
+    --c3: 255, 150, 200;
+    --primary-dark: #7cc6f2;
+    --dark: #f4f4f8;
+    --text: #d8d8e2;
+    --muted: #9494a6;
+    --background: #0b0b0e;
+    --surface: #15151b;
+    --surface-2: #1c1c24;
+    --input-bg: #101015;
+    --footer-bg: #050507;
+    --hero-gradient: linear-gradient(135deg, #0a0a12 0%, #0b2236 50%, #3a0b2a 100%);
+}
+[data-theme="light"][data-palette="neon"] {
+    --background: #e9eaf0;
+    --surface: #f4f5f8;
+    --surface-2: #eceef3;
+    --input-bg: #f8f9fb;
+    --c1: 6, 112, 167;
+    --c2: 214, 36, 122;
+    --primary-dark: #055a87;
+    --hero-gradient: linear-gradient(135deg, #0d0d14 0%, #0a3a5c 50%, #7a1450 100%);
+    --button-gradient: linear-gradient(135deg, #0670a7, #d6247a);
+}
+
+/* Silk: mocha + platinum silver + pale lavender */
+[data-theme="dark"][data-palette="silk"] {
+    --c1: 160, 138, 220;
+    --c2: 176, 112, 84;
+    --c3: 229, 228, 226;
+    --primary-dark: #cdbdf3;
+    --dark: #f5f1ee;
+    --text: #e2d9d3;
+    --muted: #a89c95;
+    --background: #1a1412;
+    --surface: #251d1a;
+    --surface-2: #2e2521;
+    --input-bg: #1e1815;
+    --footer-bg: #110d0b;
+    --hero-gradient: linear-gradient(135deg, #1e1512 0%, #3a2620 50%, #2e2540 100%);
+}
+[data-theme="light"][data-palette="silk"] {
+    --background: #e9e6e6;
+    --surface: #f3f2f1;
+    --surface-2: #eae8e7;
+    --input-bg: #f8f7f6;
+    --c1: 124, 98, 196;
+    --c2: 139, 78, 55;
+    --primary-dark: #5e46a6;
+    --hero-gradient: linear-gradient(135deg, #4a2e24 0%, #7a4e3a 50%, #6a5a9a 100%);
+    --button-gradient: linear-gradient(135deg, #7c62c4, #8b4e37);
+}
+
 /* ---------- Light background tones (light mode only) ----------
    <html data-bg="..."> swaps the page and card colours behind any palette.
    "auto" (no override) keeps the palette's own soft tint. */
