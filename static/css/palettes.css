@@ -206,3 +206,43 @@
     --hero-gradient: linear-gradient(135deg, #2b3247 0%, #38425e 50%, #2f4550 100%);
     --button-gradient: linear-gradient(135deg, #4a6fc4, #4a8fa8);
 }
+
+/* ---------- Light background tones (light mode only) ----------
+   <html data-bg="..."> swaps the page and card colours behind any palette.
+   "auto" (no override) keeps the palette's own soft tint. */
+[data-theme="light"][data-bg="cream"] {
+    --background: #f1e9d6;
+    --surface: #f9f3e6;
+    --surface-2: #efe6d2;
+    --input-bg: #fcf8ee;
+}
+[data-theme="light"][data-bg="sand"] {
+    --background: #e7dccb;
+    --surface: #f2eadd;
+    --surface-2: #e4d9c6;
+    --input-bg: #f6f0e6;
+}
+[data-theme="light"][data-bg="sage"] {
+    --background: #dbe5da;
+    --surface: #e9f0e7;
+    --surface-2: #d8e2d6;
+    --input-bg: #f0f5ee;
+}
+[data-theme="light"][data-bg="mist"] {
+    --background: #d9e2ec;
+    --surface: #e8eef5;
+    --surface-2: #d6dfea;
+    --input-bg: #eff3f8;
+}
+[data-theme="light"][data-bg="lavender"] {
+    --background: #e2dcef;
+    --surface: #eeeaf7;
+    --surface-2: #dfd9ec;
+    --input-bg: #f4f1fa;
+}
+[data-theme="light"][data-bg="dim"] {
+    --background: #d3d6dd;
+    --surface: #e1e3e9;
+    --surface-2: #d0d3da;
+    --input-bg: #e8eaef;
+}

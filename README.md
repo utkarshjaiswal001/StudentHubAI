@@ -62,4 +62,4 @@ Mentor conversations are stored locally even when AI is not configured. The Open
 - Logins expire after 7 days; security headers (X-Frame-Options, nosniff, Referrer-Policy) on every page.
 - Owner-only upload/edit/delete, checked against the database on every request.
 - Uploaded files: PDF/PPTX only, 20 MB limit, file-content checks, random stored names outside the public folder.
-- Automated tests: `.\.venv\Scripts\python.exe -m unittest discover -s tests` (61 tests).
+- Automated tests: `.\.venv\Scripts\python.exe -m unittest discover -s tests` (62 tests).

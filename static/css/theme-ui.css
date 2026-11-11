@@ -488,3 +488,72 @@ html[data-theme="light"] textarea {
     color: #fbfaff;
     box-shadow: 0 3px 10px rgba(var(--c1), .18);
 }
+
+/* ---------- Light background tones in the 🎨 menu ---------- */
+
+.theme-bg-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.theme-bg-btn {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 2px solid var(--border);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+
+.theme-bg-btn.is-auto {
+    background: linear-gradient(135deg, rgba(var(--c1), .35), rgba(var(--c2), .35));
+}
+
+.theme-bg-btn:hover {
+    transform: scale(1.1);
+}
+
+.theme-bg-btn[aria-pressed="true"] {
+    border-color: rgb(var(--c1));
+    box-shadow: 0 0 0 3px rgba(var(--c1), .25);
+}
+
+.theme-bg-name {
+    min-height: 1.2em;
+    margin: 8px 2px 0;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+/* ---------- Light background section on /themes ---------- */
+
+.theme-bg-gallery {
+    width: min(1180px, 100%);
+    margin: 0 auto;
+    padding: 36px 5% 0;
+}
+
+.theme-bg-gallery-head h2 {
+    margin: 0 0 4px;
+    color: var(--dark);
+    font-size: 24px;
+}
+
+.theme-bg-gallery-head p {
+    margin: 0 0 16px;
+    color: var(--muted);
+}
+
+.theme-bg-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 14px;
+}
+
+.theme-bg-mood {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.4;
+}

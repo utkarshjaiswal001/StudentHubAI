@@ -18,7 +18,7 @@
 | 0:55 | Owner window: Admin → Manage notes → Edit a note | "Only the owner can upload, edit, or delete notes. Uploads are checked: the semester must match the year." |
 | 1:15 | Admin → Issue reports → Mark closed | "Students report problems; the admin tracks and closes them." |
 | 1:25 | Student window: log out, enter a wrong password 5 times | "After 5 wrong passwords the account locks for 15 minutes — this blocks password guessing." |
-| 1:40 | Show terminal: run the tests | "61 automated tests check security rules, the notes flow, admin tools, and accounts." |
+| 1:40 | Show terminal: run the tests | "62 automated tests check security rules, the notes flow, admin tools, and accounts." |
 | 1:55 | — | "Future scope: free AI Mentor replies, email password reset, and searching inside PDFs." |
 
 Test command: `.\.venv\Scripts\python.exe -m unittest discover -s tests`
@@ -59,7 +59,7 @@ They report a login issue; the admin resets it to a temporary password from the 
 Inserting SQL code through form fields. All queries use `?` placeholders, so user input is always treated as data, never as SQL.
 
 **Q: How did you test it?**
-61 automated tests using Python's `unittest` and Flask's test client, run against a temporary database. They cover login, registration, CSRF, owner-only access, the notes flow, upload rules, lockout, admin tools, and account settings.
+62 automated tests using Python's `unittest` and Flask's test client, run against a temporary database. They cover login, registration, CSRF, owner-only access, the notes flow, upload rules, lockout, admin tools, and account settings.
 
 **Q: How will you host it for free?**
 PythonAnywhere's free plan. The database and uploads live in the account's storage. The AI key is left empty so there are no costs.

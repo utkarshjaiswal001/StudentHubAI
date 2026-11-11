@@ -921,6 +921,20 @@ class PhaseOneSecurityTests(unittest.TestCase):
         # The head script only accepts known palette names.
         self.assertIn('"aurora", "ocean"', body)
 
+    def test_theme_gallery_offers_light_background_tones(self):
+        body = app.test_client().get("/themes").get_data(as_text=True)
+        css = (Path(studenthub.app.root_path) / "static" / "css" / "palettes.css").read_text(encoding="utf-8")
+        tones = studenthub.THEME_LIGHT_BACKGROUNDS
+        self.assertGreaterEqual(len(tones), 5)
+        for tone in tones:
+            with self.subTest(tone=tone["id"]):
+                self.assertIn(f'data-bg="{tone["id"]}"', body)
+                self.assertIn(f'Use {tone["name"]}', body)
+                if tone["id"] != "auto":
+                    self.assertIn(f'[data-theme="light"][data-bg="{tone["id"]}"]', css)
+        # The head script only accepts known background names.
+        self.assertIn('"cream"', body)
+
 
     # --- Core strengthening: error pages, backup/restore, Quick Help, spam limits ---
 

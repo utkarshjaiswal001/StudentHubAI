@@ -27,6 +27,34 @@
         <p>Each colour set comes in dark and light. Tap “Use” and the whole site changes. You can switch again any time from the 🎨 button.</p>
     </header>
 
+    <section class="theme-bg-gallery" aria-labelledby="light-bg-title">
+        <div class="theme-bg-gallery-head">
+            <h2 id="light-bg-title">Light background</h2>
+            <p>For light mode: choose the page colour that feels easiest on your eyes. It works with any colour set below.</p>
+        </div>
+        <div class="theme-bg-grid">
+            {% for bg in theme_light_backgrounds %}
+            <div class="theme-sample-wrap">
+                <div class="theme-sample" data-theme="light" data-palette="aurora" data-bg="{{ bg.id }}" data-follow-palette aria-hidden="true">
+                    <div class="ts-body">
+                        <div class="ts-card">
+                            <span class="ts-icon">📘</span>
+                            <span class="ts-copy"><b>Data Structure</b><small>BCS301 · 3 files</small></span>
+                            <span class="ts-badge">New</span>
+                        </div>
+                        <div class="ts-actions">
+                            <span class="ts-button">Open notes</span>
+                            <span class="ts-link">Preview</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="theme-use-button theme-bg-use" type="button" data-bg="{{ bg.id }}" title="{{ bg.mood }}">Use {{ bg.name }}</button>
+                <small class="theme-bg-mood">{{ bg.mood }}</small>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
     <main class="theme-gallery">
         {% for palette in theme_palettes %}
         <section class="theme-option" data-option="{{ palette.id }}" aria-labelledby="theme-{{ palette.id }}">
@@ -70,6 +98,6 @@
     </main>
 
     <footer><p>© 2026 StudentHub AI | Developed by <strong>Utkarsh Jaiswal</strong></p></footer>
-    <script src="{{ url_for('static', filename='js/theme_gallery.js', v=1) }}" defer></script>
+    <script src="{{ url_for('static', filename='js/theme_gallery.js', v=2) }}" defer></script>
 </body>
 </html>

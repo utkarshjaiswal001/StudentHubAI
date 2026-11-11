@@ -5,6 +5,8 @@
     var root = document.documentElement;
     var dataEl = document.getElementById("theme-palettes");
     var palettes = dataEl ? JSON.parse(dataEl.textContent) : [];
+    var bgEl = document.getElementById("theme-backgrounds");
+    var backgrounds = bgEl ? JSON.parse(bgEl.textContent) : [];
 
     function mode() {
         return root.getAttribute("data-theme") === "light" ? "light" : "dark";
@@ -14,19 +16,28 @@
         return root.getAttribute("data-palette") || "aurora";
     }
 
-    function apply(newMode, newPalette) {
+    function background() {
+        return root.getAttribute("data-bg") || "auto";
+    }
+
+    function apply(newMode, newPalette, newBackground) {
         root.classList.add("theme-switching");
         if (newMode) root.setAttribute("data-theme", newMode);
         if (newPalette) root.setAttribute("data-palette", newPalette);
+        if (newBackground) root.setAttribute("data-bg", newBackground);
         try {
             localStorage.setItem("sh-theme", mode());
             localStorage.setItem("sh-palette", palette());
+            localStorage.setItem("sh-bg", background());
         } catch (e) { /* private browsing: still works for this page */ }
         setTimeout(function () { root.classList.remove("theme-switching"); }, 400);
         document.dispatchEvent(new CustomEvent("studenthub:theme"));
     }
 
-    window.StudentHubTheme = { apply: apply, mode: mode, palette: palette, palettes: palettes };
+    window.StudentHubTheme = {
+        apply: apply, mode: mode, palette: palette, background: background,
+        palettes: palettes, backgrounds: backgrounds
+    };
 
     function el(tag, className, text) {
         var node = document.createElement(tag);
@@ -80,6 +91,23 @@
         });
         panel.appendChild(list);
 
+        if (backgrounds.length) {
+            panel.appendChild(el("p", "theme-panel-label", "Light background"));
+            var tones = el("div", "theme-bg-row");
+            backgrounds.forEach(function (bg) {
+                var b = el("button", "theme-bg-btn" + (bg.id === "auto" ? " is-auto" : ""));
+                b.type = "button";
+                b.dataset.bg = bg.id;
+                b.title = bg.name + ": " + bg.mood;
+                b.setAttribute("aria-label", "Light background: " + bg.name);
+                if (bg.color) b.style.background = bg.color;
+                b.addEventListener("click", function () { apply("light", null, bg.id); });
+                tones.appendChild(b);
+            });
+            panel.appendChild(tones);
+            panel.appendChild(el("p", "theme-bg-name"));
+        }
+
         var more = el("a", "theme-gallery-link", "See all themes with previews →");
         more.href = "/themes";
         panel.appendChild(more);
@@ -91,6 +119,16 @@
             panel.querySelectorAll(".theme-palette-btn").forEach(function (b) {
                 b.setAttribute("aria-pressed", String(b.dataset.palette === palette()));
             });
+            panel.querySelectorAll(".theme-bg-btn").forEach(function (b) {
+                b.setAttribute("aria-pressed", String(b.dataset.bg === background()));
+            });
+            var label = panel.querySelector(".theme-bg-name");
+            if (label) {
+                var current = backgrounds.filter(function (bg) { return bg.id === background(); })[0];
+                label.textContent = mode() === "light"
+                    ? (current ? current.name + " · " + current.mood : "")
+                    : "Used in light mode.";
+            }
         }
 
         function open(show) {

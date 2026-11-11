@@ -781,6 +781,7 @@ def inject_user_state():
         "ai_configured": bool(os.environ.get("OPENAI_API_KEY", "").strip()),
         "csrf_token": get_csrf_token(),
         "theme_palettes": THEME_PALETTES,
+        "theme_light_backgrounds": THEME_LIGHT_BACKGROUNDS,
     }
 
 
@@ -1457,6 +1458,17 @@ THEME_PALETTES = [
      "swatches": ["#c084fc", "#f472b6", "#fcd34d"]},
     {"id": "slate", "name": "Slate", "mood": "Quiet grey-blue with soft green. Minimal and easy on the eyes.",
      "swatches": ["#7aa2f7", "#9ece6a", "#e0af68"]},
+]
+
+# Light mode page/card colour choices. "auto" uses the palette's own tint.
+THEME_LIGHT_BACKGROUNDS = [
+    {"id": "auto", "name": "Auto", "color": "", "mood": "Soft tint of your colour set."},
+    {"id": "cream", "name": "Cream", "color": "#f1e9d6", "mood": "Warm paper, like a notebook page."},
+    {"id": "sand", "name": "Sand", "color": "#e7dccb", "mood": "Light beige. Warm and calm."},
+    {"id": "sage", "name": "Sage", "color": "#dbe5da", "mood": "Soft grey-green. Very relaxing."},
+    {"id": "mist", "name": "Mist", "color": "#d9e2ec", "mood": "Soft grey-blue. Cool and clean."},
+    {"id": "lavender", "name": "Lavender", "color": "#e2dcef", "mood": "Soft lilac. Gentle."},
+    {"id": "dim", "name": "Dim", "color": "#d3d6dd", "mood": "Soft grey. Least bright, for eye comfort."},
 ]
 
 
