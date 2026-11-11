@@ -43,6 +43,12 @@
                     <label for="note-title">Title</label>
                     <input id="note-title" name="title" maxlength="120" required value="{{ form.title }}">
                 </div>
+                <div class="notes-field owner-upload-wide">
+                    <label for="note-kind">Type</label>
+                    <select id="note-kind" name="kind" required>
+                        {% for value, label in note_kinds.items() %}<option value="{{ value }}" {% if form.kind == value %}selected{% endif %}>{{ label }}</option>{% endfor %}
+                    </select>
+                </div>
                 <div class="notes-field">
                     <label for="note-branch">Branch</label>
                     <select id="note-branch" name="branch" required>

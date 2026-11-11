@@ -15,7 +15,9 @@ Last updated: 2026-11-05 · Budget: free only · AI Mentor work: out of scope fo
 | 7 AKTU subjects | ✅ Official subject list (all branches, all years) on Notes pages, upload picker, Quick Help |
 | 6 Submission | ✅ Report + slides updated, DEMO_AND_VIVA.md written · Rest handled by you separately |
 
-Tests: 67, all passing.
+| 8 Study tools | ✅ Subject pages with previous year papers, official syllabus checklist with progress, ⭐ saved notes in Account Centre; default look Glass + Galaxy + Dark |
+
+Tests: 75, all passing.
 
 **Who does what**
 - **Claude** makes every change to the project files, writes tests, runs them, and commits.

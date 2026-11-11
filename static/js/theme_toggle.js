@@ -13,7 +13,7 @@
     }
 
     function palette() {
-        return root.getAttribute("data-palette") || "aurora";
+        return root.getAttribute("data-palette") || "galaxy";
     }
 
     function background() {
@@ -21,11 +21,11 @@
     }
 
     function layout() {
-        return root.getAttribute("data-layout") === "glass" ? "glass" : "classic";
+        return root.getAttribute("data-layout") === "classic" ? "classic" : "glass";
     }
 
     function setLayout(value) {
-        root.setAttribute("data-layout", value === "glass" ? "glass" : "classic");
+        root.setAttribute("data-layout", value === "classic" ? "classic" : "glass");
         try { localStorage.setItem("sh-layout", layout()); } catch (e) { /* ignore */ }
         document.dispatchEvent(new CustomEvent("studenthub:theme"));
     }
@@ -184,8 +184,24 @@
         function open(show) {
             panel.hidden = !show;
             button.setAttribute("aria-expanded", String(show));
-            if (show) refresh();
+            if (show) {
+                refresh();
+                keepOnScreen();
+            }
         }
+
+        // On narrow screens, slide the menu sideways so it never runs off the edge.
+        function keepOnScreen() {
+            panel.style.transform = "";
+            var gap = 10;
+            var box = panel.getBoundingClientRect();
+            var room = document.documentElement.clientWidth;
+            var shift = 0;
+            if (box.right > room - gap) shift = (room - gap) - box.right;
+            if (box.left + shift < gap) shift = gap - box.left;
+            if (shift) panel.style.transform = "translateX(" + Math.round(shift) + "px)";
+        }
+        window.addEventListener("resize", function () { if (!panel.hidden) keepOnScreen(); });
 
         button.addEventListener("click", function (event) {
             event.stopPropagation();

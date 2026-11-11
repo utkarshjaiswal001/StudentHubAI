@@ -14,11 +14,12 @@
 | 0:00 | Home page | "StudentHub AI puts AKTU course notes and basic study help in one place." |
 | 0:15 | Notes → 3rd Year → any branch → Semester 5 → open a subject | "Students browse Year → Branch → Semester → Subject. Every official AKTU subject is listed with its code, for all six branches. 1st year skips the semester step." |
 | 0:35 | Preview a PDF, then Download | "Files open right here; downloads keep the original file." |
+| 0:40 | Student window: open a subject page, tick two syllabus topics, ⭐ a note | "Each subject shows its notes, previous year papers and the official AKTU syllabus. Students tick topics as they study and star notes; both show up in their Account Centre." |
 | 0:45 | Student window: Account → **My notes** | "My notes jumps straight to the student's own branch and year." |
 | 0:55 | Owner window: Admin → Manage notes → Edit a note | "Only the owner can upload, edit, or delete notes. Uploads are checked: the semester must match the year." |
 | 1:15 | Admin → Issue reports → Mark closed | "Students report problems; the admin tracks and closes them." |
 | 1:25 | Student window: log out, enter a wrong password 5 times | "After 5 wrong passwords the account locks for 15 minutes — this blocks password guessing." |
-| 1:40 | Show terminal: run the tests | "67 automated tests check security rules, the notes flow, admin tools, and accounts." |
+| 1:40 | Show terminal: run the tests | "75 automated tests check security rules, the notes flow, admin tools, accounts, and the syllabus and saved-notes tools." |
 | 1:55 | — | "Future scope: free AI Mentor replies, email password reset, and searching inside PDFs." |
 
 Test command: `.\.venv\Scripts\python.exe -m unittest discover -s tests`
@@ -59,7 +60,7 @@ They report a login issue; the admin resets it to a temporary password from the 
 Inserting SQL code through form fields. All queries use `?` placeholders, so user input is always treated as data, never as SQL.
 
 **Q: How did you test it?**
-67 automated tests using Python's `unittest` and Flask's test client, run against a temporary database. They cover login, registration, CSRF, owner-only access, the notes flow, upload rules, lockout, admin tools, and account settings.
+75 automated tests using Python's `unittest` and Flask's test client, run against a temporary database. They cover login, registration, CSRF, owner-only access, the notes flow, upload rules, lockout, admin tools, account settings, previous year papers, saved notes, and syllabus progress.
 
 **Q: How will you host it for free?**
 PythonAnywhere's free plan. The database and uploads live in the account's storage. The AI key is left empty so there are no costs.

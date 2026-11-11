@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=4) }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css', v=19) }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css', v=2) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/subject.css', v=3) }}">
     {% include "_theme_assets.html" %}
 </head>
 <body>
@@ -24,7 +25,7 @@
     <section class="hero">
         <div class="hero-content">
             <h1>Your Account Centre</h1>
-            <p>Your profile, recently visited notes, and saved mentor conversations in one place.</p>
+            <p>Your profile, saved notes, syllabus progress, and mentor conversations in one place.</p>
         </div>
     </section>
 
@@ -55,6 +56,7 @@
         <section class="account-stats" aria-label="Your activity">
             <article><span class="account-stat-icon" aria-hidden="true">📚</span><strong>{{ note_count }}</strong><span>notes visited</span></article>
             <article><span class="account-stat-icon" aria-hidden="true">💬</span><strong>{{ conversation_count }}</strong><span>mentor conversations</span></article>
+            <article><span class="account-stat-icon" aria-hidden="true">⭐</span><strong>{{ saved_notes|length }}</strong><span>saved notes</span></article>
         </section>
 
         <div class="account-content-grid">
@@ -83,6 +85,63 @@
                         <h3>No notes visited yet</h3>
                         <p>Notes you preview or download will be saved here for quick access.</p>
                         <a class="notes-preview-action" href="{{ url_for('notes') }}">Explore Notes</a>
+                    </div>
+                {% endif %}
+            </section>
+
+            <section class="account-section-panel" id="saved-notes" aria-labelledby="saved-notes-title">
+                <div class="account-section-heading">
+                    <div><span class="section-kicker">YOUR BOOKMARKS</span><h2 id="saved-notes-title">⭐ My saved notes</h2></div>
+                    <a href="{{ url_for('notes') }}">Find more →</a>
+                </div>
+                {% if saved_notes %}
+                    <ul class="account-activity-list">
+                        {% for note in saved_notes %}
+                            <li>
+                                <span class="notes-file-icon" aria-hidden="true">{{ note.original_filename.rsplit('.', 1)[-1]|upper }}</span>
+                                <div class="account-activity-copy">
+                                    <a href="{{ url_for('preview_note', note_id=note.id, return_to=url_for('account_center')) }}">{{ note.title }}</a>
+                                    <span>{{ note.subject }} · {{ note.branch }} · {{ note.year }}{% if note.semester %} · {{ note.semester }}{% endif %}</span>
+                                    <small>{% if note.kind == 'pyq' %}Previous year paper · {% endif %}Saved {{ note.saved_at[:10] }}</small>
+                                </div>
+                                <form class="subject-save-form" action="{{ url_for('toggle_saved_note', note_id=note.id) }}" method="post">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                                    <input type="hidden" name="next" value="{{ url_for('account_center', _anchor='saved-notes') }}">
+                                    <button class="subject-star is-saved" type="submit" aria-pressed="true" title="Remove from saved notes"><span aria-hidden="true">★</span><span class="visually-hidden">Remove {{ note.title }} from saved notes</span></button>
+                                </form>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="account-empty-state">
+                        <span aria-hidden="true">⭐</span>
+                        <h3>No saved notes yet</h3>
+                        <p>Open a subject and tap the ☆ next to a note to keep it here.</p>
+                        <a class="notes-preview-action" href="{{ url_for('notes') }}">Explore Notes</a>
+                    </div>
+                {% endif %}
+            </section>
+
+            <section class="account-section-panel" id="syllabus-progress" aria-labelledby="syllabus-progress-title">
+                <div class="account-section-heading">
+                    <div><span class="section-kicker">STUDY TRACKER</span><h2 id="syllabus-progress-title">🗂️ Syllabus progress</h2></div>
+                </div>
+                {% if progress %}
+                    <ul class="account-progress-list">
+                        {% for item in progress %}
+                            <li>
+                                <a href="{{ item.url }}#syllabus">{{ item.name }}</a>
+                                <small>{{ item.code }} · {{ item.done }} of {{ item.total }} topics · {{ item.percent }}%</small>
+                                <div class="subject-progress-bar" role="progressbar" aria-label="{{ item.name }} studied" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ item.percent }}"><span style="width: {{ item.percent }}%"></span></div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="account-empty-state">
+                        <span aria-hidden="true">🗂️</span>
+                        <h3>No topics ticked yet</h3>
+                        <p>Every subject page has its official AKTU syllabus. Tick topics as you study them to see your progress here.</p>
+                        {% if my_notes_url %}<a class="notes-preview-action" href="{{ my_notes_url }}">Open my subjects</a>{% endif %}
                     </div>
                 {% endif %}
             </section>

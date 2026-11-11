@@ -19,6 +19,7 @@ from flask import (
     abort,
     flash,
     g,
+    jsonify,
     redirect,
     render_template,
     request,
@@ -92,6 +93,7 @@ def notes_browse_url(branch, year, semester=""):
 
 
 app.jinja_env.globals["notes_browse_url"] = notes_browse_url
+app.jinja_env.globals["subject_page_url"] = lambda *args: subject_page_url(*args)
 
 # Official AKTU subject list (code + name) per branch and semester, taken from
 # the syllabus PDFs on aktu.ac.in. 1st year is listed per branch (stream
@@ -107,6 +109,39 @@ OFFICIAL_SUBJECT_NAMES = {
     ]
     for subject in subjects
 }
+
+
+# Official AKTU syllabus, unit by unit, keyed by subject code (see data/aktu_syllabus.json).
+_syllabus_file = Path(app.root_path) / "data" / "aktu_syllabus.json"
+AKTU_SYLLABUS = (
+    json.loads(_syllabus_file.read_text(encoding="utf-8")).get("subjects", {})
+    if _syllabus_file.exists() else {}
+)
+
+# Library files are either study notes or previous year question papers.
+NOTE_KINDS = {"notes": "Notes", "pyq": "Previous year paper"}
+
+
+def syllabus_for(code):
+    """Units for a subject code, each topic with a stable key like "2.4" (unit.topic)."""
+    entry = AKTU_SYLLABUS.get(code or "")
+    if not entry:
+        return None
+    units = []
+    for unit_number, unit in enumerate(entry.get("units", []), start=1):
+        topics = [
+            {"key": f"{unit_number}.{topic_number}", "text": text}
+            for topic_number, text in enumerate(unit.get("topics", []), start=1)
+        ]
+        units.append({"title": unit.get("title") or f"Unit {unit_number}", "topics": topics})
+    return {"source_url": entry.get("source_url", ""), "units": units}
+
+
+def syllabus_topic_keys(code):
+    syllabus = syllabus_for(code)
+    if not syllabus:
+        return set()
+    return {topic["key"] for unit in syllabus["units"] for topic in unit["topics"]}
 
 
 def official_subjects(branch, year, semester=""):
@@ -146,6 +181,18 @@ def _subject_places():
 
 
 AKTU_SUBJECT_PLACES = _subject_places()
+# Subject code -> the first place it is taught, used to link progress back to its page.
+SUBJECT_BY_CODE = {}
+for _places in AKTU_SUBJECT_PLACES.values():
+    for _code, _name, _branch, _year, _semester in _places:
+        SUBJECT_BY_CODE.setdefault(_code, {"name": _name, "branch": _branch, "year": _year, "semester": _semester})
+
+
+def subject_page_url(branch, year, semester, subject):
+    params = {"branch": branch, "year": year, "subject": subject}
+    if semester:
+        params["semester"] = semester
+    return url_for("note_subject", **params)
 
 
 def subject_choices():
@@ -414,6 +461,29 @@ def init_db():
         get_db().execute(
             """CREATE INDEX IF NOT EXISTS idx_study_notes_course
                ON study_notes (branch, year, semester, subject)"""
+        )
+        note_columns = {row["name"] for row in get_db().execute("PRAGMA table_info(study_notes)")}
+        if "kind" not in note_columns:
+            get_db().execute(
+                "ALTER TABLE study_notes ADD COLUMN kind TEXT NOT NULL DEFAULT 'notes'"
+            )
+        # A student's starred notes and the syllabus topics they've ticked as studied.
+        get_db().execute(
+            """CREATE TABLE IF NOT EXISTS saved_notes (
+                user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                note_id INTEGER NOT NULL REFERENCES study_notes(id) ON DELETE CASCADE,
+                saved_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (user_id, note_id)
+            )"""
+        )
+        get_db().execute(
+            """CREATE TABLE IF NOT EXISTS topic_progress (
+                user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                subject_code TEXT NOT NULL,
+                topic_key TEXT NOT NULL,
+                studied_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                PRIMARY KEY (user_id, subject_code, topic_key)
+            )"""
         )
         get_db().execute(
             """CREATE TABLE IF NOT EXISTS note_activity (
@@ -1135,8 +1205,36 @@ def account_center():
         "SELECT COUNT(DISTINCT note_id) FROM note_activity WHERE user_id = ?",
         (session["user_id"],),
     ).fetchone()[0]
+    saved_notes = db.execute(
+        """SELECT n.id, n.title, n.subject, n.branch, n.year, n.semester, n.kind,
+                  n.original_filename, s.saved_at
+           FROM saved_notes AS s JOIN study_notes AS n ON n.id = s.note_id
+           WHERE s.user_id = ?
+           ORDER BY s.saved_at DESC, n.id DESC""",
+        (session["user_id"],),
+    ).fetchall()
+    progress = []
+    for row in db.execute(
+        """SELECT subject_code, COUNT(*) AS done, MAX(studied_at) AS last_at
+           FROM topic_progress WHERE user_id = ?
+           GROUP BY subject_code ORDER BY last_at DESC""",
+        (session["user_id"],),
+    ):
+        total = len(syllabus_topic_keys(row["subject_code"]))
+        place = SUBJECT_BY_CODE.get(row["subject_code"])
+        if total and place:
+            progress.append({
+                "code": row["subject_code"],
+                "name": place["name"],
+                "done": min(row["done"], total),
+                "total": total,
+                "percent": round(min(row["done"], total) * 100 / total),
+                "url": subject_page_url(place["branch"], place["year"], place["semester"], place["name"]),
+            })
     return render_template(
         "account.html",
+        saved_notes=saved_notes,
+        progress=progress,
         user=user,
         recent_notes=recent_notes,
         conversations=conversations,
@@ -1334,7 +1432,7 @@ def known_subjects():
 
 def get_note_or_404(note_id):
     note = get_db().execute(
-        """SELECT id, title, subject, branch, year, semester, stored_filename,
+        """SELECT id, title, subject, branch, year, semester, kind, stored_filename,
                   original_filename, created_at
            FROM study_notes WHERE id = ?""",
         (note_id,),
@@ -1354,9 +1452,12 @@ def edit_note(note_id):
             field: request.form.get(field, "").strip()
             for field in ("title", "subject", "branch", "year", "semester")
         })
+        form["kind"] = request.form.get("kind", note["kind"])
         details_error = note_details_error(
             form["title"], form["subject"], form["branch"], form["year"], form["semester"]
         )
+        if not details_error and form["kind"] not in NOTE_KINDS:
+            details_error = "Choose whether this file is notes or a previous year paper."
         if details_error:
             flash(details_error, "error")
         else:
@@ -1364,10 +1465,10 @@ def edit_note(note_id):
             if form["subject"].casefold() != note["subject"].casefold():
                 form["subject"] = canonical_subject(form["subject"])
             db.execute(
-                """UPDATE study_notes SET title = ?, subject = ?, branch = ?, year = ?, semester = ?
-                   WHERE id = ?""",
+                """UPDATE study_notes SET title = ?, subject = ?, branch = ?, year = ?, semester = ?,
+                   kind = ? WHERE id = ?""",
                 (form["title"], form["subject"], form["branch"], form["year"],
-                 form["semester"], note_id),
+                 form["semester"], form["kind"], note_id),
             )
             db.commit()
             flash(f"Saved changes to “{form['title']}”.", "success")
@@ -1381,6 +1482,7 @@ def edit_note(note_id):
         note_branches=NOTE_BRANCHES,
         note_years=NOTE_YEARS,
         note_semesters=NOTE_SEMESTERS,
+        note_kinds=NOTE_KINDS,
     )
 
 
@@ -1696,7 +1798,7 @@ def note_subjects():
     if year == "1st Year" and branch != COMMON_FIRST_YEAR_BRANCH:
         branches.append(COMMON_FIRST_YEAR_BRANCH)
     placeholders = ", ".join("?" for _ in branches)
-    query = f"""SELECT id, title, subject, semester, original_filename, created_at,
+    query = f"""SELECT id, title, subject, semester, kind, original_filename, created_at,
                       created_at >= datetime('now', '-7 days') AS is_new
                FROM study_notes WHERE branch IN ({placeholders}) AND year = ?"""
     params = [*branches, year]
@@ -1733,7 +1835,138 @@ def note_subjects():
         semester=semester,
         search=search,
         subjects=subjects,
+        syllabus_codes=AKTU_SYLLABUS.keys(),
     )
+
+
+def wants_json():
+    return request.headers.get("X-Requested-With") == "fetch"
+
+
+def back_to(default):
+    return redirect(safe_local_path(request.form.get("next")) or default)
+
+
+@app.route("/notes/subject")
+def note_subject():
+    """One subject: its notes, previous year papers and syllabus checklist."""
+    branch = request.args.get("branch", "").strip()
+    year = request.args.get("year", "").strip()
+    semester = request.args.get("semester", "").strip()
+    name = request.args.get("subject", "").strip()[:100]
+    if not valid_branch_for_year(branch, year) or not name:
+        flash("Choose a subject from the notes library.", "error")
+        return redirect(url_for("notes"))
+    if year in YEARS_WITHOUT_SEMESTER_STEP:
+        semester = ""
+    elif semester not in YEAR_SEMESTERS[year]:
+        return redirect(url_for("note_semesters", branch=branch, year=year))
+    official = {s["name"].casefold(): s for s in official_subjects(branch, year, semester)}
+    match = official.get(name.casefold())
+    code = match["code"] if match else ""
+    name = match["name"] if match else name
+
+    branches = [branch]
+    if year == "1st Year" and branch != COMMON_FIRST_YEAR_BRANCH:
+        branches.append(COMMON_FIRST_YEAR_BRANCH)
+    placeholders = ", ".join("?" for _ in branches)
+    query = f"""SELECT id, title, subject, semester, kind, original_filename, created_at,
+                      created_at >= datetime('now', '-7 days') AS is_new
+               FROM study_notes
+               WHERE branch IN ({placeholders}) AND year = ? AND subject = ? COLLATE NOCASE"""
+    params = [*branches, year, name]
+    if semester:
+        query += " AND semester = ?"
+        params.append(semester)
+    rows = get_db().execute(query + " ORDER BY created_at DESC, id DESC", params).fetchall()
+    if not match and not rows:
+        flash("That subject isn't in the library for this branch and year.", "error")
+        return redirect(notes_browse_url(branch, year, semester))
+
+    saved_ids, studied = set(), set()
+    user_id = session.get("user_id")
+    syllabus = syllabus_for(code)
+    if user_id:
+        saved_ids = {row["note_id"] for row in get_db().execute(
+            "SELECT note_id FROM saved_notes WHERE user_id = ?", (user_id,))}
+        if syllabus:
+            studied = {row["topic_key"] for row in get_db().execute(
+                "SELECT topic_key FROM topic_progress WHERE user_id = ? AND subject_code = ?",
+                (user_id, code))}
+    total = sum(len(unit["topics"]) for unit in syllabus["units"]) if syllabus else 0
+    return render_template(
+        "note_subject.html",
+        branch=branch, year=year, semester=semester, subject=name, code=code,
+        notes=[row for row in rows if row["kind"] != "pyq"],
+        papers=[row for row in rows if row["kind"] == "pyq"],
+        saved_ids=saved_ids,
+        syllabus=syllabus,
+        studied=studied,
+        studied_count=len(studied & syllabus_topic_keys(code)) if syllabus else 0,
+        topic_total=total,
+        this_page=request.full_path.rstrip("?"),
+    )
+
+
+@app.route("/notes/<int:note_id>/save", methods=["POST"])
+def toggle_saved_note(note_id):
+    """Star or un-star a note for the logged-in student."""
+    if session.get("user_id") is None:
+        if wants_json():
+            return jsonify(error="login"), 401
+        flash("Log in to save notes.", "info")
+        return redirect(url_for("login"))
+    get_note_or_404(note_id)
+    db = get_db()
+    key = (session["user_id"], note_id)
+    if db.execute("SELECT 1 FROM saved_notes WHERE user_id = ? AND note_id = ?", key).fetchone():
+        db.execute("DELETE FROM saved_notes WHERE user_id = ? AND note_id = ?", key)
+        saved = False
+    else:
+        db.execute("INSERT INTO saved_notes (user_id, note_id) VALUES (?, ?)", key)
+        saved = True
+    db.commit()
+    if wants_json():
+        return jsonify(saved=saved)
+    flash("Saved to your notes." if saved else "Removed from your saved notes.", "success")
+    return back_to(url_for("account_center"))
+
+
+@app.route("/syllabus/progress", methods=["POST"])
+def update_topic_progress():
+    """Tick or untick one syllabus topic as studied."""
+    if session.get("user_id") is None:
+        if wants_json():
+            return jsonify(error="login"), 401
+        flash("Log in to track your syllabus.", "info")
+        return redirect(url_for("login"))
+    code = request.form.get("code", "").strip()
+    topic = request.form.get("topic", "").strip()
+    keys = syllabus_topic_keys(code)
+    if topic not in keys:
+        abort(400, "That syllabus topic doesn't exist.")
+    done = request.form.get("done") == "1"
+    db = get_db()
+    if done:
+        db.execute(
+            "INSERT OR IGNORE INTO topic_progress (user_id, subject_code, topic_key) VALUES (?, ?, ?)",
+            (session["user_id"], code, topic),
+        )
+    else:
+        db.execute(
+            "DELETE FROM topic_progress WHERE user_id = ? AND subject_code = ? AND topic_key = ?",
+            (session["user_id"], code, topic),
+        )
+    db.commit()
+    count = sum(
+        1 for row in db.execute(
+            "SELECT topic_key FROM topic_progress WHERE user_id = ? AND subject_code = ?",
+            (session["user_id"], code))
+        if row["topic_key"] in keys
+    )
+    if wants_json():
+        return jsonify(done=done, studied=count, total=len(keys))
+    return back_to(url_for("notes"))
 
 
 @app.route("/notes/upload", methods=["GET", "POST"])
@@ -1746,10 +1979,13 @@ def upload_note():
         branch = request.form.get("branch", "").strip()
         year = request.form.get("year", "").strip()
         semester = request.form.get("semester", "").strip()
+        kind = request.form.get("kind", "notes")
         uploaded_file = request.files.get("file")
         details_error = note_details_error(title, subject, branch, year, semester)
         if details_error:
             flash(details_error, "error")
+        elif kind not in NOTE_KINDS:
+            flash("Choose whether this file is notes or a previous year paper.", "error")
         elif uploaded_file is None or not uploaded_file.filename:
             flash("Choose a PDF or PowerPoint (.pptx) file to upload.", "error")
         else:
@@ -1783,10 +2019,10 @@ def upload_note():
                     db.execute(
                         """INSERT INTO study_notes
                            (title, branch, year, semester, subject, stored_filename,
-                            original_filename, uploaded_by)
-                           VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                            original_filename, uploaded_by, kind)
+                           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                         (title, branch, year, semester, subject, stored_filename,
-                         original_filename, session["user_id"]),
+                         original_filename, session["user_id"], kind),
                     )
                     db.commit()
                 except sqlite3.Error:
@@ -1805,6 +2041,7 @@ def upload_note():
         note_years=NOTE_YEARS,
         note_semesters=NOTE_SEMESTERS,
         year_semesters=YEAR_SEMESTERS,
+        note_kinds=NOTE_KINDS,
     )
 
 
@@ -1924,7 +2161,8 @@ def library_cli():
 @click.option("--year", required=True, type=click.Choice(NOTE_YEARS, case_sensitive=True))
 @click.option("--semester", required=True, type=click.Choice(NOTE_SEMESTERS, case_sensitive=True))
 @click.option("--file", "--pdf", "notes_file", required=True, type=click.Path(exists=True, dir_okay=False, path_type=Path))
-def add_library_note(owner_email, title, subject, branch, year, semester, notes_file):
+@click.option("--kind", default="notes", show_default=True, type=click.Choice(list(NOTE_KINDS)), help="notes or pyq (previous year paper).")
+def add_library_note(owner_email, title, subject, branch, year, semester, notes_file, kind):
     """Add one validated PDF or PPTX to the shared library (owner shell only)."""
     title = title.strip()
     subject = subject.strip()
@@ -1965,10 +2203,10 @@ def add_library_note(owner_email, title, subject, branch, year, semester, notes_
             cursor = get_db().execute(
                 """INSERT INTO study_notes
                    (title, branch, year, semester, subject, stored_filename,
-                    original_filename, uploaded_by)
-                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                    original_filename, uploaded_by, kind)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (title, branch, year, semester, subject, stored_filename,
-                 original_filename, owner["id"]),
+                 original_filename, owner["id"], kind),
             )
             get_db().commit()
         except sqlite3.Error:

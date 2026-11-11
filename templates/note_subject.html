@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ subject }} | StudentHub AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=5) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css', v=19) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css', v=2) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/subject.css', v=3) }}">
+    {% include "_theme_assets.html" %}
+</head>
+<body>
+    <nav class="navbar">
+        <a class="logo" href="{{ url_for('home') }}">StudentHub AI</a>
+        <ul class="nav-links">
+            <li><a href="{{ url_for('home') }}">Home</a></li>
+            <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+            <li><a class="active" href="{{ url_for('notes') }}" aria-current="page">Notes</a></li>
+            <li><a href="{{ url_for('chatbot') }}">AI Career Mentor</a></li>
+            {% include "_profile_menu.html" %}
+        </ul>
+    </nav>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}<p class="auth-message {{ category }}" role="status">{{ message }}</p>{% endfor %}
+    {% endwith %}
+
+    <header class="notes-flow-hero">
+        <span class="section-kicker">{{ year }} · {{ branch }}{% if semester %} · {{ semester }}{% endif %}</span>
+        <h1>{{ subject }}</h1>
+        <p>{% if code %}AKTU code {{ code }} · {% endif %}Notes, previous year papers and the official syllabus in one place.</p>
+    </header>
+
+    {% macro file_row(note) %}
+        <article class="notes-pdf-row">
+            <span class="notes-file-icon" aria-hidden="true">{{ note.original_filename.rsplit('.', 1)[-1]|upper }}</span>
+            <span class="notes-choice-copy"><strong>{{ note.title }}{% if note.is_new %} <span class="notes-new-badge">New</span>{% endif %}</strong><small>{{ note.semester }} · {{ note.original_filename }}</small></span>
+            <a class="notes-preview-action" href="{{ url_for('preview_note', note_id=note.id, return_to=this_page) }}">Preview</a>
+            <a class="notes-download-link" href="{{ url_for('download_note', note_id=note.id) }}">Download</a>
+            {% if session.user_id %}
+            <form class="subject-save-form" action="{{ url_for('toggle_saved_note', note_id=note.id) }}" method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                <input type="hidden" name="next" value="{{ this_page }}">
+                {% set is_saved = note.id in saved_ids %}
+                <button class="subject-star{% if is_saved %} is-saved{% endif %}" type="submit" aria-pressed="{{ 'true' if is_saved else 'false' }}" title="{{ 'Remove from saved notes' if is_saved else 'Save to my notes' }}"><span aria-hidden="true">{{ '★' if is_saved else '☆' }}</span><span class="visually-hidden">Save {{ note.title }}</span></button>
+            </form>
+            {% endif %}
+        </article>
+    {% endmacro %}
+
+    <main class="notes-flow-shell subject-shell">
+        <div class="notes-flow-heading">
+            <div><a class="notes-back-link" href="{{ notes_browse_url(branch, year, semester) }}">← {% if semester %}{{ semester }}{% else %}{{ year }}{% endif %} subjects</a></div>
+        </div>
+
+        <div class="subject-grid">
+            <div class="subject-files">
+                <section class="subject-panel" aria-labelledby="subject-notes-title">
+                    <div class="subject-panel-heading">
+                        <span class="section-kicker">STUDY FILES</span>
+                        <h2 id="subject-notes-title">📚 Notes</h2>
+                    </div>
+                    {% if notes %}
+                        <div class="notes-pdf-list subject-file-list">{% for note in notes %}{{ file_row(note) }}{% endfor %}</div>
+                    {% else %}
+                        <p class="subject-empty">No notes for this subject yet. Please check back later.</p>
+                    {% endif %}
+                </section>
+
+                <section class="subject-panel" id="papers" aria-labelledby="subject-papers-title">
+                    <div class="subject-panel-heading">
+                        <span class="section-kicker">EXAM PRACTICE</span>
+                        <h2 id="subject-papers-title">📝 Previous year papers</h2>
+                    </div>
+                    {% if papers %}
+                        <div class="notes-pdf-list subject-file-list">{% for note in papers %}{{ file_row(note) }}{% endfor %}</div>
+                    {% else %}
+                        <p class="subject-empty">No previous year papers for this subject yet.</p>
+                    {% endif %}
+                </section>
+                {% if not session.user_id %}
+                    <p class="subject-login-hint"><a href="{{ url_for('login', next=this_page) }}">Log in</a> to ⭐ save notes and tick off syllabus topics.</p>
+                {% endif %}
+            </div>
+
+            <section class="subject-panel subject-syllabus" id="syllabus" aria-labelledby="subject-syllabus-title"
+                     data-code="{{ code }}" data-total="{{ topic_total }}">
+                <div class="subject-panel-heading">
+                    <span class="section-kicker">AKTU SYLLABUS</span>
+                    <h2 id="subject-syllabus-title">🗂️ Syllabus checklist</h2>
+                </div>
+                {% if syllabus %}
+                    {% set percent = (studied_count * 100 / topic_total)|round|int if topic_total else 0 %}
+                    <div class="subject-progress" {% if not session.user_id %}hidden{% endif %}>
+                        <div class="subject-progress-text"><strong data-studied>{{ studied_count }}</strong> of {{ topic_total }} topics studied · <span data-percent>{{ percent }}</span>%</div>
+                        <div class="subject-progress-bar" role="progressbar" aria-label="Syllabus studied" aria-valuemin="0" aria-valuemax="100" aria-valuenow="{{ percent }}"><span style="width: {{ percent }}%"></span></div>
+                    </div>
+                    {% if session.user_id %}
+                        <form class="subject-progress-form" action="{{ url_for('update_topic_progress') }}" method="post" hidden>
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                        </form>
+                    {% endif %}
+                    <div class="subject-units">
+                    {% for unit in syllabus.units %}
+                        {% set unit_done = unit.topics|selectattr('key', 'in', studied)|list|length %}
+                        <details class="subject-unit" {% if loop.first %}open{% endif %}>
+                            <summary>
+                                <span class="subject-unit-title">{{ unit.title }}</span>
+                                <span class="subject-unit-count" data-unit-count>{% if session.user_id %}{{ unit_done }}/{{ unit.topics|length }}{% else %}{{ unit.topics|length }} topics{% endif %}</span>
+                            </summary>
+                            <ul class="subject-topics">
+                                {% for topic in unit.topics %}
+                                    <li>
+                                        <label class="subject-topic{% if topic.key in studied %} is-done{% endif %}">
+                                            <input type="checkbox" data-topic="{{ topic.key }}" {% if topic.key in studied %}checked{% endif %} {% if not session.user_id %}disabled{% endif %}>
+                                            <span>{{ topic.text }}</span>
+                                        </label>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </details>
+                    {% endfor %}
+                    </div>
+                    {% if syllabus.source_url %}<p class="subject-source">Source: <a href="{{ syllabus.source_url }}" target="_blank" rel="noopener noreferrer">official AKTU syllabus PDF ↗</a></p>{% endif %}
+                {% else %}
+                    <p class="subject-empty">The syllabus for this subject hasn't been added yet.</p>
+                {% endif %}
+            </section>
+        </div>
+    </main>
+
+    <footer><p>© 2026 StudentHub AI | Developed by <strong>Utkarsh Jaiswal</strong></p></footer>
+    <script src="{{ url_for('static', filename='js/subject_page.js', v=1) }}" defer></script>
+</body>
+</html>

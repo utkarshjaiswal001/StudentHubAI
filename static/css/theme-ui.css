@@ -355,8 +355,7 @@
     }
 
     .theme-panel {
-        right: auto;
-        left: 0;
+        width: min(270px, calc(100vw - 20px));
     }
 }
 

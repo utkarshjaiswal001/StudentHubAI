@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v=5) }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css', v=19) }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/theme.css', v=2) }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/subject.css', v=3) }}">
     {% include "_theme_assets.html" %}
 </head>
 <body>
@@ -49,27 +50,31 @@
         {% if subjects %}
             <div class="notes-subject-list">
                 {% for item in subjects %}
+                    {% set subject_url = subject_page_url(branch, year, semester, item.subject) %}
+                    {% set papers = item.notes|selectattr('kind', 'equalto', 'pyq')|list %}
                     {% if not item.notes %}
-                    <div class="notes-subject-dropdown notes-subject-empty">
+                    <a class="notes-subject-dropdown notes-subject-empty notes-subject-link" href="{{ subject_url }}">
                         <span class="notes-choice-icon" aria-hidden="true">📘</span>
-                        <span class="notes-choice-copy"><strong>{{ item.subject }}</strong><small>{% if item.code %}{{ item.code }} · {% endif %}No notes yet</small></span>
-                    </div>
+                        <span class="notes-choice-copy"><strong>{{ item.subject }}</strong><small>{% if item.code %}{{ item.code }} · {% endif %}No notes yet{% if item.code in syllabus_codes %} · 🗂️ Syllabus{% endif %}</small></span>
+                        <span class="notes-dropdown-caret" aria-hidden="true">→</span>
+                    </a>
                     {% else %}
                     <details class="notes-subject-dropdown">
                         <summary>
                             <span class="notes-choice-icon" aria-hidden="true">📘</span>
-                            <span class="notes-choice-copy"><strong>{{ item.subject }}{% if item.notes|selectattr('is_new')|list %} <span class="notes-new-badge">New</span>{% endif %}</strong><small>{% if item.code %}{{ item.code }} · {% endif %}{{ item.notes|length }} file{% if item.notes|length != 1 %}s{% endif %} available</small></span>
+                            <span class="notes-choice-copy"><strong>{{ item.subject }}{% if item.notes|selectattr('is_new')|list %} <span class="notes-new-badge">New</span>{% endif %}</strong><small>{% if item.code %}{{ item.code }} · {% endif %}{{ item.notes|length }} file{% if item.notes|length != 1 %}s{% endif %} available{% if papers %} · {{ papers|length }} paper{% if papers|length != 1 %}s{% endif %}{% endif %}{% if item.code in syllabus_codes %} · 🗂️ Syllabus{% endif %}</small></span>
                             <span class="notes-dropdown-caret" aria-hidden="true">⌄</span>
                         </summary>
                         <div class="notes-pdf-list">
                             {% for note in item.notes %}
                                 <article class="notes-pdf-row">
                                     <span class="notes-file-icon" aria-hidden="true">{{ note.original_filename.rsplit('.', 1)[-1]|upper }}</span>
-                                    <span class="notes-choice-copy"><strong>{{ note.title }}{% if note.is_new %} <span class="notes-new-badge">New</span>{% endif %}</strong><small>{{ note.semester }} · {{ note.original_filename }}</small></span>
+                                    <span class="notes-choice-copy"><strong>{{ note.title }}{% if note.kind == 'pyq' %} <span class="notes-paper-badge">Paper</span>{% endif %}{% if note.is_new %} <span class="notes-new-badge">New</span>{% endif %}</strong><small>{{ note.semester }} · {{ note.original_filename }}</small></span>
                                     <a class="notes-preview-action" href="{{ url_for('preview_note', note_id=note.id, return_to=notes_browse_url(branch, year, semester)) }}">Preview</a>
                                     <a class="notes-download-link" href="{{ url_for('download_note', note_id=note.id) }}">Download</a>
                                 </article>
                             {% endfor %}
+                            <a class="notes-subject-open" href="{{ subject_url }}">Open subject page: syllabus, papers and ⭐ save →</a>
                         </div>
                     </details>
                     {% endif %}

@@ -925,7 +925,9 @@ class PhaseOneSecurityTests(unittest.TestCase):
         client = app.test_client()
         home = client.get("/").get_data(as_text=True)
         self.assertIn("css/layout-glass.css", home)
-        self.assertIn('l==="glass"?"glass":"classic"', home)
+        # Glass + Galaxy + Dark is the default look.
+        self.assertIn('l==="classic"?"classic":"glass"', home)
+        self.assertIn('ok.indexOf(p)>-1?p:"galaxy"', home)
         self.assertIn('class="hero-glass-card"', home)
         gallery = client.get("/themes").get_data(as_text=True)
         self.assertIn('data-layout="classic"', gallery)
