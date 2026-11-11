@@ -1456,16 +1456,10 @@ THEME_PALETTES = [
      "swatches": ["#5fd38d", "#3fb7a6", "#f2c66d"]},
     {"id": "galaxy", "name": "Galaxy", "mood": "Purple and pink with a yellow spark. Bold and fun.",
      "swatches": ["#c084fc", "#f472b6", "#fcd34d"]},
-    {"id": "slate", "name": "Slate", "mood": "Quiet grey-blue with soft green. Minimal and easy on the eyes.",
-     "swatches": ["#7aa2f7", "#9ece6a", "#e0af68"]},
     {"id": "racing", "name": "Racing", "mood": "Charcoal, forest green and crimson, with chrome shine and red light streaks.",
      "swatches": ["#2b2b2b", "#1f6f58", "#c8262e"]},
     {"id": "mocha", "name": "Mocha Gold", "mood": "Mocha brown and burnt amber, with shiny gold titles and warm light rays.",
      "swatches": ["#5a4034", "#f2d39c", "#c96a28"]},
-    {"id": "neon", "name": "Neon", "mood": "Jet black, cerulean blue and neon rose. Futuristic and bold.",
-     "swatches": ["#16161c", "#0b7fbf", "#ff2d95"]},
-    {"id": "emerald", "name": "Emerald", "mood": "Jet black, muted moss and neon emerald. Techy and fresh.",
-     "swatches": ["#000000", "#6d8f63", "#39ff88"]},
 ]
 
 # Light mode page/card colour choices. "auto" uses the palette's own tint.
