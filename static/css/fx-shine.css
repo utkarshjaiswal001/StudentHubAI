@@ -18,17 +18,37 @@
    ========================================================= */
 
 html[data-fx] {
-    --fx-rim: rgba(255, 255, 255, .55);
-    --fx-rim-tint: rgba(var(--c1), .35);
-    --fx-spot: rgba(var(--c1), .16);
-    --fx-streak: rgba(255, 255, 255, .45);
+    --fx-rim: rgba(255, 255, 255, .85);
+    --fx-rim-tint: rgba(var(--c1), .55);
+    --fx-spot: rgba(var(--c1), .24);
+    --fx-streak: rgba(255, 255, 255, .75);
+    --fx-card-streak: rgba(255, 255, 255, .55);
+    /* Metal for headings in light mode: deep tones with a coloured glint. */
+    --fx-metal: linear-gradient(110deg,
+        var(--dark) 0%, var(--primary-dark) 20%, rgb(var(--c1)) 32%, var(--dark) 46%,
+        color-mix(in srgb, rgb(var(--c3)) 70%, #000) 62%, var(--primary-dark) 80%, var(--dark) 100%);
 }
 
 html[data-fx][data-theme="dark"] {
-    --fx-rim: rgba(255, 255, 255, .22);
-    --fx-rim-tint: rgba(var(--c1), .45);
-    --fx-spot: rgba(var(--c1), .20);
-    --fx-streak: rgba(255, 255, 255, .28);
+    --fx-rim: rgba(255, 255, 255, .38);
+    --fx-rim-tint: rgba(var(--c1), .65);
+    --fx-spot: rgba(var(--c1), .30);
+    --fx-streak: rgba(255, 255, 255, .55);
+    --fx-card-streak: rgba(255, 255, 255, .16);
+    /* Metal for headings in dark mode: bright silver with coloured reflections. */
+    --fx-metal: linear-gradient(110deg,
+        #ffffff 0%, color-mix(in srgb, rgb(var(--c1)) 45%, #fff) 18%, #ffffff 30%,
+        color-mix(in srgb, rgb(var(--c3)) 55%, #fff) 46%, #ececec 60%,
+        color-mix(in srgb, rgb(var(--c1)) 60%, #fff) 78%, #ffffff 100%);
+}
+
+/* Dark bands inside light mode (AI Mentor section, footer) need the light metal. */
+html[data-fx][data-theme="light"] :is(.mentor-intro, footer, .footer) {
+    --fx-metal: linear-gradient(110deg,
+        #ffffff 0%, color-mix(in srgb, rgb(var(--c1)) 45%, #fff) 18%, #ffffff 30%,
+        color-mix(in srgb, rgb(var(--c3)) 55%, #fff) 46%, #ececec 60%,
+        color-mix(in srgb, rgb(var(--c1)) 60%, #fff) 78%, #ffffff 100%);
+    --fx-title: var(--fx-metal);
 }
 
 /* ---------- 1 + 2. Glossy edge and spotlight on cards ---------- */
@@ -56,9 +76,9 @@ html[data-fx] :is(.card, .service-card, .future-card, .notes-choice-card,
     position: absolute;
     inset: 0;
     z-index: -1;
-    padding: 1px;
+    padding: 1.5px;
     border-radius: inherit;
-    background: linear-gradient(135deg, var(--fx-rim), transparent 32%, transparent 68%, var(--fx-rim-tint));
+    background: linear-gradient(135deg, var(--fx-rim), transparent 35%, transparent 62%, var(--fx-rim-tint));
     -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
     -webkit-mask-composite: xor;
     mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
@@ -72,10 +92,26 @@ html[data-fx] :is(.card, .service-card, .future-card, .notes-choice-card,
     inset: 0;
     z-index: -1;
     border-radius: inherit;
-    background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 0%), var(--fx-spot), transparent 65%);
+    background:
+        radial-gradient(300px circle at var(--mx, 50%) var(--my, 0%), var(--fx-spot), transparent 65%),
+        linear-gradient(105deg, transparent 38%, var(--fx-card-streak) 50%, transparent 62%);
+    background-size: 100% 100%, 260% 100%;
+    background-position: 0 0, 130% 0;
+    background-repeat: no-repeat;
     opacity: 0;
     transition: opacity .35s ease;
     pointer-events: none;
+}
+
+/* Shine: a bright light sweep runs across a card when you point at it. */
+html[data-fx="shine"] :is(.card, .service-card, .future-card, .notes-choice-card,
+    .notes-subject-dropdown, .form-card, .process-card, .account-stats > *):hover::after {
+    animation: fx-card-sweep .9s ease-out;
+}
+
+@keyframes fx-card-sweep {
+    from { background-position: 0 0, 130% 0; }
+    to   { background-position: 0 0, -30% 0; }
 }
 
 html[data-fx] :is(.card, .service-card, .future-card, .notes-choice-card,
@@ -99,11 +135,12 @@ html[data-fx="shine"] :is(.primary-button, .notes-primary-button, .card-btn,
     top: -50%;
     left: 0;
     z-index: 1;
-    width: 40%;
+    width: 55%;
     height: 200%;
-    background: linear-gradient(90deg, transparent, var(--fx-streak), transparent);
+    background: linear-gradient(90deg, transparent, var(--fx-streak) 45%, #fff 50%, var(--fx-streak) 55%, transparent);
+    filter: blur(1px);
     transform: translateX(-180%) rotate(20deg);
-    animation: fx-sweep 6.5s ease-in-out infinite;
+    animation: fx-sweep 4s ease-in-out infinite;
     pointer-events: none;
 }
 
@@ -111,8 +148,8 @@ html[data-fx="shine"] .register-button::after { animation-delay: 1.2s; }
 html[data-fx="shine"] .hg-open::after { animation-delay: 2.4s; }
 
 @keyframes fx-sweep {
-    0%, 70% { transform: translateX(-180%) rotate(20deg); }
-    100%    { transform: translateX(380%) rotate(20deg); }
+    0%, 55% { transform: translateX(-180%) rotate(20deg); }
+    100%    { transform: translateX(300%) rotate(20deg); }
 }
 
 /* ---------- 4. Sparkles in page headers (added by theme_toggle.js) ---------- */
@@ -136,7 +173,9 @@ html[data-fx] .fx-sparkles::before {
     content: "";
     position: absolute;
     inset: 0;
-    background: var(--fx-hero-light, none);
+    background: var(--fx-hero-light,
+        radial-gradient(45% 55% at 85% 10%, rgba(var(--c1), .30), transparent 70%),
+        radial-gradient(40% 50% at 10% 100%, rgba(var(--c3), .20), transparent 70%));
 }
 
 html[data-fx="shine"] .fx-sparkles::before {
@@ -159,8 +198,8 @@ html[data-fx="calm"] .fx-sparkle {
     height: var(--s, 10px);
     background: var(--fx-star, #fff);
     clip-path: polygon(50% 0, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%);
-    filter: drop-shadow(0 0 6px var(--fx-star, #fff));
-    opacity: .15;
+    filter: drop-shadow(0 0 8px var(--fx-star, #fff)) drop-shadow(0 0 2px var(--fx-star, #fff));
+    opacity: .2;
     animation: fx-twinkle var(--d, 3.4s) ease-in-out infinite;
     animation-delay: var(--delay, 0s);
 }
@@ -173,37 +212,50 @@ html[data-fx="calm"] .fx-sparkle {
 html[data-theme="dark"] .fx-sparkle { --fx-star: rgba(255, 255, 255, .95); }
 html[data-theme="dark"] .fx-sparkle:nth-child(3n) { --fx-star: rgb(var(--c3)); }
 html[data-theme="dark"] .fx-sparkle:nth-child(4n) { --fx-star: color-mix(in srgb, rgb(var(--c1)) 60%, #fff); }
-html[data-theme="light"] .fx-sparkle { --fx-star: rgba(var(--c1), .75); }
-html[data-theme="light"] .fx-sparkle:nth-child(3n) { --fx-star: rgba(var(--c3), .9); }
-html[data-theme="light"] .fx-sparkle:nth-child(4n) { --fx-star: rgba(var(--c2), .75); }
+html[data-theme="light"] .fx-sparkle { --fx-star: rgb(var(--c1)); }
+html[data-theme="light"] .fx-sparkle:nth-child(3n) { --fx-star: rgb(var(--c3)); }
+html[data-theme="light"] .fx-sparkle:nth-child(4n) { --fx-star: rgb(var(--c2)); }
 
 @keyframes fx-twinkle {
-    0%, 100% { opacity: .1; transform: scale(.55) rotate(0deg); }
-    50%      { opacity: .95; transform: scale(1) rotate(45deg); }
+    0%, 100% { opacity: .12; transform: scale(.5) rotate(0deg); }
+    50%      { opacity: 1; transform: scale(1.15) rotate(45deg); }
 }
 
-/* ---------- 5. Slow shimmer across big headings ---------- */
+/* ---------- 5. Shiny metal headings everywhere ---------- */
 
-/* Colour sets can give their own metal (gold, chrome...) with --fx-title. */
-html[data-fx] :is(.hero-content h1, .notes-flow-hero h1, .hero h1) {
-    background: var(--fx-title, linear-gradient(110deg,
-        currentColor 40%,
-        color-mix(in srgb, rgb(var(--c1)) 55%, currentColor) 48%,
-        color-mix(in srgb, rgb(var(--c3)) 45%, currentColor) 52%,
-        currentColor 60%));
-    background-size: 300% 100%;
+/* Every page and section heading gets a metal finish in the colour set's tones.
+   Colour sets with their own metal (gold, chrome...) set --fx-title. */
+html[data-fx] :is(h1, h2, h3):not(.theme-sample *) {
+    background: var(--fx-metal);
+    background-size: 220% 100%;
     background-position: 50% 0;
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
-html[data-fx="shine"] :is(.hero-content h1, .notes-flow-hero h1, .hero h1) {
-    animation: fx-title 9s ease-in-out infinite;
+html[data-fx] :is(.hero-content h1, .notes-flow-hero h1, .hero h1, .hero-content h2) {
+    background-image: var(--fx-title, var(--fx-metal));
+    background-size: 300% 100%;
+}
+
+/* Shine: light slowly travels across the metal. */
+html[data-fx="shine"] :is(h1, h2, h3):not(.theme-sample *) {
+    animation: fx-title 10s ease-in-out infinite;
+}
+
+html[data-fx="shine"] h3:not(.theme-sample *) {
+    animation-duration: 13s;
+}
+
+/* Emojis inside headings keep their own colours (added by theme_toggle.js). */
+html[data-fx] .fx-emoji {
+    -webkit-text-fill-color: initial;
+    background: none;
 }
 
 @keyframes fx-title {
-    0%, 55% { background-position: 100% 0; }
+    0%, 40% { background-position: 100% 0; }
     100%    { background-position: 0% 0; }
 }
 

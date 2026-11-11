@@ -324,9 +324,9 @@
             if (host.querySelector(".fx-sparkles")) return;
             var layer = el("span", "fx-sparkles");
             layer.setAttribute("aria-hidden", "true");
-            for (var i = 0; i < 16; i++) {
+            for (var i = 0; i < 26; i++) {
                 var star = el("span", "fx-sparkle" + (i % 3 === 2 ? " is-dot" : ""));
-                var size = i % 3 === 2 ? 3 + Math.random() * 3 : 7 + Math.random() * 9;
+                var size = i % 3 === 2 ? 3 + Math.random() * 4 : (i % 7 === 0 ? 18 + Math.random() * 8 : 8 + Math.random() * 10);
                 star.style.setProperty("--s", size.toFixed(1) + "px");
                 star.style.setProperty("--d", (2.6 + Math.random() * 2.6).toFixed(2) + "s");
                 star.style.setProperty("--delay", (-Math.random() * 5).toFixed(2) + "s");
@@ -335,6 +335,27 @@
                 layer.appendChild(star);
             }
             host.insertBefore(layer, host.firstChild);
+        });
+    }
+
+    // Metal headings paint text with a gradient; wrap emojis so they keep their colours.
+    function protectEmojis() {
+        var emoji = /(\p{Extended_Pictographic}(?:\uFE0F|\u200D\p{Extended_Pictographic})*)/u;
+        document.querySelectorAll("h1, h2, h3").forEach(function (heading) {
+            var walker = document.createTreeWalker(heading, NodeFilter.SHOW_TEXT);
+            var nodes = [];
+            while (walker.nextNode()) nodes.push(walker.currentNode);
+            nodes.forEach(function (node) {
+                if (!emoji.test(node.nodeValue) || (node.parentNode.classList && node.parentNode.classList.contains("fx-emoji"))) return;
+                var parts = node.nodeValue.split(new RegExp(emoji.source, "gu"));
+                var frag = document.createDocumentFragment();
+                parts.forEach(function (part, index) {
+                    if (!part) return;
+                    if (index % 2 === 1) frag.appendChild(el("span", "fx-emoji", part));
+                    else frag.appendChild(document.createTextNode(part));
+                });
+                node.parentNode.replaceChild(frag, node);
+            });
         });
     }
 
@@ -353,6 +374,7 @@
         placeMenu();
         placeRail();
         addSparkles();
+        protectEmojis();
         document.addEventListener("pointermove", spotlight, { passive: true });
         greet();
     }
