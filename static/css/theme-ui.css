@@ -362,3 +362,17 @@ html[data-theme="light"] .nav-link:hover {
     background: rgba(var(--c1), .10);
     color: var(--primary-dark);
 }
+
+/* Light mode: soft page banners and icon tiles tinted by the chosen colour set. */
+html[data-theme="light"] .notes-flow-hero {
+    background: linear-gradient(135deg,
+        color-mix(in srgb, rgb(var(--c1)) 12%, var(--surface)),
+        color-mix(in srgb, rgb(var(--c2)) 8%, var(--surface)) 60%,
+        var(--surface));
+}
+
+html[data-theme="light"] .notes-choice-icon,
+html[data-theme="light"] .service-icon,
+html[data-theme="light"] .notes-file-icon {
+    background: rgba(var(--c1), .12);
+}

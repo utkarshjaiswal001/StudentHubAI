@@ -51,10 +51,11 @@
     --dark: #1f2440;
     --text: #3d4260;
     --muted: #6b7090;
-    --background: #f5f6fb;
-    --surface: #ffffff;
-    --surface-2: #f3f4fa;
-    --input-bg: #fbfbff;
+    /* Soft, not pure white: easier on the eyes. */
+    --background: #e8eaf2;
+    --surface: #f4f5f9;
+    --surface-2: #eceef5;
+    --input-bg: #f8f9fc;
     --footer-bg: #1f2340;
     --white: #ffffff;
     --border: #e3e5f0;
@@ -83,6 +84,10 @@
     --hero-gradient: linear-gradient(135deg, #0d1b2e 0%, #11294a 50%, #0f3a3a 100%);
 }
 [data-theme="light"][data-palette="ocean"] {
+    --background: #e6edf3;
+    --surface: #f2f6f9;
+    --surface-2: #e9eff5;
+    --input-bg: #f7fafc;
     --c1: 47, 127, 216;
     --c2: 31, 158, 133;
     --primary-dark: #1f63b3;
@@ -107,6 +112,10 @@
     --hero-gradient: linear-gradient(135deg, #1f1430 0%, #3a1a3a 50%, #3a2416 100%);
 }
 [data-theme="light"][data-palette="sunset"] {
+    --background: #f1e8e9;
+    --surface: #f9f3f3;
+    --surface-2: #f3eaeb;
+    --input-bg: #fcf8f8;
     --c1: 217, 84, 111;
     --c2: 138, 92, 214;
     --primary-dark: #b23e57;
@@ -131,6 +140,10 @@
     --hero-gradient: linear-gradient(135deg, #0f2119 0%, #123326 50%, #1d2f1a 100%);
 }
 [data-theme="light"][data-palette="forest"] {
+    --background: #e6ede8;
+    --surface: #f2f6f3;
+    --surface-2: #e9f0eb;
+    --input-bg: #f7faf8;
     --c1: 47, 156, 98;
     --c2: 42, 143, 132;
     --primary-dark: #237a4c;
@@ -155,6 +168,10 @@
     --hero-gradient: linear-gradient(135deg, #1a1033 0%, #2d1450 50%, #3a1238 100%);
 }
 [data-theme="light"][data-palette="galaxy"] {
+    --background: #ebe7f1;
+    --surface: #f5f2f9;
+    --surface-2: #eee9f4;
+    --input-bg: #f9f7fc;
     --c1: 139, 79, 216;
     --c2: 208, 80, 143;
     --primary-dark: #6d36b5;
@@ -179,6 +196,10 @@
     --hero-gradient: linear-gradient(135deg, #1e2030 0%, #24283b 50%, #1f2a33 100%);
 }
 [data-theme="light"][data-palette="slate"] {
+    --background: #e7e9ed;
+    --surface: #f3f4f6;
+    --surface-2: #eaecf0;
+    --input-bg: #f8f9fa;
     --c1: 74, 111, 196;
     --c2: 74, 143, 168;
     --primary-dark: #3a589f;
