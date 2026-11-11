@@ -30,6 +30,16 @@
         document.dispatchEvent(new CustomEvent("studenthub:theme"));
     }
 
+    function fx() {
+        return root.getAttribute("data-fx") === "calm" ? "calm" : "shine";
+    }
+
+    function setFx(value) {
+        root.setAttribute("data-fx", value === "calm" ? "calm" : "shine");
+        try { localStorage.setItem("sh-fx", fx()); } catch (e) { /* ignore */ }
+        document.dispatchEvent(new CustomEvent("studenthub:theme"));
+    }
+
     function apply(newMode, newPalette, newBackground) {
         root.classList.add("theme-switching");
         if (newMode) root.setAttribute("data-theme", newMode);
@@ -46,7 +56,7 @@
 
     window.StudentHubTheme = {
         apply: apply, mode: mode, palette: palette, background: background,
-        layout: layout, setLayout: setLayout,
+        layout: layout, setLayout: setLayout, fx: fx, setFx: setFx,
         palettes: palettes, backgrounds: backgrounds
     };
 
@@ -92,6 +102,18 @@
             layouts.appendChild(b);
         });
         panel.appendChild(layouts);
+
+        panel.appendChild(el("p", "theme-panel-label", "Effects"));
+        var effects = el("div", "theme-mode-row");
+        [["shine", "✨ Shine"], ["calm", "🍃 Calm"]].forEach(function (item) {
+            var b = el("button", "theme-mode-btn theme-fx-btn", item[1]);
+            b.type = "button";
+            b.dataset.fx = item[0];
+            b.title = item[0] === "shine" ? "Glossy edges, sparkles and soft shine" : "No sparkles or moving shine";
+            b.addEventListener("click", function () { setFx(item[0]); });
+            effects.appendChild(b);
+        });
+        panel.appendChild(effects);
 
         panel.appendChild(el("p", "theme-panel-label", "Colours"));
         var list = el("div", "theme-palette-list");
@@ -140,6 +162,9 @@
             });
             panel.querySelectorAll(".theme-layout-btn").forEach(function (b) {
                 b.setAttribute("aria-pressed", String(b.dataset.layout === layout()));
+            });
+            panel.querySelectorAll(".theme-fx-btn").forEach(function (b) {
+                b.setAttribute("aria-pressed", String(b.dataset.fx === fx()));
             });
             panel.querySelectorAll(".theme-palette-btn").forEach(function (b) {
                 b.setAttribute("aria-pressed", String(b.dataset.palette === palette()));
@@ -213,7 +238,7 @@
         rail.setAttribute("aria-label", "Quick links");
         var path = window.location.pathname;
         [["/", "🏠", "Home"], ["/notes", "📚", "Notes"], ["/dashboard", "📊", "Dashboard"],
-         ["/chatbot", "🤖", "AI Career Mentor"], ["/themes", "🎨", "Themes"]].forEach(function (item) {
+         ["/chatbot", "🤖", "AI Career Mentor"]].forEach(function (item) {
             var a = el("a", "", item[1]);
             a.href = item[0];
             a.title = item[2];
@@ -222,12 +247,113 @@
             if (here) a.setAttribute("aria-current", "page");
             rail.appendChild(a);
         });
+
+        // Bottom of the rail: a small dark/light switch and a colour picker, like the reel.
+        rail.appendChild(el("span", "rail-divider"));
+
+        var modeSwitch = el("button", "rail-mode");
+        modeSwitch.type = "button";
+        modeSwitch.setAttribute("role", "switch");
+        modeSwitch.setAttribute("aria-label", "Dark mode");
+        modeSwitch.appendChild(el("span", "rail-mode-knob"));
+        modeSwitch.addEventListener("click", function () { apply(mode() === "dark" ? "light" : "dark"); });
+        rail.appendChild(modeSwitch);
+
+        var pick = el("button", "rail-palette", "🎨");
+        pick.type = "button";
+        pick.title = "Colours";
+        pick.setAttribute("aria-label", "Choose colours");
+        pick.setAttribute("aria-haspopup", "true");
+        pick.setAttribute("aria-expanded", "false");
+        rail.appendChild(pick);
+
+        var pop = el("div", "rail-pop");
+        pop.hidden = true;
+        pop.setAttribute("role", "dialog");
+        pop.setAttribute("aria-label", "Colours");
+        pop.appendChild(el("p", "rail-pop-title", "Colours"));
+        palettes.forEach(function (p) {
+            var b = el("button", "rail-pop-item");
+            b.type = "button";
+            b.dataset.palette = p.id;
+            var dots = el("span", "theme-dots");
+            p.swatches.forEach(function (color) {
+                var dot = el("span", "theme-dot");
+                dot.style.background = color;
+                dots.appendChild(dot);
+            });
+            b.appendChild(dots);
+            b.appendChild(el("span", "", p.name));
+            b.addEventListener("click", function () { apply(null, p.id); });
+            pop.appendChild(b);
+        });
+        var all = el("a", "rail-pop-more", "All themes →");
+        all.href = "/themes";
+        pop.appendChild(all);
+        rail.appendChild(pop);
+
+        function sync() {
+            modeSwitch.setAttribute("aria-checked", String(mode() === "dark"));
+            modeSwitch.title = mode() === "dark" ? "Switch to light mode" : "Switch to dark mode";
+            pop.querySelectorAll(".rail-pop-item").forEach(function (b) {
+                b.setAttribute("aria-pressed", String(b.dataset.palette === palette()));
+            });
+        }
+        function openPop(show) {
+            pop.hidden = !show;
+            pick.setAttribute("aria-expanded", String(show));
+        }
+        pick.addEventListener("click", function (event) {
+            event.stopPropagation();
+            openPop(pop.hidden);
+        });
+        pop.addEventListener("click", function (event) { event.stopPropagation(); });
+        document.addEventListener("click", function () { openPop(false); });
+        document.addEventListener("keydown", function (event) {
+            if (event.key === "Escape" && !pop.hidden) { openPop(false); pick.focus(); }
+        });
+        document.addEventListener("studenthub:theme", sync);
+        sync();
+
         document.body.appendChild(rail);
+    }
+
+    // Shine effects: sparkles in page headers and a spotlight that follows the mouse.
+    function addSparkles() {
+        document.querySelectorAll(".hero, .hero-section, .notes-flow-hero").forEach(function (host) {
+            if (host.querySelector(".fx-sparkles")) return;
+            var layer = el("span", "fx-sparkles");
+            layer.setAttribute("aria-hidden", "true");
+            for (var i = 0; i < 16; i++) {
+                var star = el("span", "fx-sparkle" + (i % 3 === 2 ? " is-dot" : ""));
+                var size = i % 3 === 2 ? 3 + Math.random() * 3 : 7 + Math.random() * 9;
+                star.style.setProperty("--s", size.toFixed(1) + "px");
+                star.style.setProperty("--d", (2.6 + Math.random() * 2.6).toFixed(2) + "s");
+                star.style.setProperty("--delay", (-Math.random() * 5).toFixed(2) + "s");
+                star.style.left = (3 + Math.random() * 94).toFixed(1) + "%";
+                star.style.top = (4 + Math.random() * 88).toFixed(1) + "%";
+                layer.appendChild(star);
+            }
+            host.insertBefore(layer, host.firstChild);
+        });
+    }
+
+    var SPOT = ".card, .service-card, .future-card, .notes-choice-card, .notes-subject-dropdown, " +
+               ".form-card, .process-card, .account-stats > *";
+    function spotlight(event) {
+        if (fx() !== "shine" || !event.target.closest) return;
+        var card = event.target.closest(SPOT);
+        if (!card) return;
+        var box = card.getBoundingClientRect();
+        card.style.setProperty("--mx", (event.clientX - box.left) + "px");
+        card.style.setProperty("--my", (event.clientY - box.top) + "px");
     }
 
     function start() {
         placeMenu();
         placeRail();
+        addSparkles();
+        document.addEventListener("pointermove", spotlight, { passive: true });
         greet();
     }
 

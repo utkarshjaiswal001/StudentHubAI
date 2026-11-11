@@ -430,7 +430,7 @@ html[data-theme="light"] .hero-badge {
 
 html[data-theme="light"] .hero-greeting {
     background: rgba(var(--c3), .16);
-    color: color-mix(in srgb, rgb(var(--c3)) 55%, #3a2a10);
+    color: color-mix(in srgb, rgb(var(--c3)) 50%, #1c1c1c);
     border: 1px solid rgba(var(--c3), .35);
 }
 

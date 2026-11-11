@@ -2,14 +2,34 @@
    put hand-made theme styles in dark.css or theme-ui.css instead. */
 
 /* style.css */
+html[data-theme="dark"] body {
+    background: radial-gradient(circle at 10% 10%, rgba(var(--c1), 0.08), transparent 25%), radial-gradient(circle at 90% 15%, rgba(var(--c2), 0.08), transparent 25%), var(--background);
+}
+
+/* style.css */
+html[data-theme="dark"] :where(a,
+html[data-theme="dark"] button,
+html[data-theme="dark"] input,
+html[data-theme="dark"] select,
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] [tabindex]):focus-visible {
+    outline: 3px solid rgba(var(--c1), 0.58);
+}
+
+/* style.css */
+html[data-theme="dark"] .nav-links a.active {
+    background: rgba(var(--c1), 0.13);
+}
+
+/* style.css */
 html[data-theme="dark"] .navbar {
     background: color-mix(in srgb, var(--surface) 88%, transparent);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid rgba(var(--c1), 0.10);
 }
 
 /* style.css */
 html[data-theme="dark"] .welcome-toast {
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(var(--c1), 0.18);
     background: var(--surface);
 }
 
@@ -19,9 +39,31 @@ html[data-theme="dark"] .welcome-toast-close {
 }
 
 /* style.css */
+html[data-theme="dark"] .nav-link:hover {
+    background: rgba(var(--c1), 0.08);
+}
+
+/* style.css */
+html[data-theme="dark"] .nav-link.active {
+    background: rgba(var(--c1), 0.12);
+}
+
+/* style.css */
+html[data-theme="dark"] .profile-menu summary:hover,
+html[data-theme="dark"] .profile-menu[open] summary {
+    background: rgba(var(--c1), 0.10);
+}
+
+/* style.css */
 html[data-theme="dark"] .profile-menu-panel {
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(var(--c1), 0.12);
     background: var(--surface);
+}
+
+/* style.css */
+html[data-theme="dark"] .profile-menu-panel a:hover,
+html[data-theme="dark"] .profile-menu-panel button:hover {
+    background: rgba(var(--c1), 0.08);
 }
 
 /* style.css */
@@ -32,18 +74,23 @@ html[data-theme="dark"] .profile-menu-panel .profile-logout {
 
 /* style.css */
 html[data-theme="dark"] .login-button {
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(var(--c1), 0.30);
+}
+
+/* style.css */
+html[data-theme="dark"] .register-button {
+    box-shadow: 0 7px 20px rgba(var(--c1), 0.25);
 }
 
 /* style.css */
 html[data-theme="dark"] .service-notice {
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(var(--c1), 0.18);
     background: color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface));
 }
 
 /* style.css */
 html[data-theme="dark"] .hero-section {
-    background: radial-gradient(ellipse at 18% 12%, rgba(255, 255, 255, 0.03), transparent 30%), radial-gradient(ellipse at 85% 85%, rgba(0, 213, 220, .28), transparent 34%), linear-gradient(128deg, #3931a7 0%, color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface)) 48%, #258bd7 100%);
+    background: radial-gradient(ellipse at 18% 12%, rgba(255, 255, 255, 0.03), transparent 30%), radial-gradient(ellipse at 85% 85%, rgba(var(--c2), 0.28), transparent 34%), linear-gradient(128deg, color-mix(in srgb, rgb(var(--c1)) 71%, #05060a) 0%, color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface)) 48%, color-mix(in srgb, rgb(var(--c1)) 82%, #05060a) 100%);
 }
 
 /* style.css */
@@ -54,6 +101,7 @@ html[data-theme="dark"] .hero-section::before {
 /* style.css */
 html[data-theme="dark"] .hero-section::after {
     background: rgba(255, 255, 255, 0.01);
+    box-shadow: 0 0 0 46px rgba(255,255,255,.025), 0 0 110px rgba(var(--c2), 0.18);
 }
 
 /* style.css */
@@ -63,8 +111,18 @@ html[data-theme="dark"] .hero-badge {
 }
 
 /* style.css */
+html[data-theme="dark"] .primary-button {
+    box-shadow: 0 9px 25px rgba(var(--c1), 0.23);
+}
+
+/* style.css */
 html[data-theme="dark"] .secondary-button {
     background: var(--surface);
+}
+
+/* style.css */
+html[data-theme="dark"] .primary-button:hover {
+    box-shadow: 0 14px 30px rgba(var(--c1), 0.30);
 }
 
 /* style.css */
@@ -74,7 +132,14 @@ html[data-theme="dark"] .service-showcase {
 
 /* style.css */
 html[data-theme="dark"] .service-card {
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(var(--c1), 0.09);
+    box-shadow: 0 6px 18px rgba(var(--c1), 0.07);
+}
+
+/* style.css */
+html[data-theme="dark"] .service-card:hover,
+html[data-theme="dark"] .service-card:focus {
+    box-shadow: 0 18px 35px rgba(var(--c1), 0.16);
 }
 
 /* style.css */
@@ -106,7 +171,7 @@ html[data-theme="dark"] .service-ai {
 
 /* style.css */
 html[data-theme="dark"] .service-placement {
-    background: linear-gradient( 135deg, color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface)), color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface)) );
+    background: linear-gradient( 135deg, color-mix(in srgb, rgb(var(--c3)) 10%, var(--surface)), color-mix(in srgb, rgb(var(--c3)) 10%, var(--surface)) );
 }
 
 /* style.css */
@@ -116,12 +181,12 @@ html[data-theme="dark"] .service-resume {
 
 /* style.css */
 html[data-theme="dark"] .service-interview {
-    background: linear-gradient( 135deg, color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface)), color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface)) );
+    background: linear-gradient( 135deg, color-mix(in srgb, rgb(var(--c2)) 10%, var(--surface)), color-mix(in srgb, rgb(var(--c2)) 10%, var(--surface)) );
 }
 
 /* style.css */
 html[data-theme="dark"] .service-internship {
-    background: linear-gradient( 135deg, color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface)), color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface)) );
+    background: linear-gradient( 135deg, color-mix(in srgb, rgb(var(--c2)) 10%, var(--surface)), color-mix(in srgb, rgb(var(--c2)) 10%, var(--surface)) );
 }
 
 /* style.css */
@@ -177,6 +242,16 @@ html[data-theme="dark"] .process-card {
 }
 
 /* style.css */
+html[data-theme="dark"] .mentor-section {
+    background: linear-gradient( 135deg, color-mix(in srgb, rgb(var(--c1)) 36%, #05060a), color-mix(in srgb, rgb(var(--c1)) 58%, #05060a), color-mix(in srgb, rgb(var(--c2)) 53%, #05060a) );
+}
+
+/* style.css */
+html[data-theme="dark"] .mentor-intro .section-label {
+    color: color-mix(in srgb, rgb(var(--c1)) 35%, #fff);
+}
+
+/* style.css */
 html[data-theme="dark"] .prompt-chip {
     border: 1px solid rgba(255, 255, 255, 0.06);
     background: rgba(255, 255, 255, 0.02);
@@ -194,7 +269,7 @@ html[data-theme="dark"] .chat-container {
 
 /* style.css */
 html[data-theme="dark"] .chat-avatar {
-    background: linear-gradient( 135deg, color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface)), color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface)) );
+    background: linear-gradient( 135deg, color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface)), color-mix(in srgb, rgb(var(--c2)) 10%, var(--surface)) );
 }
 
 /* style.css */
@@ -210,6 +285,7 @@ html[data-theme="dark"] .message-icon {
 /* style.css */
 html[data-theme="dark"] .message-content {
     background: var(--surface);
+    box-shadow: 0 5px 15px rgba(var(--c1), 0.08);
 }
 
 /* style.css */
@@ -221,6 +297,16 @@ html[data-theme="dark"] .chat-input-area {
 html[data-theme="dark"] .chat-input-area textarea {
     border: 1px solid rgba(255, 255, 255, 0.09);
     background: var(--surface);
+}
+
+/* style.css */
+html[data-theme="dark"] .chat-input-area textarea:focus {
+    box-shadow: 0 0 0 4px rgba(var(--c1), 0.08);
+}
+
+/* style.css */
+html[data-theme="dark"] .send-button:hover {
+    box-shadow: 0 10px 22px rgba(var(--c1), 0.28);
 }
 
 /* style.css */
@@ -253,19 +339,19 @@ html[data-theme="dark"] .future-card:nth-child(6n + 3) {
 
 /* style.css */
 html[data-theme="dark"] .future-card:nth-child(6n + 4) {
-    background: linear-gradient(145deg, color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface)), var(--surface));
+    background: linear-gradient(145deg, color-mix(in srgb, rgb(var(--c3)) 10%, var(--surface)), var(--surface));
     border-color: rgba(255, 255, 255, 0.09);
 }
 
 /* style.css */
 html[data-theme="dark"] .future-card:nth-child(6n + 5) {
-    background: linear-gradient(145deg, color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface)), var(--surface));
+    background: linear-gradient(145deg, color-mix(in srgb, rgb(var(--c2)) 10%, var(--surface)), var(--surface));
     border-color: rgba(255, 255, 255, 0.09);
 }
 
 /* style.css */
 html[data-theme="dark"] .future-card:nth-child(6n) {
-    background: linear-gradient(145deg, color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface)), var(--surface));
+    background: linear-gradient(145deg, color-mix(in srgb, rgb(var(--c2)) 10%, var(--surface)), var(--surface));
     border-color: rgba(255, 255, 255, 0.09);
 }
 
@@ -273,16 +359,18 @@ html[data-theme="dark"] .future-card:nth-child(6n) {
 html[data-theme="dark"] .future-card:hover,
 html[data-theme="dark"] .future-card:focus-visible {
     border-color: rgba(255, 255, 255, 0.09);
+    box-shadow: 0 14px 32px rgba(var(--c1), 0.14);
 }
 
 /* style.css */
 html[data-theme="dark"] .future-status {
+    background: rgba(var(--c1), 0.10);
     color: var(--primary-dark);
 }
 
 /* style.css */
 html[data-theme="dark"] .suggestion-section {
-    background: linear-gradient( 135deg, color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface)), color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface)) );
+    background: linear-gradient( 135deg, color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface)), color-mix(in srgb, rgb(var(--c2)) 10%, var(--surface)) );
 }
 
 /* style.css */
@@ -298,6 +386,32 @@ html[data-theme="dark"] .suggestion-card textarea {
 /* style.css */
 html[data-theme="dark"] .suggestion-card select {
     background: var(--surface);
+}
+
+/* style.css */
+html[data-theme="dark"] .suggestion-card textarea:focus {
+    box-shadow: 0 0 0 4px rgba(var(--c1), 0.08);
+}
+
+/* style.css */
+html[data-theme="dark"] .footer {
+    background: color-mix(in srgb, rgb(var(--c1)) 25%, #05060a);
+    color: color-mix(in srgb, rgb(var(--c1)) 35%, #fff);
+}
+
+/* style.css */
+html[data-theme="dark"] .footer-brand p {
+    color: rgb(var(--c1));
+}
+
+/* style.css */
+html[data-theme="dark"] .footer-links a {
+    color: rgb(var(--c1));
+}
+
+/* style.css */
+html[data-theme="dark"] .footer-logout-button {
+    color: rgb(var(--c1));
 }
 
 /* style.css */
@@ -336,7 +450,7 @@ html[data-theme="dark"] .chat-message.user-message .message-content {
 
 /* style.css */
 html[data-theme="dark"] .quick-result-card {
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(var(--c1), 0.16);
     background: var(--surface);
 }
 
@@ -347,18 +461,28 @@ html[data-theme="dark"] .quick-result-card li a {
 
 /* style.css */
 html[data-theme="dark"] .quick-continue-form button {
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(var(--c1), 0.20);
     background: color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface));
 }
 
 /* pages.css */
+html[data-theme="dark"] .nav-links a:hover {
+    background: rgba(var(--c1), 0.09);
+}
+
+/* pages.css */
 html[data-theme="dark"] .hero {
-    background: linear-gradient(135deg, #4d43c6, color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface)) 40%, #00a9c6);
+    background: linear-gradient(135deg, rgb(var(--c1)), color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface)) 40%, color-mix(in srgb, rgb(var(--c2)) 65%, #05060a));
 }
 
 /* pages.css */
 html[data-theme="dark"] .card {
     background: var(--surface);
+}
+
+/* pages.css */
+html[data-theme="dark"] .card:hover {
+    box-shadow: 0 20px 44px rgba(var(--c1), 0.17);
 }
 
 /* pages.css */
@@ -380,6 +504,12 @@ html[data-theme="dark"] .form-card select {
 /* pages.css */
 html[data-theme="dark"] .chat-box {
     background: var(--surface);
+}
+
+/* pages.css */
+html[data-theme="dark"] footer {
+    background: color-mix(in srgb, rgb(var(--c1)) 25%, #05060a);
+    color: color-mix(in srgb, rgb(var(--c1)) 35%, #fff);
 }
 
 /* pages.css */
@@ -410,7 +540,7 @@ html[data-theme="dark"] .mentor-history-search a {
 
 /* pages.css */
 html[data-theme="dark"] .owner-upload-card {
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(var(--c1), 0.14);
     background: var(--surface, var(--surface));
 }
 
@@ -423,7 +553,7 @@ html[data-theme="dark"] .owner-upload-card select {
 
 /* pages.css */
 html[data-theme="dark"] .notes-upload-shortcut {
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(var(--c1), 0.22);
     background: var(--surface);
 }
 
@@ -435,16 +565,18 @@ html[data-theme="dark"] .notes-upload-shortcut:hover {
 /* pages.css */
 html[data-theme="dark"] .notes-choice-card {
     background: var(--surface);
+    box-shadow: 0 10px 28px rgba(var(--c1), 0.07);
 }
 
 /* pages.css */
 html[data-theme="dark"] .notes-choice-card:hover {
     border-color: rgba(255, 255, 255, 0.09);
+    box-shadow: 0 16px 34px rgba(var(--c1), 0.13);
 }
 
 /* pages.css */
 html[data-theme="dark"] .notes-choice-icon {
-    background: linear-gradient(140deg, color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface)), color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface)));
+    background: linear-gradient(140deg, color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface)), color-mix(in srgb, rgb(var(--c2)) 10%, var(--surface)));
 }
 
 /* pages.css */
@@ -456,11 +588,17 @@ html[data-theme="dark"] .notes-flow-tip {
 /* pages.css */
 html[data-theme="dark"] .notes-subject-dropdown {
     background: var(--surface);
+    box-shadow: 0 8px 24px rgba(var(--c1), 0.06);
 }
 
 /* pages.css */
 html[data-theme="dark"] .notes-subject-dropdown summary:hover {
     background: var(--surface);
+}
+
+/* pages.css */
+html[data-theme="dark"] .notes-subject-dropdown summary:focus-visible {
+    outline: 3px solid rgba(var(--c1), 0.58);
 }
 
 /* pages.css */
@@ -506,13 +644,33 @@ html[data-theme="dark"] .notes-field select {
 }
 
 /* pages.css */
+html[data-theme="dark"] .notes-field input:focus,
+html[data-theme="dark"] .notes-field select:focus {
+    box-shadow: 0 0 0 4px rgba(var(--c1), 0.11);
+}
+
+/* pages.css */
 html[data-theme="dark"] .notes-field input[type="file"] {
     background: var(--surface);
 }
 
 /* pages.css */
+html[data-theme="dark"] .notes-primary-button,
+html[data-theme="dark"] .notes-secondary-button,
+html[data-theme="dark"] .notes-download-link {
+    box-shadow: 0 8px 18px rgba(var(--c1), 0.16);
+}
+
+/* pages.css */
+html[data-theme="dark"] .notes-primary-button:hover,
+html[data-theme="dark"] .notes-secondary-button:hover,
+html[data-theme="dark"] .notes-download-link:hover {
+    box-shadow: 0 12px 24px rgba(var(--c1), 0.23);
+}
+
+/* pages.css */
 html[data-theme="dark"] .notes-preview-action {
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(var(--c1), 0.22);
 }
 
 /* pages.css */
@@ -523,11 +681,13 @@ html[data-theme="dark"] .notes-preview-action:hover {
 /* pages.css */
 html[data-theme="dark"] .note-preview-title-row {
     background: var(--surface);
+    box-shadow: 0 12px 34px rgba(var(--c1), 0.07);
 }
 
 /* pages.css */
 html[data-theme="dark"] .note-preview-frame {
     background: color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface));
+    box-shadow: 0 16px 42px rgba(var(--c1), 0.10);
 }
 
 /* pages.css */
@@ -543,6 +703,7 @@ html[data-theme="dark"] .pptx-preview-note {
 /* pages.css */
 html[data-theme="dark"] .pptx-slide-card {
     background: var(--surface);
+    box-shadow: 0 10px 28px rgba(var(--c1), 0.06);
 }
 
 /* pages.css */
@@ -608,28 +769,28 @@ html[data-theme="dark"] .notes-file-icon {
 /* pages.css */
 html[data-theme="dark"] .notes-empty-state {
     border: 1px dashed rgba(255, 255, 255, 0.09);
-    background: linear-gradient(135deg, var(--surface), color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface)));
+    background: linear-gradient(135deg, var(--surface), color-mix(in srgb, rgb(var(--c2)) 10%, var(--surface)));
 }
 
 /* pages.css */
 html[data-theme="dark"] .notes-suggestions {
-    background: linear-gradient(155deg, var(--surface), color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface)) 60%, color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface)));
+    background: linear-gradient(155deg, var(--surface), color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface)) 60%, color-mix(in srgb, rgb(var(--c2)) 10%, var(--surface)));
 }
 
 /* pages.css */
 html[data-theme="dark"] .suggestions-icon {
-    background: linear-gradient(135deg, color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface)), color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface)));
+    background: linear-gradient(135deg, color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface)), color-mix(in srgb, rgb(var(--c2)) 10%, var(--surface)));
 }
 
 /* pages.css */
 html[data-theme="dark"] .suggestion-list a {
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(var(--c1), 0.10);
     background: color-mix(in srgb, var(--surface) 82%, transparent);
 }
 
 /* pages.css */
 html[data-theme="dark"] .suggestion-list a:hover {
-    border-color: rgba(255, 255, 255, 0.06);
+    border-color: rgba(var(--c1), 0.38);
     background: var(--surface);
 }
 
@@ -644,7 +805,7 @@ html[data-theme="dark"] .mentor-conversation-panel {
 
 /* pages.css */
 html[data-theme="dark"] .account-avatar {
-    background: linear-gradient(135deg, color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface)), color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface)));
+    background: linear-gradient(135deg, color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface)), color-mix(in srgb, rgb(var(--c2)) 10%, var(--surface)));
 }
 
 /* pages.css */
@@ -670,7 +831,7 @@ html[data-theme="dark"] .account-conversation-list li > a {
 /* pages.css */
 html[data-theme="dark"] .account-conversation-list li > a:hover,
 html[data-theme="dark"] .mentor-conversation-list li > a:hover {
-    border-color: rgba(255, 255, 255, 0.06);
+    border-color: rgba(var(--c1), 0.35);
     background: color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface));
 }
 
@@ -686,7 +847,7 @@ html[data-theme="dark"] .mentor-conversation-list li > a {
 
 /* pages.css */
 html[data-theme="dark"] .mentor-conversation-list li > a.current {
-    border-color: rgba(255, 255, 255, 0.06);
+    border-color: rgba(var(--c1), 0.22);
     background: color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface));
 }
 
@@ -709,7 +870,7 @@ html[data-theme="dark"] .mentor-message {
 
 /* pages.css */
 html[data-theme="dark"] .mentor-message.user {
-    border-color: rgba(255, 255, 255, 0.06);
+    border-color: rgba(var(--c1), 0.15);
     background: color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface));
 }
 
@@ -718,6 +879,11 @@ html[data-theme="dark"] .mentor-message-form .mentor-consent {
     border: 1px solid rgba(255, 255, 255, 0.09);
     background: color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface));
     color: var(--primary-dark);
+}
+
+/* pages.css */
+html[data-theme="dark"] .mentor-consent input {
+    accent-color: var(--primary-dark);
 }
 
 /* pages.css */
@@ -752,6 +918,16 @@ html[data-theme="dark"] .notes-subject-empty {
 }
 
 /* login.css */
+html[data-theme="dark"] .navbar .nav-links a:hover {
+    background: rgba(var(--c1), 0.09);
+}
+
+/* login.css */
+html[data-theme="dark"] .navbar .nav-links a.active {
+    background: rgba(var(--c1), 0.13);
+}
+
+/* login.css */
 html[data-theme="dark"] .form-card {
     background: color-mix(in srgb, var(--surface) 96%, transparent);
 }
@@ -762,6 +938,34 @@ html[data-theme="dark"] .form-card select {
     background: var(--surface);
 }
 
+/* login.css */
+html[data-theme="dark"] .form-card input:focus,
+html[data-theme="dark"] .form-card select:focus {
+    box-shadow: 0 0 0 4px rgba(var(--c1), 0.12);
+}
+
+/* login.css */
+html[data-theme="dark"] .form-card form button {
+    box-shadow: 0 9px 22px rgba(var(--c1), 0.22);
+}
+
+/* login.css */
+html[data-theme="dark"] .form-card form button:hover {
+    box-shadow: 0 13px 27px rgba(var(--c1), 0.28);
+}
+
+/* theme.css */
+html[data-theme="dark"] body {
+    background: radial-gradient(circle at 8% 0%, rgba(var(--c1), .06), transparent 30%), radial-gradient(circle at 92% 10%, rgba(var(--c2), 0.06), transparent 30%), var(--background);
+}
+
+/* theme.css */
+html[data-theme="dark"] footer,
+html[data-theme="dark"] .footer {
+    background: color-mix(in srgb, rgb(var(--c1)) 31%, #05060a);
+    color: color-mix(in srgb, rgb(var(--c1)) 35%, #fff);
+}
+
 /* theme.css */
 html[data-theme="dark"] .navbar {
     background: color-mix(in srgb, var(--surface) 92%, transparent);
@@ -770,7 +974,15 @@ html[data-theme="dark"] .navbar {
 /* theme.css */
 html[data-theme="dark"] .hero-section,
 html[data-theme="dark"] .hero {
-    background: radial-gradient(ellipse at 15% 10%, rgba(255, 255, 255, 0.02), transparent 35%), radial-gradient(ellipse at 85% 90%, rgba(80, 190, 200, .16), transparent 40%), var(--hero-gradient);
+    background: radial-gradient(ellipse at 15% 10%, rgba(255, 255, 255, 0.02), transparent 35%), radial-gradient(ellipse at 85% 90%, rgba(var(--c2), 0.16), transparent 40%), var(--hero-gradient);
+}
+
+/* theme.css */
+html[data-theme="dark"] .primary-button,
+html[data-theme="dark"] .notes-primary-button,
+html[data-theme="dark"] .form-card button[type="submit"],
+html[data-theme="dark"] .card-btn {
+    box-shadow: 0 6px 18px rgba(var(--c1), 0.20);
 }
 
 /* theme.css */
@@ -802,7 +1014,7 @@ html[data-theme="dark"] .future-card:nth-child(n) {
 
 /* theme.css */
 html[data-theme="dark"] .future-card:nth-child(3n + 2) {
-    background: linear-gradient(150deg, color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface)), var(--surface) 70%);
+    background: linear-gradient(150deg, color-mix(in srgb, rgb(var(--c2)) 10%, var(--surface)), var(--surface) 70%);
     border-color: rgba(255, 255, 255, 0.09);
 }
 
@@ -824,7 +1036,7 @@ html[data-theme="dark"] .service-ai {
 
 /* theme.css */
 html[data-theme="dark"] .service-placement {
-    background: linear-gradient(150deg, color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface)), var(--surface) 75%);
+    background: linear-gradient(150deg, color-mix(in srgb, rgb(var(--c3)) 10%, var(--surface)), var(--surface) 75%);
 }
 
 /* theme.css */
@@ -834,12 +1046,12 @@ html[data-theme="dark"] .service-resume {
 
 /* theme.css */
 html[data-theme="dark"] .service-interview {
-    background: linear-gradient(150deg, color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface)), var(--surface) 75%);
+    background: linear-gradient(150deg, color-mix(in srgb, rgb(var(--c2)) 10%, var(--surface)), var(--surface) 75%);
 }
 
 /* theme.css */
 html[data-theme="dark"] .service-internship {
-    background: linear-gradient(150deg, color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface)), var(--surface) 75%);
+    background: linear-gradient(150deg, color-mix(in srgb, rgb(var(--c2)) 10%, var(--surface)), var(--surface) 75%);
 }
 
 /* theme.css */

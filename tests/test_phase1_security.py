@@ -933,6 +933,19 @@ class PhaseOneSecurityTests(unittest.TestCase):
         css = (Path(studenthub.app.root_path) / "static" / "css" / "layout-glass.css").read_text(encoding="utf-8")
         self.assertIn('html[data-layout="glass"] .navbar', css)
 
+    def test_shine_effects_can_be_switched_off(self):
+        home = app.test_client().get("/").get_data(as_text=True)
+        self.assertIn("css/fx-shine.css", home)
+        self.assertIn('f==="calm"?"calm":"shine"', home)
+        css = (Path(studenthub.app.root_path) / "static" / "css" / "fx-shine.css").read_text(encoding="utf-8")
+        # Every effect is behind the Shine switch, so "Calm" turns all of them off.
+        for line in css.splitlines():
+            if line.startswith("html[") and "fx-sparkle" not in line:
+                self.assertIn('data-fx="shine"', line)
+        js = (Path(studenthub.app.root_path) / "static" / "js" / "theme_toggle.js").read_text(encoding="utf-8")
+        self.assertIn("rail-mode", js)
+        self.assertIn("rail-pop", js)
+
     def test_theme_gallery_offers_light_background_tones(self):
         body = app.test_client().get("/themes").get_data(as_text=True)
         css = (Path(studenthub.app.root_path) / "static" / "css" / "palettes.css").read_text(encoding="utf-8")

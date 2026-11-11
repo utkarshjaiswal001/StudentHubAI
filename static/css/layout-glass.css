@@ -1,6 +1,6 @@
 /* =========================================================
    StudentHub AI: "Glass" layout
-   Inspired by the soft, floating design in the Powder Sky reel:
+   Inspired by soft, floating web designs:
    a pill-shaped top bar, rounded floating page header, frosted
    glass cards, pill buttons, and a small icon rail on the left.
 
@@ -15,7 +15,8 @@ html[data-layout="glass"] {
     --glass-border: rgba(255, 255, 255, .6);
     --glass-blur: blur(18px) saturate(140%);
     --glass-shadow: 0 18px 50px rgba(30, 40, 90, .10);
-    --page-width: min(1220px, calc(100% - 32px));
+    /* Nearly full width, like the reel: just a small even gap on each side. */
+    --page-width: calc(100% - 32px);
 }
 
 html[data-layout="glass"][data-theme="dark"] {
@@ -89,6 +90,16 @@ html[data-layout="glass"] .notes-flow-hero {
 
 html[data-layout="glass"] .hero-section {
     min-height: 0;
+}
+
+/* Home page sections below the header float as rounded cards too. */
+html[data-layout="glass"] section.page-section:not(.hero-section) {
+    width: var(--page-width);
+    margin: 18px auto 0;
+    border: 1px solid var(--glass-border);
+    border-radius: 32px;
+    box-shadow: var(--glass-shadow);
+    overflow: hidden;
 }
 
 /* Light mode: airy sky gradient, like the reel. */
@@ -319,7 +330,7 @@ html[data-layout="glass"] body > section:last-of-type {
         box-shadow: var(--glass-shadow);
     }
 
-    html[data-layout="glass"] .glass-rail a {
+    html[data-layout="glass"] .glass-rail > a {
         display: grid;
         place-items: center;
         width: 44px;
@@ -330,13 +341,146 @@ html[data-layout="glass"] body > section:last-of-type {
         transition: background .2s ease, transform .2s ease;
     }
 
-    html[data-layout="glass"] .glass-rail a:hover {
+    html[data-layout="glass"] .glass-rail > a:hover {
         background: rgba(var(--c1), .14);
         transform: scale(1.06);
     }
 
-    html[data-layout="glass"] .glass-rail a[aria-current="page"] {
+    html[data-layout="glass"] .glass-rail > a[aria-current="page"] {
         background: rgba(var(--c1), .22);
         box-shadow: inset 0 0 0 1px rgba(var(--c1), .4);
     }
+}
+
+/* Bottom of the rail: dark/light switch and colour picker */
+.glass-rail .rail-divider {
+    width: 24px;
+    height: 1px;
+    margin: 4px auto;
+    background: var(--glass-border);
+    box-shadow: 0 0 0 .5px rgba(var(--c1), .25);
+}
+
+.glass-rail .rail-mode {
+    position: relative;
+    width: 44px;
+    height: 26px;
+    margin: 4px auto;
+    padding: 0;
+    border: 1px solid var(--glass-border);
+    border-radius: 999px;
+    background: rgba(var(--c1), .18);
+    cursor: pointer;
+}
+
+.glass-rail .rail-mode-knob {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--surface);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .25);
+    font-size: 12px;
+    transition: transform .25s ease;
+}
+
+.glass-rail .rail-mode-knob::before {
+    content: "☀️";
+}
+
+.glass-rail .rail-mode[aria-checked="true"] .rail-mode-knob {
+    transform: translateX(18px);
+}
+
+.glass-rail .rail-mode[aria-checked="true"] .rail-mode-knob::before {
+    content: "🌙";
+}
+
+.glass-rail .rail-palette {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    font-size: 19px;
+    cursor: pointer;
+    transition: background .2s ease, transform .2s ease;
+}
+
+.glass-rail .rail-palette:hover,
+.glass-rail .rail-palette[aria-expanded="true"] {
+    background: rgba(var(--c1), .18);
+    transform: scale(1.06);
+}
+
+.glass-rail .rail-pop {
+    position: absolute;
+    left: calc(100% + 12px);
+    bottom: 0;
+    width: 200px;
+    padding: 12px;
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    background: var(--surface);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    box-shadow: var(--glass-shadow);
+    color: var(--text);
+}
+
+.glass-rail .rail-pop[hidden] {
+    display: none;
+}
+
+.glass-rail .rail-pop-title {
+    margin: 0 0 8px 4px;
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+}
+
+.glass-rail .rail-pop-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    font-size: 14px;
+    text-align: left;
+    cursor: pointer;
+}
+
+.glass-rail .rail-pop-item:hover {
+    background: rgba(var(--c1), .12);
+}
+
+.glass-rail .rail-pop-item[aria-pressed="true"] {
+    border-color: rgba(var(--c1), .45);
+    background: rgba(var(--c1), .16);
+    color: var(--dark);
+    font-weight: 600;
+}
+
+.glass-rail .rail-pop-more {
+    display: block;
+    margin-top: 6px;
+    padding: 8px 10px;
+    color: var(--primary-dark);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
 }

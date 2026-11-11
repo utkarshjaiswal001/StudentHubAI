@@ -50,17 +50,65 @@ def fmt(r, g, b, a=1.0):
     return f"rgba({r}, {g}, {b}, {a:.2f})"
 
 
+def band(h, s):
+    """Which palette colour a fixed brand colour should follow (None = keep it).
+
+    Violet/blue -> --c1, cyan/teal and pink -> --c2, orange/amber -> --c3.
+    Green and red stay as they are: they mean "success" and "error".
+    """
+    if s < 0.25:
+        return None
+    hue = h * 360
+    if 200 <= hue <= 290:
+        return "--c1"
+    if 170 <= hue < 200 or 290 < hue <= 345:
+        return "--c2"
+    if 15 <= hue < 60:
+        return "--c3"
+    return None
+
+
+def themed(token, use):
+    """Swap a fixed brand colour for the same strength of the palette colour.
+
+    use: "bg" (backgrounds), "text", "line" (borders, outlines, shadows).
+    Returns None when the colour should be left to the other rules.
+    """
+    c = parse_color(token)
+    if c is None:
+        return None
+    r, g, b, a = c
+    h, l, s = colorsys.rgb_to_hls(r, g, b)
+    var = band(h, s)
+    if var is None or l > 0.985:
+        return None
+    if a < 0.999:
+        if l < 0.3:
+            return None  # dark shadow or overlay
+        return f"rgba(var({var}), {a:.2f})"
+    if l > 0.8:  # pastel tint
+        if use == "text":
+            return f"color-mix(in srgb, rgb(var({var})) 35%, #fff)"
+        pct = max(5, min(35, round((1 - l) * 220)))
+        return f"color-mix(in srgb, rgb(var({var})) {pct}%, var(--surface))"
+    if l < 0.5:  # deep colour (dark banners, deep text)
+        pct = max(25, min(90, round(l / 0.6 * 100)))
+        return f"color-mix(in srgb, rgb(var({var})) {pct}%, #05060a)"
+    return f"rgb(var({var}))"
+
+
 def dark_background(token):
-    """Light surfaces become the palette's dark surfaces; pastel tints get a hint of the palette colour."""
+    """Light surfaces become the palette's dark surfaces; brand colours follow the palette."""
     c = parse_color(token)
     if c is None:
         return token
     r, g, b, a = c
     h, l, s = colorsys.rgb_to_hls(r, g, b)
+    var = band(h, s)
     if l < 0.62:
-        return token  # already dark or a strong colour (buttons, badges): keep
+        return themed(token, "bg") or token  # strong colours (banners, buttons, badges)
     if a < 0.999 and s > 0.15 and l < 0.985:
-        return token  # faint colour tints work on dark too
+        return themed(token, "bg") or token  # faint colour tints work on dark too
     if a < 0.999:
         # Light glass overlays: dark glass for strong ones, faint light for subtle ones.
         if a >= 0.5:
@@ -68,35 +116,55 @@ def dark_background(token):
         return fmt(1, 1, 1, round(a * 0.18, 2))
     if s < 0.12 or l > 0.985:
         return "var(--surface)" if l > 0.97 else "var(--surface-2)"
-    return "color-mix(in srgb, rgb(var(--c1)) 10%, var(--surface))"
+    return f"color-mix(in srgb, rgb(var({var or '--c1'})) 10%, var(--surface))"
 
 
 def light_background(token):
-    """Light mode: pure/near-white surfaces use the palette's soft surface instead of #fff."""
+    """Light mode: near-white surfaces use the palette's soft surface; brand tints follow the palette."""
     c = parse_color(token)
     if c is None:
         return token
     r, g, b, a = c
     h, l, s = colorsys.rgb_to_hls(r, g, b)
     if l < 0.975:
-        return token  # tinted pastels, strong colours and dark colours stay as they are
+        return themed(token, "bg") or token
     if a < 0.999:
         return f"color-mix(in srgb, var(--surface) {round(a * 100)}%, transparent)" if a >= 0.5 else token
     return "var(--surface)"
 
 
-def dark_text(token):
-    """Dark text becomes light; brand-coloured text uses the palette's link colour."""
+def light_text(token):
+    """Light mode: brand-coloured text follows the palette (deep shades for readability)."""
     c = parse_color(token)
     if c is None:
         return token
     r, g, b, a = c
     h, l, s = colorsys.rgb_to_hls(r, g, b)
+    var = band(h, s)
+    if var == "--c1" and 0.25 <= l <= 0.7 and a >= 0.999:
+        return "var(--primary-dark)"
+    return themed(token, "text") or token
+
+
+def light_line(token):
+    return themed(token, "line") or token
+
+
+def dark_text(token):
+    """Dark text becomes light; brand-coloured text uses the palette's colours."""
+    c = parse_color(token)
+    if c is None:
+        return token
+    r, g, b, a = c
+    h, l, s = colorsys.rgb_to_hls(r, g, b)
+    var = band(h, s)
     if l > 0.7:
-        return token  # already light (e.g. white text on buttons)
+        return themed(token, "text") or token  # already light (e.g. white text on buttons)
     if s > 0.35:
-        if 200 <= h * 360 <= 290:
+        if var == "--c1":
             return "var(--primary-dark)"
+        if var:
+            return f"color-mix(in srgb, rgb(var({var})) 70%, #fff)"
         return fmt(*colorsys.hls_to_rgb(h, 0.76, min(s, 0.85)), a)
     if l < 0.35:
         return "var(--dark)"
@@ -110,26 +178,40 @@ def dark_border(token):
     r, g, b, a = c
     h, l, s = colorsys.rgb_to_hls(r, g, b)
     if l < 0.6:
-        return token
+        return themed(token, "line") or token
+    if a < 0.999 and s > 0.25:
+        return themed(token, "line") or token
     return fmt(1, 1, 1, 0.09 if a >= 0.5 else 0.06)
+
+
+BG_PROPS = ("background", "background-color", "background-image")
+TEXT_PROPS = ("color", "fill", "caret-color", "accent-color")
+SHADOW_PROPS = ("box-shadow", "text-shadow")
 
 
 def convert(prop, value, mode="dark"):
     prop = prop.lower()
+    sub = lambda fn: COLOR_RE.sub(lambda m: fn(m.group(0)), value)
     if mode == "light":
-        if prop not in ("background", "background-color", "background-image"):
-            return value
-        if value.strip() in ("var(--white)", "var(--classic-surface)"):
-            return "var(--surface)"
-        return COLOR_RE.sub(lambda m: light_background(m.group(0)), value)
-    if prop in ("background", "background-color", "background-image"):
+        if prop in BG_PROPS:
+            if value.strip() in ("var(--white)", "var(--classic-surface)"):
+                return "var(--surface)"
+            return sub(light_background)
+        if prop in TEXT_PROPS:
+            return sub(light_text)
+        if prop.startswith("border") or prop.startswith("outline") or prop in SHADOW_PROPS:
+            return sub(light_line)
+        return value
+    if prop in BG_PROPS:
         if value.strip() in LIGHT_BG_VARS:
             return "var(--surface)"
-        return COLOR_RE.sub(lambda m: dark_background(m.group(0)), value)
-    if prop in ("color", "fill", "caret-color"):
-        return COLOR_RE.sub(lambda m: dark_text(m.group(0)), value)
+        return sub(dark_background)
+    if prop in TEXT_PROPS:
+        return sub(dark_text)
     if prop.startswith("border") or prop in ("outline", "outline-color"):
-        return COLOR_RE.sub(lambda m: dark_border(m.group(0)), value)
+        return sub(dark_border)
+    if prop in SHADOW_PROPS:
+        return sub(lambda t: themed(t, "line") or t)
     return value
 
 

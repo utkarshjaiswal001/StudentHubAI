@@ -1,0 +1,196 @@
+/* =========================================================
+   StudentHub AI: "Shine" effects
+   The glossy, glittery finish seen in modern web design reels:
+     1. Glossy edge: a thin light-catching gradient rim on cards.
+     2. Spotlight: a soft glow that follows the mouse over cards.
+     3. Shine sweep: a light streak that passes over main buttons now and then.
+     4. Sparkles: a few twinkling stars in page headers.
+     5. Title shimmer: a slow sheen across big headings.
+     6. Film grain: a very faint texture that makes flat colour feel premium.
+
+   Only applies when <html data-fx="shine">. "Calm" turns it all off.
+   Colours come from the palette (--c1, --c2, --c3), so every colour set
+   and both modes get matching shine. People who ask their device for
+   reduced motion get no animation (see theme.css).
+   ========================================================= */
+
+html[data-fx="shine"] {
+    --fx-rim: rgba(255, 255, 255, .55);
+    --fx-rim-tint: rgba(var(--c1), .35);
+    --fx-spot: rgba(var(--c1), .16);
+    --fx-streak: rgba(255, 255, 255, .45);
+}
+
+html[data-fx="shine"][data-theme="dark"] {
+    --fx-rim: rgba(255, 255, 255, .22);
+    --fx-rim-tint: rgba(var(--c1), .45);
+    --fx-spot: rgba(var(--c1), .20);
+    --fx-streak: rgba(255, 255, 255, .28);
+}
+
+/* ---------- 1 + 2. Glossy edge and spotlight on cards ---------- */
+
+html[data-fx="shine"] :is(.card, .service-card, .future-card, .notes-choice-card,
+    .notes-subject-dropdown, .notes-panel, .form-card, .service-showcase,
+    .owner-upload-card, .account-profile-panel, .account-section-panel,
+    .account-stats > *, .process-card) {
+    position: relative;
+}
+
+/* Shine layers sit behind the content (z-index -1 inside each card). */
+html[data-fx="shine"] :is(.card, .service-card, .future-card, .notes-choice-card,
+    .notes-subject-dropdown, .notes-panel, .notes-suggestions, .form-card,
+    .owner-upload-card, .account-profile-panel, .account-section-panel,
+    .account-stats > *, .process-card, .hero-glass-card, .service-showcase) {
+    isolation: isolate;
+}
+
+html[data-fx="shine"] :is(.card, .service-card, .future-card, .notes-choice-card,
+    .notes-subject-dropdown, .notes-panel, .notes-suggestions, .form-card,
+    .owner-upload-card, .account-profile-panel, .account-section-panel,
+    .account-stats > *, .process-card, .hero-glass-card, .service-showcase)::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    padding: 1px;
+    border-radius: inherit;
+    background: linear-gradient(135deg, var(--fx-rim), transparent 32%, transparent 68%, var(--fx-rim-tint));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+    pointer-events: none;
+}
+
+html[data-fx="shine"] :is(.card, .service-card, .future-card, .notes-choice-card,
+    .notes-subject-dropdown, .form-card, .process-card, .account-stats > *)::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 0%), var(--fx-spot), transparent 65%);
+    opacity: 0;
+    transition: opacity .35s ease;
+    pointer-events: none;
+}
+
+html[data-fx="shine"] :is(.card, .service-card, .future-card, .notes-choice-card,
+    .notes-subject-dropdown, .form-card, .process-card, .account-stats > *):hover::after {
+    opacity: 1;
+}
+
+/* ---------- 3. Shine sweep on main buttons ---------- */
+
+html[data-fx="shine"] :is(.primary-button, .notes-primary-button, .card-btn,
+    .register-button, .hg-open, .form-card button[type="submit"]) {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+}
+
+html[data-fx="shine"] :is(.primary-button, .notes-primary-button, .card-btn,
+    .register-button, .hg-open, .form-card button[type="submit"])::after {
+    content: "";
+    position: absolute;
+    top: -50%;
+    left: 0;
+    z-index: 1;
+    width: 40%;
+    height: 200%;
+    background: linear-gradient(90deg, transparent, var(--fx-streak), transparent);
+    transform: translateX(-180%) rotate(20deg);
+    animation: fx-sweep 6.5s ease-in-out infinite;
+    pointer-events: none;
+}
+
+html[data-fx="shine"] .register-button::after { animation-delay: 1.2s; }
+html[data-fx="shine"] .hg-open::after { animation-delay: 2.4s; }
+
+@keyframes fx-sweep {
+    0%, 70% { transform: translateX(-180%) rotate(20deg); }
+    100%    { transform: translateX(380%) rotate(20deg); }
+}
+
+/* ---------- 4. Sparkles in page headers (added by theme_toggle.js) ---------- */
+
+html[data-fx="shine"] :is(.hero, .hero-section, .notes-flow-hero) {
+    position: relative;
+    isolation: isolate;
+}
+
+.fx-sparkles {
+    display: none;
+}
+
+html[data-fx="shine"] .fx-sparkles {
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.fx-sparkle {
+    position: absolute;
+    width: var(--s, 10px);
+    height: var(--s, 10px);
+    background: var(--fx-star, #fff);
+    clip-path: polygon(50% 0, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%);
+    filter: drop-shadow(0 0 6px var(--fx-star, #fff));
+    opacity: .15;
+    animation: fx-twinkle var(--d, 3.4s) ease-in-out infinite;
+    animation-delay: var(--delay, 0s);
+}
+
+.fx-sparkle.is-dot {
+    clip-path: none;
+    border-radius: 50%;
+}
+
+html[data-theme="dark"] .fx-sparkle { --fx-star: rgba(255, 255, 255, .95); }
+html[data-theme="dark"] .fx-sparkle:nth-child(3n) { --fx-star: rgb(var(--c3)); }
+html[data-theme="dark"] .fx-sparkle:nth-child(4n) { --fx-star: color-mix(in srgb, rgb(var(--c1)) 60%, #fff); }
+html[data-theme="light"] .fx-sparkle { --fx-star: rgba(var(--c1), .75); }
+html[data-theme="light"] .fx-sparkle:nth-child(3n) { --fx-star: rgba(var(--c3), .9); }
+html[data-theme="light"] .fx-sparkle:nth-child(4n) { --fx-star: rgba(var(--c2), .75); }
+
+@keyframes fx-twinkle {
+    0%, 100% { opacity: .1; transform: scale(.55) rotate(0deg); }
+    50%      { opacity: .95; transform: scale(1) rotate(45deg); }
+}
+
+/* ---------- 5. Slow shimmer across big headings ---------- */
+
+html[data-fx="shine"] :is(.hero-content h1, .notes-flow-hero h1, .hero h1) {
+    background: linear-gradient(110deg,
+        currentColor 40%,
+        color-mix(in srgb, rgb(var(--c1)) 55%, currentColor) 48%,
+        color-mix(in srgb, rgb(var(--c3)) 45%, currentColor) 52%,
+        currentColor 60%);
+    background-size: 300% 100%;
+    background-position: 100% 0;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: fx-title 9s ease-in-out infinite;
+}
+
+@keyframes fx-title {
+    0%, 55% { background-position: 100% 0; }
+    100%    { background-position: 0% 0; }
+}
+
+/* ---------- 6. Film grain ---------- */
+
+html[data-fx="shine"] body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 4000;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: .045;
+    mix-blend-mode: overlay;
+    pointer-events: none;
+}
