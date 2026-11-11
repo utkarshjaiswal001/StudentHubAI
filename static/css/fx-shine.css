@@ -132,6 +132,20 @@ html[data-fx="shine"] .fx-sparkles {
     pointer-events: none;
 }
 
+/* Signature light in the header (red streaks, gold rays, chrome glow, sunset). */
+html[data-fx="shine"] .fx-sparkles::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--fx-hero-light, none);
+    animation: fx-glow 8s ease-in-out infinite alternate;
+}
+
+@keyframes fx-glow {
+    from { opacity: .75; transform: translateX(-1.5%); }
+    to   { opacity: 1; transform: translateX(1.5%); }
+}
+
 .fx-sparkle {
     position: absolute;
     width: var(--s, 10px);
@@ -163,12 +177,13 @@ html[data-theme="light"] .fx-sparkle:nth-child(4n) { --fx-star: rgba(var(--c2), 
 
 /* ---------- 5. Slow shimmer across big headings ---------- */
 
+/* Colour sets can give their own metal (gold, chrome...) with --fx-title. */
 html[data-fx="shine"] :is(.hero-content h1, .notes-flow-hero h1, .hero h1) {
-    background: linear-gradient(110deg,
+    background: var(--fx-title, linear-gradient(110deg,
         currentColor 40%,
         color-mix(in srgb, rgb(var(--c1)) 55%, currentColor) 48%,
         color-mix(in srgb, rgb(var(--c3)) 45%, currentColor) 52%,
-        currentColor 60%);
+        currentColor 60%));
     background-size: 300% 100%;
     background-position: 100% 0;
     -webkit-background-clip: text;
@@ -192,5 +207,33 @@ html[data-fx="shine"] body::after {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     opacity: .045;
     mix-blend-mode: overlay;
+    pointer-events: none;
+}
+
+/* ---------- 7. Glossy "candy" buttons for the shiny reel sets ---------- */
+
+html[data-fx="shine"] :is(.primary-button, .notes-primary-button, .card-btn,
+    .register-button, .hg-open, .form-card button[type="submit"]) {
+    background: var(--fx-button, var(--button-gradient));
+}
+
+html[data-fx="shine"]:is([data-palette="racing"], [data-palette="mocha"], [data-palette="silk"], [data-palette="powder"])
+    :is(.primary-button, .notes-primary-button, .card-btn, .register-button, .hg-open, .form-card button[type="submit"]) {
+    color: #fff;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, .25);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .55),
+        inset 0 -10px 18px rgba(0, 0, 0, .16),
+        0 10px 26px rgba(var(--c1), .35);
+}
+
+html[data-fx="shine"]:is([data-palette="racing"], [data-palette="mocha"], [data-palette="silk"], [data-palette="powder"])
+    :is(.primary-button, .notes-primary-button, .card-btn, .register-button, .hg-open, .form-card button[type="submit"])::before {
+    content: "";
+    position: absolute;
+    inset: 1px 1px 50% 1px;
+    z-index: 0;
+    border-radius: inherit;
+    background: linear-gradient(180deg, rgba(255, 255, 255, .38), rgba(255, 255, 255, 0));
     pointer-events: none;
 }
