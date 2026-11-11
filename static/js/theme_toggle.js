@@ -341,7 +341,7 @@
     var SPOT = ".card, .service-card, .future-card, .notes-choice-card, .notes-subject-dropdown, " +
                ".form-card, .process-card, .account-stats > *";
     function spotlight(event) {
-        if (fx() !== "shine" || !event.target.closest) return;
+        if (!event.target.closest) return;
         var card = event.target.closest(SPOT);
         if (!card) return;
         var box = card.getBoundingClientRect();

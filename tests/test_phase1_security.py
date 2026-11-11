@@ -938,10 +938,15 @@ class PhaseOneSecurityTests(unittest.TestCase):
         self.assertIn("css/fx-shine.css", home)
         self.assertIn('f==="calm"?"calm":"shine"', home)
         css = (Path(studenthub.app.root_path) / "static" / "css" / "fx-shine.css").read_text(encoding="utf-8")
-        # Every effect is behind the Shine switch, so "Calm" turns all of them off.
-        for line in css.splitlines():
-            if line.startswith("html[") and "fx-sparkle" not in line:
-                self.assertIn('data-fx="shine"', line)
+        # "Calm" keeps the look but stops the motion: every animated rule needs Shine.
+        rules = re.findall(r"([^{}]+)\{([^{}]*)\}", re.sub(r"@keyframes[^{]+\{(?:[^{}]*\{[^{}]*\})*[^{}]*\}", "", css))
+        animated = [sel.strip() for sel, body in rules if re.search(r"(?<![-\w])animation\s*:", body)]
+        self.assertTrue(animated)
+        for selector in animated:
+            if selector.startswith(".fx-sparkle"):
+                self.assertIn('html[data-fx="calm"] .fx-sparkle', css)  # stars are hidden in Calm
+                continue
+            self.assertIn('data-fx="shine"', selector)
         js = (Path(studenthub.app.root_path) / "static" / "js" / "theme_toggle.js").read_text(encoding="utf-8")
         self.assertIn("rail-mode", js)
         self.assertIn("rail-pop", js)
